@@ -1,0 +1,26 @@
+.cal-head { display: grid; gap: 12px; }
+.cal-step-title { margin: 0; letter-spacing: -0.3px; }
+.cal-choices { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.cal-choices.cal-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.cal-choices.cal-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cal-choice { justify-content: flex-start; text-align: left; min-height: 52px; height: auto; padding: 10px 16px; white-space: normal; line-height: 1.4; }
+.cal-choices.cal-3 .cal-choice, .cal-choices.cal-2 .cal-choice { justify-content: center; text-align: center; flex-direction: column; }
+.cal-group-title { margin: 0; font-size: 17px; }
+.cal-note { padding: 12px 14px; border-radius: 16px; background: var(--surface-soft); border: 1px solid var(--hairline); }
+.cal-list { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+.cal-nav { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; }
+.cal-nav .cal-nav-right { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.cal-inst { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; align-items: center; }
+.cal-inst-fig { display: flex; align-items: center; justify-content: center; }
+.cal-sum { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.cal-sum li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--hairline); }
+.cal-sum li:last-child { border-bottom: 0; }
+.cal-sum-label { font-weight: 600; color: var(--body-strong); }
+.cal-start-grid { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+.cal-flow { display: grid; gap: 8px; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none; }
+.cal-flow li { padding: 10px; border-radius: 16px; background: var(--surface-soft); border: 1px solid var(--hairline); font-weight: 600; text-align: center; }
+@media (max-width: 520px) {
+  .cal-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cal-choices.cal-3 .cal-choice { padding: 8px 6px; }
+}
+@media (min-width: 720px) { .cal-start-grid.cal-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }

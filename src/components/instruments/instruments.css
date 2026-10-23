@@ -1,0 +1,120 @@
+/* ───────── 연주자 일러스트 ───────── */
+.inst-fig { display: block; overflow: visible; flex: none; }
+.inst-fig .f-p { display: none; }
+.inst-fig[data-pose='idle'] .f-idle,
+.inst-fig[data-pose='hitCenter'] .f-hitCenter,
+.inst-fig[data-pose='hitEdge'] .f-hitEdge,
+.inst-fig[data-pose='pluck'] .f-pluck,
+.inst-fig[data-pose='blow'] .f-blow,
+.inst-fig[data-pose='rest'] .f-rest { display: inline; }
+
+.inst-fig .f-bob, .inst-fig .f-trumpet, .inst-fig .f-impact, .inst-fig .f-vib, .inst-fig .f-breath, .inst-fig .f-puff {
+  transform-box: view-box;
+  transition: transform 70ms ease-out, opacity 70ms ease-out;
+}
+/* 연주 중 몸이 살짝 들썩 */
+.inst-fig[data-pose='hitCenter'] .f-bob,
+.inst-fig[data-pose='hitEdge'] .f-bob { transform: translateY(calc(var(--fi, 0) * 3px)); }
+.inst-fig[data-pose='pluck'] .f-bob { transform: translateX(calc(var(--fi, 0) * -2px)); }
+.inst-fig[data-pose='blow'] .f-bob { transform: translateY(calc(var(--fi, 0) * -2px)); }
+.inst-fig[data-pose='rest'] .f-bob { transform: translateY(calc(var(--fi, 0) * 1px)); }
+
+.inst-fig .f-impact { opacity: calc(0.35 + var(--fi, 0) * 0.65); transform-origin: 50% 60%; }
+.inst-fig .f-vib { opacity: calc(0.4 + var(--fi, 0) * 0.6); }
+.inst-fig .f-puff { transform-origin: 92px 61px; transform: scale(calc(0.9 + var(--fi, 0) * 0.35)); }
+
+/* 트럼펫: 연주(입에 댐) / 대기(살짝 내림) / 쉼(허리 아래로 내림) */
+.inst-fig .f-trumpet { transform-origin: 104px 58px; }
+.inst-fig[data-pose='idle'] .f-trumpet { transform: translate(2px, 30px) rotate(14deg); }
+.inst-fig[data-pose='rest'] .f-trumpet { transform: translate(4px, 56px) rotate(30deg); }
+.inst-fig[data-pose='blow'] .f-trumpet { transform: translateX(calc(var(--fi, 0) * 1.5px)); }
+.inst-fig .f-breath { opacity: calc(var(--pulse, 0.55) * (0.4 + var(--fi, 0) * 0.6)); transform-origin: 176px 58px; transform: scale(calc(0.85 + var(--pulse, 0.55) * 0.2)); }
+
+/* 꺼진 악기: 회색·정지 */
+.inst-fig-off { filter: grayscale(1) contrast(0.9); opacity: 0.5; }
+.inst-fig-off * { transition: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .inst-fig .f-bob, .inst-fig .f-trumpet, .inst-fig .f-impact, .inst-fig .f-vib, .inst-fig .f-breath, .inst-fig .f-puff { transition: none; }
+}
+
+/* ───────── 악기 카드 ───────── */
+.inst-card {
+  container-type: inline-size;
+  appearance: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  gap: 6px;
+  width: 100%; min-width: 0; min-height: 48px;
+  padding: 10px 6px 10px;
+  background: var(--surface-card);
+  color: var(--ink);
+  border: 2px solid transparent;
+  border-radius: var(--r-xl);
+  font-family: var(--font-body);
+  text-align: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+.inst-card:hover { background: var(--surface-strong); }
+.inst-card:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.inst-card.is-selected { border-color: var(--primary); }
+.inst-card.is-compact { padding: 6px 4px; gap: 3px; border-radius: var(--r-lg); }
+
+.inst-art { width: 100%; display: flex; align-items: center; justify-content: center; }
+.inst-art .inst-fig { width: 100%; height: auto; aspect-ratio: 1; max-width: 150px; }
+.is-compact .inst-art .inst-fig { max-width: 72px; }
+
+.inst-blind-num {
+  display: grid; place-items: center;
+  width: 100%; max-width: 110px; aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--surface-strong);
+  border: 2px solid var(--hairline-strong);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 56px; line-height: 1;
+}
+.is-compact .inst-blind-num { max-width: 56px; font-size: 30px; }
+.inst-blind-num.is-off { color: var(--muted); }
+
+.inst-name {
+  max-width: 100%;
+  font-size: 16px; font-weight: 700; line-height: 1.25;
+  letter-spacing: -0.2px;
+  white-space: nowrap; word-break: keep-all;
+}
+.is-compact .inst-name { font-size: 15px; }
+@container (max-width: 125px) {
+  .inst-name { font-size: 15px; letter-spacing: -0.5px; }
+}
+
+.inst-state {
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  font-size: 15px; font-weight: 600; line-height: 1.2;
+  color: var(--ink);
+}
+.inst-state.is-off { color: var(--muted); }
+.inst-state svg { flex: none; }
+
+.inst-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; min-height: 24px; max-width: 100%; }
+.is-compact .inst-tags { min-height: 0; }
+.inst-tag {
+  display: inline-flex; align-items: center;
+  padding: 1px 8px; border-radius: var(--r-pill);
+  background: var(--primary); color: var(--on-primary);
+  font-size: 14px; font-weight: 700; line-height: 1.5; letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+.inst-tag.is-soft { background: var(--surface-strong); color: var(--body-strong); }
+
+/* ───────── 갤러리 ───────── */
+.inst-gal { display: grid; gap: 16px; padding: 16px; max-width: 900px; margin: 0 auto; }
+.inst-gal h2, .inst-gal h3 { margin: 0; letter-spacing: -0.3px; }
+.inst-gal-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; }
+.inst-gal-cell { display: grid; gap: 4px; justify-items: center; font-size: 14px; color: var(--body); text-align: center; }
+.inst-gal-cell .inst-art { background: var(--surface-card); border-radius: var(--r-xl); padding: 6px; }
+.inst-gal-three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; max-width: 375px; }

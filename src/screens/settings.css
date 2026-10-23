@@ -1,0 +1,18 @@
+/* 설정 (set-) */
+.set-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 48px; }
+.set-row + .set-row { border-top: 1px solid var(--hairline); padding-top: 12px; }
+.set-label { font-weight: 600; color: var(--body-strong); min-width: 0; flex: 1 1 200px; }
+.set-switch {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 48px; min-width: 96px; padding: 8px 16px;
+  border-radius: var(--r-pill); border: 1.5px solid var(--hairline-strong); background: var(--canvas);
+  color: var(--body-strong); font-weight: 700; font-size: 16px; cursor: pointer; justify-content: center;
+}
+.set-switch[aria-checked='true'] { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+.set-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 8px; }
+.set-steps li { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; padding: 8px 12px; border: 1px solid var(--hairline-strong); border-radius: var(--r-md); background: var(--canvas); }
+.set-steps a { white-space: nowrap; }
+.set-kv { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 4px 16px; margin: 0; }
+.set-kv dt { color: var(--muted); font-weight: 600; }
+.set-kv dd { margin: 0; color: var(--body-strong); overflow-wrap: anywhere; }
+.about-h { margin-top: 4px; }
+.about-list { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }

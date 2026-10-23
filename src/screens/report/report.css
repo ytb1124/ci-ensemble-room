@@ -1,0 +1,26 @@
+/* 나의 청취 단서 (rep-) */
+.rep-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--s-md); }
+.rep-col { min-width: 0; background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-md); padding: var(--s-sm) var(--s-md); }
+.rep-col h4 { font-family: var(--font-body); font-size: 15px; font-weight: 700; color: var(--body-strong); margin: 0 0 4px; letter-spacing: 0; }
+.rep-word { font-size: 18px; font-weight: 700; color: var(--ink); }
+.rep-faint { color: var(--muted); font-weight: 500; }
+.rep-strong { font-weight: 800; color: var(--ink); }
+.rep-quote { margin: 4px 0 0; padding-left: 10px; border-left: 3px solid var(--hairline-strong); color: var(--body-strong); overflow-wrap: anywhere; }
+.rep-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.rep-sentence { margin: 0; padding: var(--s-sm) var(--s-md); border-radius: var(--r-md); background: var(--canvas); border: 1px solid var(--hairline-strong); }
+.rep-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.rep-table th, .rep-table td { text-align: left; vertical-align: top; padding: 8px 6px; border-bottom: 1px solid var(--hairline-strong); overflow-wrap: anywhere; }
+.rep-table th { color: var(--body-strong); font-weight: 700; }
+.rep-table td:first-child, .rep-table th:first-child { white-space: nowrap; width: 1%; }
+.rep-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-md); }
+@media (max-width: 560px) { .rep-pair { grid-template-columns: minmax(0, 1fr); } }
+.rep-details > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--ink); list-style: none; }
+.rep-details > summary::-webkit-details-marker { display: none; }
+.rep-details > summary::before { content: '+'; display: inline-flex; width: 24px; height: 24px; align-items: center; justify-content: center; border: 1.5px solid var(--hairline-strong); border-radius: 50%; font-weight: 700; }
+.rep-details[open] > summary::before { content: '−'; }
+.rep-textarea { width: 100%; min-height: 96px; resize: vertical; }
+.rep-list { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.rep-profile { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 6px 16px; margin: 0; }
+.rep-profile dt { color: var(--muted); font-weight: 600; }
+.rep-profile dd { margin: 0; color: var(--body-strong); overflow-wrap: anywhere; }
+@media (max-width: 420px) { .rep-profile { grid-template-columns: minmax(0, 1fr); gap: 0; } .rep-profile dd { margin-bottom: 8px; } }

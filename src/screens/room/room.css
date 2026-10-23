@@ -1,0 +1,35 @@
+.room-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.room-head h1 { font-size: 22px; margin: 0; letter-spacing: -0.3px; flex: 1 1 auto; text-align: center; min-width: 0; }
+.room-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 600px) { .room-cards { gap: 16px; } }
+.room-songlist { display: flex; flex-direction: column; gap: 8px; }
+.room-songlist .btn { justify-content: space-between; }
+.room-live { min-height: 24px; font-weight: 600; color: var(--body-strong); }
+.room-viz { min-width: 0; overflow: hidden; }
+
+.room-transport {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  background: var(--canvas); border-top: 1px solid var(--hairline-strong);
+  box-shadow: 0 -4px 16px rgba(10, 10, 10, 0.08);
+  padding: 8px var(--s-md) calc(8px + env(safe-area-inset-bottom));
+}
+.room-transport-in { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+.room-tp-main { display: flex; align-items: center; gap: 8px; }
+.room-play { width: 56px; height: 56px; min-height: 56px; padding: 0; flex: 0 0 auto; border-radius: 9999px; }
+.room-tp-time { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 15px; color: var(--body-strong); white-space: nowrap; }
+.room-tp-seek { flex: 1 1 auto; min-width: 0; }
+.room-tp-extra { display: none; }
+@media (min-width: 760px) { .room-tp-extra { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; } }
+.room-body-controls { display: flex; flex-direction: column; gap: 12px; }
+@media (min-width: 760px) { .room-body-controls { display: none; } }
+.room-pills { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.room-pill {
+  min-height: 44px; padding: 8px 14px; border-radius: 9999px; font: inherit; font-size: 15px; font-weight: 600;
+  background: var(--surface-soft); color: var(--body-strong); border: 1px solid var(--hairline-strong); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.room-pill[aria-pressed='true'] { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+.room-select { min-height: 44px; border-radius: 9999px; padding: 8px 14px; font: inherit; font-size: 15px; background: var(--surface-soft); color: var(--body-strong); border: 1px solid var(--hairline-strong); }
+.room-steps { display: flex; flex-direction: column; gap: 8px; }
+.room-adv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+@media (prefers-reduced-motion: reduce) { .room-transport * { transition: none !important; } }
