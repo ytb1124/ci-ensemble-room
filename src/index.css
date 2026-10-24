@@ -29,6 +29,7 @@
   --focus: #1d4ed8;
 
   /* 레인 색(구성안 7.1: 관례 기반 제안, 색만으로 구분하지 않음) */
+  --lane-piano: #7e22ce;
   --lane-cajon: #c2410c;
   --lane-bass: #1e3a8a;
   --lane-trumpet: #a16207;
@@ -72,6 +73,7 @@
     --surface-soft: #112222;
     --surface-card: #1a2a2a;
     --surface-strong: #243535;
+    --lane-piano: #d8b4fe;
     --lane-cajon: #fb923c;
     --lane-bass: #93c5fd;
     --lane-trumpet: #facc15;
@@ -98,6 +100,7 @@
   --surface-soft: #112222;
   --surface-card: #1a2a2a;
   --surface-strong: #243535;
+  --lane-piano: #d8b4fe;
   --lane-cajon: #fb923c;
   --lane-bass: #93c5fd;
   --lane-trumpet: #facc15;
@@ -300,3 +303,7 @@ a { color: var(--ink); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }
+
+/* 연구 참여 동의 체크 */
+.join-check { display: flex; align-items: flex-start; gap: 12px; font-weight: 600; color: var(--body-strong); cursor: pointer; min-height: 44px; }
+.join-check input { flex: none; width: 24px; height: 24px; margin: 2px 0 0; accent-color: var(--primary); }

@@ -1,14 +1,17 @@
 // 공용 타입. 저장 스키마는 구성안 4.3절(cihall.profile.v1)을 따른다.
 
-export type InstrumentId = 'cajon' | 'bass' | 'trumpet';
-export const INSTRUMENTS: InstrumentId[] = ['cajon', 'bass', 'trumpet'];
+export type InstrumentId = 'piano' | 'cajon' | 'trumpet' | 'bass';
+/** 카드·목록 순서(팀 합의: 피아노 · 카혼 · 트럼펫 · 베이스) */
+export const INSTRUMENTS: InstrumentId[] = ['piano', 'cajon', 'trumpet', 'bass'];
 export const INSTRUMENT_LABEL: Record<InstrumentId, string> = {
+  piano: '피아노',
   cajon: '카혼',
-  bass: '콘트라베이스',
+  bass: '베이스',
   trumpet: '트럼펫',
 };
 /** 짧은 라벨(좁은 화면용) */
 export const INSTRUMENT_SHORT: Record<InstrumentId, string> = {
+  piano: '피아노',
   cajon: '카혼',
   bass: '베이스',
   trumpet: '트럼펫',

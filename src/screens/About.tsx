@@ -19,7 +19,7 @@ export default function About() {
       <section className="card stack" aria-labelledby="ab-goal">
         <h2 id="ab-goal" className="about-h">무엇을 하는 프로그램인가요</h2>
         <p>
-          인공와우(CI)를 쓰는 분이 카혼·콘트라베이스·트럼펫 3인조가 연주하는 노래를 그림으로 된 합주실에서 직접 만져 보며 듣는 웹
+          인공와우(CI)를 쓰는 분이 피아노·카혼·트럼펫·베이스 4인조가 연주하는 노래를 그림으로 된 합주실에서 직접 만져 보며 듣는 웹
           프로그램이에요. 연주자 그림을 누르면 그 악기만 들리고, 다시 누르면 합주로 돌아와요.
         </p>
         <p>
@@ -55,7 +55,7 @@ export default function About() {
       <section className="card stack" aria-labelledby="ab-rec">
         <h2 id="ab-rec" className="about-h">소리는 이렇게 만들 예정이에요</h2>
         <ul className="about-list">
-          <li>카혼, 콘트라베이스(줄을 튕기는 피치카토), 트럼펫 3인조예요.</li>
+          <li>피아노, 카혼, 트럼펫, 베이스(콘트라베이스, 줄을 튕기는 피치카토) 4인조예요.</li>
           <li>악기마다 따로 녹음해서 하나씩 들을 수 있게 해요.</li>
           <li>잔향 없는 소리(드라이)로 녹음하고, 시작 소리(어택)를 깎지 않아요. 압축·리미터를 쓰지 않아요.</li>
           <li>악기마다 같은 크기로 맞춰서, 큰 소리가 이기는 일이 없게 해요.</li>

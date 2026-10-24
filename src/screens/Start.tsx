@@ -4,6 +4,7 @@ import { SoundOnButton } from '../components/SoundGate';
 import { Icon } from '../components/ui/Icon';
 import { useEngineState } from '../audio/useEngine';
 import { useProfile } from '../store/profile';
+import { researchEnabled, useResearch } from '../store/research';
 import './calibrate/calibrate.css';
 
 export default function Start() {
@@ -11,6 +12,7 @@ export default function Start() {
   const profile = useProfile();
   const nav = useNavigate();
   const [skipAsk, setSkipAsk] = useState(false);
+  const rs = useResearch();
 
   return (
     <main className="page page-narrow stack-lg">
@@ -67,6 +69,20 @@ export default function Start() {
           </div>
         )}
       </section>
+
+      {researchEnabled && rs.status === 'unknown' && (
+        <section className="card card-tone lavender stack" aria-labelledby="start-research">
+          <h2 id="start-research" style={{ margin: 0 }}>연구에 함께해 주실래요? (1분)</h2>
+          <p style={{ margin: 0 }}>
+            인공와우로 음악을 듣는 사람마다 무엇이 잘 들리는지 알아보고 있어요. 이름이나 연락처는 받지 않아요.
+          </p>
+          <div className="row">
+            <Link to="/join" className="btn btn-primary">
+              자세히 보고 참여하기 <Icon name="chevronRight" />
+            </Link>
+          </div>
+        </section>
+      )}
 
       <p className="small muted" style={{ margin: 0 }}>
         지금은 시험판이라 악기 소리 대신 '쉬—' 하는 잡음이 나요.

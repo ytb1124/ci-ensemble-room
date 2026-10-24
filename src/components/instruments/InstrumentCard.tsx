@@ -14,11 +14,51 @@ export interface InstrumentCardProps {
   mode: RoomMode;
   motion: MotionLevel;
   animate?: boolean;
-  blindNumber?: 1 | 2 | 3;
+  blindNumber?: number;
   revealed?: boolean;
   compact?: boolean;
+  /** 있으면 카드 아래에 크기 조절 줄을 붙인다(누르는 영역과 분리) */
+  volume?: VolumeProps;
   onPress: () => void;
   onLongPress?: () => void;
+}
+
+export interface VolumeProps {
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  onChange: (v: number) => void;
+}
+
+/** dB 대신 말로 보여 준다 */
+export function volumeWord(db: number): string {
+  if (db === 0) return '보통';
+  if (db > 0) return db <= 2 ? '조금 크게' : db <= 6 ? '크게' : '아주 크게';
+  return db >= -4 ? '조금 작게' : db >= -8 ? '작게' : '아주 작게';
+}
+
+function VolumeStrip({ name, v }: { name: string; v: VolumeProps }) {
+  const pct = ((v.value - v.min) / (v.max - v.min)) * 100;
+  const zero = ((0 - v.min) / (v.max - v.min)) * 100;
+  const set = (n: number) => v.onChange(Math.max(v.min, Math.min(v.max, n)));
+  return (
+    <div className="inst-vol" role="group" aria-label={`${name} 크기`}>
+      <button type="button" className="inst-vol-btn" aria-label={`${name} 작게`} disabled={v.value <= v.min} onClick={() => set(v.value - v.step)}>
+        <Icon name="minus" size={20} />
+      </button>
+      <div className="inst-vol-mid">
+        <span className="inst-vol-word" aria-live="polite">{volumeWord(v.value)}</span>
+        <span className="inst-vol-meter" aria-hidden="true">
+          <span className="inst-vol-zero" style={{ left: `${zero}%` }} />
+          <span className="inst-vol-fill" style={{ width: `${pct}%` }} />
+        </span>
+      </div>
+      <button type="button" className="inst-vol-btn" aria-label={`${name} 크게`} disabled={v.value >= v.max} onClick={() => set(v.value + v.step)}>
+        <Icon name="plus" size={20} />
+      </button>
+    </div>
+  );
 }
 
 const COEF: Record<MotionLevel, number> = { off: 0, calm: 0.35, normal: 0.7, vivid: 1 };
@@ -85,6 +125,9 @@ export function InstrumentCard(p: InstrumentCardProps) {
       if (id === 'cajon') {
         const o = lastOnset(engine.timeline('cajon')?.onsets ?? [], now);
         if (o && now - o.t <= 0.12) pose = o.kind === 'bassTone' ? 'hitCenter' : o.kind === 'slap' ? 'hitEdge' : 'idle';
+      } else if (id === 'piano') {
+        const o = lastOnset(engine.timeline('piano')?.onsets ?? [], now);
+        if (o && now - o.t <= 0.14) pose = 'press';
       } else if (id === 'bass') {
         const o = lastOnset(engine.timeline('bass')?.onsets ?? [], now);
         if (o && now - o.t <= 0.15) pose = 'pluck';
@@ -144,11 +187,11 @@ export function InstrumentCard(p: InstrumentCardProps) {
       : selected ? '누르면 모두 함께 들어요' : `누르면 ${hidden ? name : INSTRUMENT_LABEL[id]}만 들어요`;
   const label = `${name}, ${onTxt}${selected ? ', 혼자 듣는 중' : ''}, ${hint}`;
 
-  return (
+  const card = (
     <button
       ref={cardRef}
       type="button"
-      className={'inst-card' + (selected ? ' is-selected' : '') + (compact ? ' is-compact' : '') + (on ? ' is-on' : ' is-off')}
+      className={'inst-card' + (selected && !p.volume ? ' is-selected' : '') + (compact ? ' is-compact' : '') + (p.volume ? ' is-boxed' : '') + (on ? ' is-on' : ' is-off')}
       aria-label={label}
       aria-pressed={mode === 'toggle' ? on : selected}
       onClick={click}
@@ -175,5 +218,12 @@ export function InstrumentCard(p: InstrumentCardProps) {
         {blindNumber !== undefined && revealed && <span className="inst-tag is-soft">악기 {blindNumber}</span>}
       </span>
     </button>
+  );
+  if (!p.volume) return card;
+  return (
+    <div className={'inst-cardbox' + (selected ? ' is-selected' : '')}>
+      {card}
+      <VolumeStrip name={name} v={p.volume} />
+    </div>
   );
 }

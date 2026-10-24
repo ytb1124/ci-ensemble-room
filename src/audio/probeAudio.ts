@@ -108,7 +108,7 @@ async function renderPlaceholderClip(sampleRate: number, id: ClipId): Promise<Au
     tail = f;
   }
   tail.connect(off.destination);
-  const stems: StemId[] = id === 'emph_bass' ? ['cajon', 'bass', 'trumpet', 'bassOct'] : ['cajon', 'bass', 'trumpet'];
+  const stems: StemId[] = id === 'emph_bass' ? ['piano', 'cajon', 'bass', 'trumpet', 'bassOct'] : ['piano', 'cajon', 'bass', 'trumpet'];
   for (const sid of stems) {
     const data = renderStem(sid, song, sampleRate, { shape: 'rhythm', ...r.opts, ...r.stemOpts?.[sid] });
     normalizeTo(data, -24);

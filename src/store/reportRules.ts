@@ -459,7 +459,7 @@ const ROUTE_LABEL: Record<string, string> = {
   speaker: '스피커',
   headphones: '헤드폰',
 };
-const ASSIST_LABEL: Record<string, string> = { none: '쓰지 않아요', boost: '저음 강조', octaveUp: '한 옥타브 위 소리 더하기' };
+const ASSIST_LABEL: Record<string, string> = { none: '쓰지 않아요', boost: '저음 강조', octaveUp: '베이스를 높게 겹쳐 듣기' };
 const SIGNED = (v: number) => `${v > 0 ? '+' : ''}${v} dB`;
 
 export function profileLines(p: Profile): { label: string; value: string }[] {
@@ -492,7 +492,7 @@ const HISTORY_KEY_LABEL: Record<string, string> = {
   allowPlus12: '+12 dB 허용',
   bassAssist: '저음 도움',
   bassVizEmphasis: '저음 그림 강조',
-  soloLoudnessMatch: '솔로 크기 맞춤',
+  soloLoudnessMatch: '혼자 들어도 같은 크기로',
   songOverrides: '곡별 섞기',
 };
 

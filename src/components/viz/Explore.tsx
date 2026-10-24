@@ -45,7 +45,7 @@ export function Explore(p: { on: Record<InstrumentId, boolean> }) {
   );
 }
 
-const DASH: Record<InstrumentId, number[]> = { cajon: [], bass: [10, 5], trumpet: [2, 5] };
+const DASH: Record<InstrumentId, number[]> = { piano: [6, 3, 1, 3], cajon: [], bass: [10, 5], trumpet: [2, 5] };
 function Legend() {
   const [c, setC] = useState<VizColors | null>(null);
   useEffect(() => {

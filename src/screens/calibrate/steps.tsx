@@ -303,7 +303,7 @@ export function Step5({ d, set, range }: StepProps & { range: { min: number; max
   return (
     <div className="stack-lg">
       <p className="lead" style={{ margin: 0 }}>
-        세 악기가 함께 연주해요. 가장 듣기 편한 비율로 섞어 보세요. 정답은 없어요.
+        네 악기가 함께 연주해요. 가장 듣기 편한 비율로 섞어 보세요. 정답은 없어요.
       </p>
       <LoopPlayer />
       {INSTRUMENTS.map((id: InstrumentId) => (
@@ -322,7 +322,7 @@ export function Step5({ d, set, range }: StepProps & { range: { min: number; max
       <button
         type="button"
         className="btn"
-        onClick={() => set({ instGainDb: { cajon: 0, bass: 0, trumpet: 0 } })}
+        onClick={() => set({ instGainDb: { piano: 0, cajon: 0, bass: 0, trumpet: 0 } })}
       >
         <Icon name="refresh" /> 처음 상태로
       </button>
@@ -335,7 +335,7 @@ export function Step6({ d, set, pick, setPick }: StepProps & { pick: BassAssist 
   const opts: { v: BassAssist; l: string }[] = [
     { v: 'none', l: '원래 소리' },
     { v: 'boost', l: '저음 강조' },
-    { v: 'octaveUp', l: '한 옥타브 위 소리 더하기' },
+    { v: 'octaveUp', l: '베이스를 높게 겹쳐 듣기' },
   ];
   const listen = (v: BassAssist) => {
     set({ bassAssist: v, bassVizEmphasis: false });
@@ -344,7 +344,7 @@ export function Step6({ d, set, pick, setPick }: StepProps & { pick: BassAssist 
   };
   return (
     <div className="stack-lg">
-      <p className="lead" style={{ margin: 0 }}>콘트라베이스만 연주해요. 줄을 튕기는 소리나 박이 느껴지나요?</p>
+      <p className="lead" style={{ margin: 0 }}>베이스만 연주해요. 줄을 튕기는 소리나 박이 느껴지나요?</p>
       <LoopPlayer label="베이스 2마디 반복" />
       <div className="cal-choices cal-3" role="group" aria-label="저음 도움 비교">
         {opts.map((o, i) => (
@@ -368,7 +368,7 @@ export function Step6({ d, set, pick, setPick }: StepProps & { pick: BassAssist 
       {pick === 'unsure' && (
         <p className="cal-note">괜찮아요. 소리는 그대로 두고, 합주실 그림에서 저음의 박을 조금 더 눈에 띄게 보여 드릴게요.</p>
       )}
-      <p className="small muted">현재 선택: {d.bassAssist === 'none' ? '원래 소리' : d.bassAssist === 'boost' ? '저음 강조' : '한 옥타브 위 소리 더하기'}</p>
+      <p className="small muted">현재 선택: {d.bassAssist === 'none' ? '원래 소리' : d.bassAssist === 'boost' ? '저음 강조' : '베이스를 높게 겹쳐 듣기'}</p>
     </div>
   );
 }

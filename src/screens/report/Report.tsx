@@ -98,7 +98,7 @@ export default function Report() {
             {data.bass.appeared > 0 && (
               <p className="card card-soft">
                 <strong>저음</strong> (참고로만 봐 주세요): 저음을 키운 소리를 {data.bass.appeared}번 중 {data.bass.chosen}번 "더 또렷해요"로
-                골랐어요. 관련된 악기는 콘트라베이스예요.
+                골랐어요. 관련된 악기는 베이스예요.
               </p>
             )}
           </section>
@@ -217,7 +217,7 @@ export default function Report() {
             </div>
           )}
           <div>
-            <Link to="/settings" className="btn btn-sm"><Icon name="sliders" size={20} /> 소리 맞춤 바꾸기</Link>
+            <Link to="/settings" className="btn btn-sm"><Icon name="sliders" size={20} /> 처음 설정 바꾸기</Link>
           </div>
         </div>
       </section>

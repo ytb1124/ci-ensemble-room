@@ -12,6 +12,7 @@ import { profileLines } from '../store/reportRules';
 import { storageAvailable } from '../store/storage';
 import type { MotionLevel, PlaceholderShape, Profile, Theme, ViewMode } from '../types';
 import { DeleteAll } from './report/DeleteAll';
+import { ResearchSection } from './ResearchSection';
 import { ExportButtons } from './report/ExportButtons';
 import './settings.css';
 
@@ -49,7 +50,7 @@ export default function Settings() {
       <h1>설정</h1>
 
       <section className="card stack" aria-labelledby="set-calib">
-        <h2 id="set-calib">소리 맞춤</h2>
+        <h2 id="set-calib">처음 설정</h2>
         <ul className="set-steps">
           {STEPS.map((name, i) => (
             <li key={name}>
@@ -186,10 +187,10 @@ export default function Settings() {
       <section className="card stack" aria-labelledby="set-sound">
         <h2 id="set-sound">소리</h2>
         <Switch
-          label="솔로 크기 맞춤"
+          label="혼자 들어도 같은 크기로"
           checked={p.soloLoudnessMatch}
           onChange={(v) => updateProfile({ soloLoudnessMatch: v })}
-          hint="한 악기만 들을 때도 비슷한 크기로 들려요."
+          hint="한 악기만 골라 들을 때도 함께 들을 때와 비슷한 크기로 들려요."
         />
         <Switch
           label="+12 dB까지 허용"
@@ -198,11 +199,8 @@ export default function Settings() {
             updateProfile((cur) => {
               if (v) return { allowPlus12: true };
               // 끌 때는 +6 dB를 넘는 값을 +6 dB로 맞춘다
-              const clamp = (g: Profile['instGainDb']) => ({
-                cajon: Math.min(6, g.cajon),
-                bass: Math.min(6, g.bass),
-                trumpet: Math.min(6, g.trumpet),
-              });
+              const clamp = (g: Profile['instGainDb']) =>
+                Object.fromEntries(Object.entries(g).map(([k, v]) => [k, Math.min(6, v)])) as Profile['instGainDb'];
               const so: Profile['songOverrides'] = {};
               (Object.keys(cur.songOverrides) as (keyof Profile['songOverrides'])[]).forEach((k) => {
                 const o = cur.songOverrides[k];
@@ -236,6 +234,8 @@ export default function Settings() {
         </div>
       </section>
 
+      <ResearchSection />
+
       <section className="card stack" aria-labelledby="set-data">
         <h2 id="set-data">데이터</h2>
         {!storageAvailable() && (
@@ -243,7 +243,7 @@ export default function Settings() {
             이 기기에서는 기록이 남지 않아요. 창을 닫으면 설정과 응답이 사라져요. 필요하면 내보내기로 파일을 받아 두세요.
           </p>
         )}
-        <p className="small muted">모든 기록은 이 기기 안에만 있어요. 이름이나 연락처는 받지 않아요.</p>
+        <p className="small muted">이름이나 연락처는 받지 않아요. 연구에 참여하지 않았다면 모든 기록은 이 기기 안에만 있어요. 아래 [지우기]는 이 기기만 지워요. 연구에 보낸 기록은 위 [연구 참여]에서 지워요.</p>
         <ExportButtons />
         <DeleteAll />
       </section>

@@ -11,6 +11,8 @@ import Report from './screens/report/Report';
 import Room from './screens/room/Room';
 import Settings from './screens/Settings';
 import Start from './screens/Start';
+import Join from './screens/Join';
+import { initResearch } from './store/research';
 
 // 사이트맵(구성안 3.1절). 정적 호스팅에서도 동작하도록 해시 라우터를 쓴다.
 
@@ -68,6 +70,7 @@ function ScrollTop() {
 }
 
 export default function App() {
+  useEffect(() => initResearch(), []);
   return (
     <HashRouter>
       <ThemeSync />
@@ -94,6 +97,7 @@ export default function App() {
           <Route path="/report" element={<Report />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/about" element={<About />} />
+          <Route path="/join" element={<Join />} />
           {/* 개발용: 악기 UI 모든 상태 보기 */}
           {import.meta.env.DEV && <Route path="/dev/instruments" element={<InstrumentGallery />} />}
           <Route path="*" element={<Navigate to="/" replace />} />

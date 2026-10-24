@@ -1,16 +1,10 @@
 import { useState } from 'react';
 import { engine, useEngineState } from '../../audio/useEngine';
-import { DbSlider, Chip } from '../../components/ui/controls';
+import { Chip } from '../../components/ui/controls';
 import { Icon } from '../../components/ui/Icon';
-import { effectiveInstGain, gainRange, updateProfile, useProfile } from '../../store/profile';
+import { updateProfile, useProfile } from '../../store/profile';
 import { logEvent } from '../../store/log';
-import { INSTRUMENTS, INSTRUMENT_LABEL, type BassAssist, type InstrumentId, type SongId } from '../../types';
-
-const PRESETS: { label: string; id: InstrumentId }[] = [
-  { label: '멜로디 또렷하게', id: 'trumpet' },
-  { label: '박 또렷하게', id: 'cajon' },
-  { label: '저음 또렷하게', id: 'bass' },
-];
+import type { BassAssist, SongId } from '../../types';
 
 export function AdvancedPanel({
   song, blind, onBlind, onReveal, revealed,
@@ -20,52 +14,22 @@ export function AdvancedPanel({
   const profile = useProfile();
   const st = useEngineState();
   const [open, setOpen] = useState(false);
-  const base = effectiveInstGain(profile, song);
-  const [draft, setDraft] = useState<Record<InstrumentId, number> | null>(null);
-  const cur = draft ?? base;
-  const range = gainRange(profile);
-
-  const apply = (next: Record<InstrumentId, number>) => {
-    setDraft(next);
-    engine.setPreview({ instGainDb: next });
-  };
-  const change = (id: InstrumentId, v: number) => {
-    const from = cur[id];
-    if (from === v) return;
-    apply({ ...cur, [id]: v });
-  };
-  const logDiff = (id: InstrumentId, to: number) => {
-    const from = base[id];
-    if (from !== to) logEvent({ type: 'gain', instrument: id, fromDb: from, toDb: to, song });
-  };
-  const save = () => {
-    if (!draft) return;
-    updateProfile((p) => ({ songOverrides: { ...p.songOverrides, [song]: { instGainDb: draft } } }));
-    engine.setPreview(null);
-    setDraft(null);
-  };
+  const saved = !!profile.songOverrides[song];
   const revert = () => {
     updateProfile((p) => {
       const so = { ...p.songOverrides };
       delete so[song];
       return { songOverrides: so };
     });
-    engine.setPreview(null);
-    setDraft(null);
-  };
-  const preset = (id: InstrumentId) => {
-    const next = { ...base, [id]: Math.min(range.max, 6) };
-    apply(next);
-    logDiff(id, next[id]);
   };
   const assists: { v: BassAssist; label: string }[] = [
-    { v: 'none', label: '없음' },
+    { v: 'none', label: '쓰지 않기' },
     { v: 'boost', label: '저음 키우기' },
-    { v: 'octaveUp', label: '한 옥타브 위' },
+    { v: 'octaveUp', label: '베이스를 높게 겹쳐 듣기' },
   ];
 
   return (
-    <section className="card stack" aria-label="자세히">
+    <section className="card stack" aria-label="더 맞추기">
       <button
         type="button"
         className="btn btn-ghost"
@@ -74,45 +38,22 @@ export function AdvancedPanel({
         onClick={() => setOpen(!open)}
         style={{ justifyContent: 'space-between' }}
       >
-        <span>자세히 · 악기별 크기 · 저음 도움 · 원래 소리</span>
+        <span>더 맞추기</span>
         <Icon name="chevronDown" style={{ transform: open ? 'rotate(180deg)' : undefined }} />
       </button>
       {open && (
         <div id="room-adv" className="stack-lg">
           <div className="stack">
-            <h3 style={{ margin: 0 }}>악기별 크기</h3>
-            <div className="room-adv-grid">
-              {INSTRUMENTS.map((id) => (
-                <DbSlider
-                  key={id}
-                  label={INSTRUMENT_LABEL[id]}
-                  value={cur[id]}
-                  min={range.min}
-                  max={range.max}
-                  step={range.step}
-                  onChange={(v) => change(id, v)}
-                  onCommit={(v) => logDiff(id, v)}
-                />
-              ))}
-            </div>
-            <div className="row">
-              {PRESETS.map((p) => (
-                <button key={p.id} type="button" className="room-pill" onClick={() => preset(p.id)}>
-                  {p.label}
-                </button>
-              ))}
-            </div>
-            <div className="row">
-              <button type="button" className="btn btn-primary btn-sm" disabled={!draft} onClick={save}>
-                이 곡에 저장
-              </button>
-              <button type="button" className="btn btn-sm" onClick={revert}>
-                프로필 값으로 되돌리기
-              </button>
-            </div>
             <p className="small muted" style={{ margin: 0 }} role="status">
-              {draft ? '아직 저장하지 않았어요. 지금은 미리 듣는 중이에요.' : profile.songOverrides[song] ? '이 곡에 저장한 크기를 쓰고 있어요.' : '프로필 값을 쓰고 있어요.'}
+              {saved ? '악기 크기는 카드 아래 [−][+]로 바꾸고, 이 곡에 바로 저장돼요.' : '악기 크기는 카드 아래 [−][+]로 바꿔요. 바꾸면 이 곡에 바로 저장돼요.'}
             </p>
+            {saved && (
+              <div className="row">
+                <button type="button" className="btn btn-sm" onClick={revert}>
+                  내 기본 설정으로
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="stack">
@@ -128,10 +69,10 @@ export function AdvancedPanel({
 
           <div className="row" style={{ gap: 12 }}>
             <Chip pressed={profile.soloLoudnessMatch} onClick={() => updateProfile({ soloLoudnessMatch: !profile.soloLoudnessMatch })}>
-              솔로 크기 맞춤
+              혼자 들어도 같은 크기로
             </Chip>
             <Chip pressed={st.bypass} onClick={() => engine.setBypass(!st.bypass)}>
-              원래 소리
+              보정 없이 비교 듣기
             </Chip>
             <Chip
               pressed={blind}
@@ -140,15 +81,15 @@ export function AdvancedPanel({
                 logEvent({ type: 'blind', value: !blind ? 'on' : 'off' });
               }}
             >
-              눈 가리고 듣기
+              그림 없이 맞혀 보기
             </Chip>
             {blind && !revealed && (
               <button type="button" className="btn btn-sm" onClick={onReveal}>공개</button>
             )}
           </div>
           <p className="small muted" style={{ margin: 0 }}>
-            {st.bypass ? '보정을 잠시 끄고 원본을 들어요.' : '[원래 소리]를 켜면 보정을 잠시 끄고 원본을 들어요.'}
-            {' '}솔로 크기 맞춤은 혼자 들을 때 소리를 합주 크기에 가깝게 맞춰요.
+            {st.bypass ? '지금은 내 설정을 잠시 끄고 원본을 들어요. 다시 누르면 돌아가요.' : '[보정 없이 비교 듣기]를 켜면 내 설정을 잠시 끄고 원본과 비교할 수 있어요.'}
+            {' '}[혼자 들어도 같은 크기로]는 한 악기만 들을 때 소리가 작아지지 않게 해 줘요.
           </p>
         </div>
       )}

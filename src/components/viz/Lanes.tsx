@@ -20,7 +20,7 @@ export function readColors(el: Element): VizColors {
   const cs = getComputedStyle(el);
   const v = (n: string, d: string) => cs.getPropertyValue(n).trim() || d;
   return {
-    lane: { cajon: v('--lane-cajon', '#c2410c'), bass: v('--lane-bass', '#1e3a8a'), trumpet: v('--lane-trumpet', '#a16207') },
+    lane: { piano: v('--lane-piano', '#7e22ce'), cajon: v('--lane-cajon', '#c2410c'), bass: v('--lane-bass', '#1e3a8a'), trumpet: v('--lane-trumpet', '#a16207') },
     soft: v('--surface-soft', '#faf5e8'),
     ink: v('--ink', '#0a0a0a'),
     body: v('--body-strong', '#1a1a1a'),
@@ -65,6 +65,13 @@ function glyph(g: CanvasRenderingContext2D, id: InstrumentId, x: number, y: numb
   g.beginPath();
   if (id === 'cajon') g.rect(x - s, y - s, s * 2, s * 2); // 네모
   else if (id === 'bass') g.ellipse(x, y, s * 0.7, s * 1.1, 0, 0, Math.PI * 2); // 세로 타원
+  else if (id === 'piano') {
+    g.moveTo(x, y - s); // 마름모
+    g.lineTo(x + s, y);
+    g.lineTo(x, y + s);
+    g.lineTo(x - s, y);
+    g.closePath();
+  }
   else {
     g.moveTo(x - s, y + s * 0.8); // 삼각형
     g.lineTo(x + s, y);
@@ -74,7 +81,7 @@ function glyph(g: CanvasRenderingContext2D, id: InstrumentId, x: number, y: numb
 }
 
 export function Lanes(p: { on: Record<InstrumentId, boolean>; pitchLines: boolean; bassEmphasis: boolean; motion: MotionLevel }) {
-  const { ref, size } = useFitCanvas((w) => (w < 520 ? 180 : 220));
+  const { ref, size } = useFitCanvas((w) => (w < 520 ? 220 : 260));
   const colors = useRef<VizColors | null>(null);
   const frameNo = useRef(0);
   const st = useEngineState();
@@ -108,8 +115,8 @@ export function Lanes(p: { on: Record<InstrumentId, boolean>; pitchLines: boolea
     const prof = profileStore.get();
     const inst = effectiveInstGain(prof, st.songId);
     const k = MOTION_K[motion];
-    const laneH = (h - 8) / 3;
-    const order: InstrumentId[] = ['trumpet', 'bass', 'cajon'];
+    const order: InstrumentId[] = ['trumpet', 'piano', 'bass', 'cajon'];
+    const laneH = (h - 8) / order.length;
     const showBars = pitchLines;
 
     order.forEach((id, idx) => {

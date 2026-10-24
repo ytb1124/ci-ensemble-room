@@ -172,7 +172,7 @@ export default function Calibrate() {
       { n: 3, label: '좌우', value: profile.stereo ? `${profile.balance === -1 ? '왼쪽' : profile.balance === 1 ? '오른쪽' : '가운데'}${profile.spread ? ' · 넓게 펼침' : ''}` : '양쪽 같은 소리(모노)' },
       { n: 4, label: '소리 색', value: `저음 ${profile.eqLowDb ? sign(profile.eqLowDb) : '원래 소리'} · 또렷함 ${profile.eqMidDb ? `${sign(profile.eqMidDb)}${profile.eqMidHz === 3000 ? ' (약 3 kHz)' : ''}` : '원래 소리'}` },
       { n: 5, label: '악기 섞기', value: INSTRUMENTS.map((i) => `${INSTRUMENT_SHORT[i]} ${sign(profile.instGainDb[i], '')}`.trim()).join(' · ') },
-      { n: 6, label: '저음 도움', value: profile.bassAssist === 'boost' ? '저음 강조' : profile.bassAssist === 'octaveUp' ? '한 옥타브 위 소리 더하기' : profile.bassVizEmphasis ? '원래 소리 (그림에서 저음 박을 더 눈에 띄게)' : '원래 소리' },
+      { n: 6, label: '저음 도움', value: profile.bassAssist === 'boost' ? '저음 강조' : profile.bassAssist === 'octaveUp' ? '베이스를 높게 겹쳐 듣기' : profile.bassVizEmphasis ? '원래 소리 (그림에서 저음 박을 더 눈에 띄게)' : '원래 소리' },
     ];
     return (
       <main className="page page-narrow stack-lg">

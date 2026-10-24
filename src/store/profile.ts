@@ -16,7 +16,7 @@ export const DEFAULT_PROFILE: Profile = {
   eqLowDb: 0,
   eqMidDb: 0,
   eqMidHz: 1700,
-  instGainDb: { cajon: 0, bass: 0, trumpet: 0 },
+  instGainDb: { piano: 0, cajon: 0, bass: 0, trumpet: 0 },
   allowPlus12: false,
   bassAssist: 'none',
   bassVizEmphasis: false,
@@ -85,8 +85,10 @@ export function markCalibStep(step: number) {
 
 /** 곡별 믹스가 있으면 그것을, 없으면 프로필 값(4.4절) */
 export function effectiveInstGain(p: Profile, song: SongId | null): Record<InstrumentId, number> {
-  if (song && p.songOverrides[song]) return p.songOverrides[song]!.instGainDb;
-  return p.instGainDb;
+  // 악기가 늘어도 예전에 저장한 값이 깨지지 않게 기본값 위에 덮는다
+  const base = { ...DEFAULT_PROFILE.instGainDb, ...p.instGainDb };
+  if (song && p.songOverrides[song]) return { ...base, ...p.songOverrides[song]!.instGainDb };
+  return base;
 }
 
 export function resetProfile() {

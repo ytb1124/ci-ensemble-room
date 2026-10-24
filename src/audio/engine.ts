@@ -10,14 +10,15 @@ import { INSTRUMENTS } from '../types';
 import { placeholderOnsets, renderStem } from './placeholder';
 import { analyzeBuffer, fetchTimeline, rmsAt, type Timeline } from './timeline';
 
-const STEMS: StemId[] = ['cajon', 'bass', 'trumpet', 'bassOct'];
+const STEMS: StemId[] = ['piano', 'cajon', 'bass', 'trumpet', 'bassOct'];
+const allInst = (v: boolean) => Object.fromEntries(INSTRUMENTS.map((i) => [i, v])) as Record<InstrumentId, boolean>;
 const dbToLin = (db: number) => Math.pow(10, db / 20);
 const PAN_COMP_DB = 20 * Math.log10(Math.SQRT2); // pan 0 모노 입력의 −3.01 dB 보상
 const RAMP = 0.02; // 솔로/뮤트 램프 20 ms (5.1절)
-// 자리표시 스템은 피크를 같은 값으로 맞춘다. 세 스템 피크가 겹쳐도 약 −5.5 dBFS라 마스터 +6 dB에서도 클리핑 여유가 거의 있다.
+// 자리표시 스템은 피크를 같은 값으로 맞춘다. 네 스템 피크가 겹쳐도 약 −4 dBFS라 마스터 +6 dB에서도 클리핑 여유가 거의 있다.
 // 컴프레서·리미터는 쓰지 않는다(구성안 5.4절 설계 선택).
-const PLACEHOLDER_PEAK_DB = -15;
-const SPREAD_PAN: Record<StemId, number> = { cajon: -0.6, bass: 0, trumpet: 0.6, bassOct: 0 };
+const PLACEHOLDER_PEAK_DB = -16;
+const SPREAD_PAN: Record<StemId, number> = { piano: -0.25, cajon: -0.6, bass: 0, trumpet: 0.6, bassOct: 0 };
 
 interface StemNode {
   id: StemId;
@@ -65,12 +66,12 @@ const initialState: EngineState = {
   duration: 0,
   section: null,
   repeat: false,
-  on: { cajon: true, bass: true, trumpet: true },
+  on: allInst(true),
   solo: null,
   bypass: false,
   alternating: null,
   clip: null,
-  sources: { cajon: 'placeholder', bass: 'placeholder', trumpet: 'placeholder', bassOct: 'placeholder' },
+  sources: { piano: 'placeholder', cajon: 'placeholder', bass: 'placeholder', trumpet: 'placeholder', bassOct: 'placeholder' },
 };
 
 class AudioEngine {
@@ -274,7 +275,7 @@ class AudioEngine {
     this.stopSources();
     this.stopAlternate();
     this.song = SONGS[id];
-    this.patch({ songId: id, loading: true, error: null, playing: false, section: null, repeat: false, solo: null, on: { cajon: true, bass: true, trumpet: true } });
+    this.patch({ songId: id, loading: true, error: null, playing: false, section: null, repeat: false, solo: null, on: allInst(true) });
     this.pausedAt = 0;
     this.loopRegion = null;
     try {
@@ -512,7 +513,7 @@ class AudioEngine {
   /** 한 악기만(솔로). null이면 모두 함께 */
   solo(id: InstrumentId | null) {
     if (id === null) return this.allOn();
-    const on = { cajon: false, bass: false, trumpet: false };
+    const on = allInst(false);
     on[id] = true;
     this.setOnMap(on, id);
   }
@@ -523,7 +524,7 @@ class AudioEngine {
 
   allOn() {
     this.stopAlternate();
-    this.setOnMap({ cajon: true, bass: true, trumpet: true }, null);
+    this.setOnMap(allInst(true), null);
   }
 
   setBypass(v: boolean) {
@@ -539,7 +540,7 @@ class AudioEngine {
     const bar = beatToSec(this.song, this.song.meter) - beatToSec(this.song, 0);
     const period = bar * 2;
     this.patch({ alternating: id });
-    this.setOnMap({ cajon: true, bass: true, trumpet: true }, null);
+    this.setOnMap(allInst(true), null);
     let last: boolean | null = null;
     this.altTimer = window.setInterval(() => {
       if (!this.state.playing) return;

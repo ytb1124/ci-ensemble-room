@@ -6,7 +6,7 @@
 import type { SongConfig } from '../config/songs';
 import type { PlaceholderShape, StemId } from '../types';
 
-export type OnsetKind = 'bassTone' | 'slap' | 'pluck' | 'note';
+export type OnsetKind = 'bassTone' | 'slap' | 'pluck' | 'note' | 'chord';
 
 export interface ScoreNote {
   beat: number;
@@ -25,6 +25,7 @@ function scoreHbd(): Record<StemId, ScoreNote[]> {
   const cajon: ScoreNote[] = [];
   const bass: ScoreNote[] = [];
   const trumpet: ScoreNote[] = [];
+  const piano: ScoreNote[] = [];
   const BARS = 17; // 예비박 1 + 선율 8마디 × 2회
   for (let b = 0; b < BARS; b++) {
     cajon.push({ beat: 3 * b, dur: 1, vel: 1, kind: 'bassTone' }); // 1박 베이스 톤
@@ -33,6 +34,8 @@ function scoreHbd(): Record<StemId, ScoreNote[]> {
     if (b > 0) {
       bass.push({ beat: 3 * b, dur: 2, vel: 1, kind: 'pluck' }); // 첫 박 근음
       bass.push({ beat: 3 * b + 2, dur: 1, vel: 0.65, kind: 'pluck' }); // 3박 5음(선택)
+      piano.push({ beat: 3 * b + 1, dur: 1, vel: 0.75, kind: 'chord' }); // 2·3박 화음(쿵-짝-짝의 짝짝)
+      piano.push({ beat: 3 * b + 2, dur: 1, vel: 0.75, kind: 'chord' });
     }
   }
   // 선율 리듬(한 회). 마디 기준 상대 박, 길이
@@ -60,7 +63,7 @@ function scoreHbd(): Record<StemId, ScoreNote[]> {
   pickup.forEach(([o, d]) => trumpet.push({ beat: o, dur: d, vel: 1, kind: 'note' }));
   addPass(1, false);
   addPass(9, true);
-  return { cajon, bass, trumpet, bassOct: bass.map((n) => ({ ...n })) };
+  return { piano, cajon, bass, trumpet, bassOct: bass.map((n) => ({ ...n })) };
 }
 
 function score44(song: SongConfig): Record<StemId, ScoreNote[]> {
@@ -68,6 +71,7 @@ function score44(song: SongConfig): Record<StemId, ScoreNote[]> {
   const cajon: ScoreNote[] = [];
   const bass: ScoreNote[] = [];
   const trumpet: ScoreNote[] = [];
+  const piano: ScoreNote[] = [];
   const lastBeat = song.lines[song.lines.length - 1].endBeat;
   const BARS = Math.ceil(lastBeat / 4);
   for (let b = 0; b < BARS; b++) {
@@ -79,6 +83,8 @@ function score44(song: SongConfig): Record<StemId, ScoreNote[]> {
     if (b > 0) {
       bass.push({ beat: s, dur: 2, vel: 1, kind: 'pluck' });
       bass.push({ beat: s + 2, dur: 2, vel: 0.8, kind: 'pluck' });
+      piano.push({ beat: s + 1, dur: 1, vel: 0.75, kind: 'chord' }); // 2·4박 화음
+      piano.push({ beat: s + 3, dur: 1, vel: 0.75, kind: 'chord' });
     }
   }
   for (const line of song.lines) {
@@ -88,7 +94,7 @@ function score44(song: SongConfig): Record<StemId, ScoreNote[]> {
       trumpet.push({ beat, dur: lineEnd ? 2 : 1, vel: 1, kind: 'note' });
     }
   }
-  return { cajon, bass, trumpet, bassOct: bass.map((n) => ({ ...n })) };
+  return { piano, cajon, bass, trumpet, bassOct: bass.map((n) => ({ ...n })) };
 }
 
 // ───────── 핑크노이즈 ─────────
@@ -132,7 +138,7 @@ export interface EnvelopeOpts {
 function noteEnv(kind: OnsetKind, t: number, durSec: number, o: EnvelopeOpts): number {
   if (t < 0) return 0;
   const atk =
-    kind === 'slap' ? 0.001 : kind === 'bassTone' ? 0.003 : kind === 'pluck' ? 0.004 : 0.012;
+    kind === 'slap' ? 0.001 : kind === 'bassTone' ? 0.003 : kind === 'pluck' || kind === 'chord' ? 0.004 : 0.012;
   const attack = o.softAttack ? (kind === 'slap' || kind === 'bassTone' ? 0.025 : 0.05) : o.sharpAttack ? atk * 0.5 : atk;
   const rise = t < attack ? t / attack : 1;
   switch (kind) {
@@ -144,6 +150,12 @@ function noteEnv(kind: OnsetKind, t: number, durSec: number, o: EnvelopeOpts): n
       if (t > durSec) return 0;
       const tail = durSec - t < 0.02 ? (durSec - t) / 0.02 : 1;
       return rise * Math.exp(-(t - Math.min(t, attack)) / 0.25) * tail;
+    }
+    case 'chord': {
+      // 건반: 빠른 시작, 천천히 줄어듦, 다음 박 전에 뗌
+      if (t > durSec) return 0;
+      const tail = durSec - t < 0.03 ? (durSec - t) / 0.03 : 1;
+      return rise * Math.exp(-(t - Math.min(t, attack)) / 0.35) * tail;
     }
     case 'note': {
       const end = durSec * 0.88;
@@ -163,7 +175,7 @@ export interface RenderStemOpts extends EnvelopeOpts {
   evenRhythm?: boolean;
 }
 
-const SEEDS: Record<StemId, number> = { cajon: 0x1234, bass: 0x9e37, trumpet: 0x5a5a, bassOct: 0x7f4a };
+const SEEDS: Record<StemId, number> = { piano: 0x3c6e, cajon: 0x1234, bass: 0x9e37, trumpet: 0x5a5a, bassOct: 0x7f4a };
 
 /** 스템 하나를 렌더링한다(모노). 박 패턴이 없는 steady면 처음부터 끝까지 핑크노이즈 */
 export function renderStem(
@@ -191,7 +203,7 @@ export function renderStem(
   for (const note of notes) {
     const start = song.startOffsetSec + note.beat * bs;
     const durSec = note.dur * bs;
-    const maxLen = note.kind === 'note' || note.kind === 'pluck' ? durSec + 0.05 : 0.6;
+    const maxLen = note.kind === 'note' || note.kind === 'pluck' || note.kind === 'chord' ? durSec + 0.05 : 0.6;
     const i0 = Math.max(0, Math.round(start * sampleRate));
     const i1 = Math.min(n, Math.round((start + maxLen) * sampleRate));
     for (let i = i0; i < i1; i++) {

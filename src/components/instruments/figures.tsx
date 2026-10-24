@@ -4,7 +4,7 @@ import { useId, type ReactNode } from 'react';
 import type { InstrumentId } from '../../types';
 import './instruments.css';
 
-export type FigurePose = 'idle' | 'hitCenter' | 'hitEdge' | 'pluck' | 'blow' | 'rest';
+export type FigurePose = 'idle' | 'hitCenter' | 'hitEdge' | 'pluck' | 'blow' | 'rest' | 'press';
 
 const OUT = '#7a5238'; // 외곽선(따뜻한 갈색)
 const SKIN = '#f4c9a3';
@@ -13,6 +13,7 @@ const PANTS = '#d9bc92';
 const SHOE = '#8a5a3c';
 
 const VALID: Record<InstrumentId, FigurePose[]> = {
+  piano: ['idle', 'press'],
   cajon: ['idle', 'hitCenter', 'hitEdge'],
   bass: ['idle', 'pluck'],
   trumpet: ['idle', 'blow', 'rest'],
@@ -207,6 +208,53 @@ function Bass({ p }: { p: string }) {
   );
 }
 
+function Piano({ p }: { p: string }) {
+  const whites = Array.from({ length: 9 }, (_, i) => 52 + i * 10);
+  const blacks = [0, 1, 3, 4, 5, 7].map((i) => 52 + i * 10 + 7);
+  return (
+    <>
+      <Shadow cx={100} rx={80} />
+      {/* 업라이트 피아노 몸통 */}
+      <rect x="22" y="40" width="112" height="140" rx="10" fill={`url(#${p}-woodD)`} stroke={OUT} strokeWidth="3.4" />
+      <rect x="16" y="34" width="124" height="14" rx="7" fill={`url(#${p}-wood)`} stroke={OUT} strokeWidth="3" />
+      <rect x="34" y="56" width="88" height="40" rx="7" fill={`url(#${p}-wood)`} stroke={OUT} strokeOpacity=".6" strokeWidth="2" />
+      <ellipse cx="50" cy="64" rx="10" ry="3.4" fill="#fff" opacity=".3" />
+      <rect x="34" y="132" width="88" height="40" rx="7" fill={`url(#${p}-wood)`} stroke={OUT} strokeOpacity=".6" strokeWidth="2" />
+      {/* 의자 + 연주자(오른쪽, 건반을 향해 앉음) */}
+      <rect x="138" y="138" width="50" height="10" rx="5" fill={`url(#${p}-woodD)`} stroke={OUT} strokeWidth="2.6" />
+      <path d="M146 148 V182 M180 148 V182" stroke={OUT} strokeWidth="4" strokeLinecap="round" />
+      <Leg x={140} y={140} h={40} w={14} />
+      <g className="f-bob">
+        <Torso p={p} x={140} y={76} w={48} h={66} />
+        <Head p={p} cx={164} cy={52} r={19} />
+      </g>
+      {/* 건반 선반 */}
+      <rect x="44" y="102" width="102" height="22" rx="5" fill={`url(#${p}-woodD)`} stroke={OUT} strokeWidth="3" />
+      <rect x="50" y="104" width="92" height="16" rx="3" fill="#f6efe0" stroke={OUT} strokeWidth="2.4" />
+      <g stroke={OUT} strokeOpacity=".45" strokeWidth="1.4">
+        {whites.slice(1).map((x) => <path key={x} d={`M${x} 105 V119`} />)}
+      </g>
+      {blacks.map((x) => <rect key={x} x={x} y="104" width="5" height="9" rx="1.5" fill="#2a1a10" />)}
+      {/* 팔: 대기 = 건반 위에 손을 띄움 / 누름 = 손이 건반에 닿음 */}
+      <P poses={['idle']}>
+        <Limb d="M148 92 Q126 98 112 98" />
+        <Hand p={p} x={108} y={98} />
+        <Limb d="M152 100 Q138 104 128 100" />
+        <Hand p={p} x={124} y={99} />
+      </P>
+      <P poses={['press']}>
+        <Limb d="M148 92 Q124 104 108 106" />
+        <Hand p={p} x={104} y={107} r={8} />
+        <Limb d="M152 100 Q136 110 124 108" />
+        <Hand p={p} x={120} y={108} r={8} />
+        <g className="f-impact" fill="none" stroke={OUT} strokeWidth="2.4" strokeLinecap="round">
+          <path d="M96 88 L100 94 M112 84 L112 91 M128 88 L124 94" />
+        </g>
+      </P>
+    </>
+  );
+}
+
 function Trumpet({ p }: { p: string }) {
   return (
     <>
@@ -292,6 +340,7 @@ export function InstrumentFigure({
       focusable="false"
     >
       <Defs p={uid} />
+      {id === 'piano' && <Piano p={uid} />}
       {id === 'cajon' && <Cajon p={uid} />}
       {id === 'bass' && <Bass p={uid} />}
       {id === 'trumpet' && <Trumpet p={uid} />}

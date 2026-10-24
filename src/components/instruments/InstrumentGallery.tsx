@@ -5,6 +5,7 @@ import { INSTRUMENTS, INSTRUMENT_LABEL, type InstrumentId } from '../../types';
 import './instruments.css';
 
 const POSES: Record<InstrumentId, FigurePose[]> = {
+  piano: ['idle', 'press'],
   cajon: ['idle', 'hitCenter', 'hitEdge'],
   bass: ['idle', 'pluck'],
   trumpet: ['idle', 'blow', 'rest'],
@@ -35,46 +36,46 @@ export default function InstrumentGallery() {
         </section>
       ))}
 
-      <h2>카드 (375px 한 줄 3개 · 켜짐/꺼짐)</h2>
-      <div className="inst-gal-three">
+      <h2>카드 (375px 2×2 · 켜짐/꺼짐)</h2>
+      <div className="inst-gal-four">
         {INSTRUMENTS.map((id) => (
           <InstrumentCard key={id} id={id} on selected={false} mode="solo" motion="off" animate={false} onPress={noop} />
         ))}
       </div>
       <h3>선택(솔로): 카혼만 켜짐</h3>
-      <div className="inst-gal-three">
+      <div className="inst-gal-four">
         {INSTRUMENTS.map((id) => (
           <InstrumentCard key={id} id={id} on={id === 'cajon'} selected={id === 'cajon'} mode="solo" motion="off" animate={false} onPress={noop} />
         ))}
       </div>
       <h3>켜고 끄기 모드: 베이스 꺼짐</h3>
-      <div className="inst-gal-three">
+      <div className="inst-gal-four">
         {INSTRUMENTS.map((id) => (
           <InstrumentCard key={id} id={id} on={id !== 'bass'} selected={false} mode="toggle" motion="off" animate={false} onPress={noop} />
         ))}
       </div>
       <h3>눈 가리고 듣기 (번호)</h3>
-      <div className="inst-gal-three">
+      <div className="inst-gal-four">
         {INSTRUMENTS.map((id, i) => (
-          <InstrumentCard key={id} id={id} on={i !== 1} selected={false} mode="toggle" motion="off" animate={false} blindNumber={(i + 1) as 1 | 2 | 3} onPress={noop} />
+          <InstrumentCard key={id} id={id} on={i !== 1} selected={false} mode="toggle" motion="off" animate={false} blindNumber={i + 1} onPress={noop} />
         ))}
       </div>
       <h3>공개 후</h3>
-      <div className="inst-gal-three">
+      <div className="inst-gal-four">
         {INSTRUMENTS.map((id, i) => (
-          <InstrumentCard key={id} id={id} on={i !== 1} selected={i === 2} mode="toggle" motion="off" animate={false} blindNumber={(i + 1) as 1 | 2 | 3} revealed onPress={noop} />
+          <InstrumentCard key={id} id={id} on={i !== 1} selected={i === 2} mode="toggle" motion="off" animate={false} blindNumber={i + 1} revealed onPress={noop} />
         ))}
       </div>
       <h3>컴팩트</h3>
-      <div className="inst-gal-three">
+      <div className="inst-gal-four">
         {INSTRUMENTS.map((id, i) => (
           <InstrumentCard key={id} id={id} on={i !== 2} selected={i === 0} mode="solo" motion="off" animate={false} compact onPress={noop} />
         ))}
       </div>
       <h3>컴팩트 · 눈 가리고 듣기</h3>
-      <div className="inst-gal-three">
+      <div className="inst-gal-four">
         {INSTRUMENTS.map((id, i) => (
-          <InstrumentCard key={id} id={id} on selected={false} mode="toggle" motion="off" animate={false} compact blindNumber={(i + 1) as 1 | 2 | 3} onPress={noop} />
+          <InstrumentCard key={id} id={id} on selected={false} mode="toggle" motion="off" animate={false} compact blindNumber={i + 1} onPress={noop} />
         ))}
       </div>
       <h3>넓은 카드 (태블릿/데스크톱)</h3>

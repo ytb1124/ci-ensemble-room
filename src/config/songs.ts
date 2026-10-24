@@ -45,6 +45,7 @@ export const SONGS: Record<SongId, SongConfig> = {
     startOffsetSec: 0,
     placeholderDurationSec: 35, // 임시값(구성안은 60–90초)
     stems: {
+      piano: { url: null },
       cajon: { url: null },
       bass: { url: null },
       trumpet: { url: null },
@@ -69,6 +70,7 @@ export const SONGS: Record<SongId, SongConfig> = {
     startOffsetSec: 0,
     placeholderDurationSec: 42, // 임시값
     stems: {
+      piano: { url: null },
       cajon: { url: null },
       bass: { url: null },
       trumpet: { url: null },

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { engine, useEngineState } from '../../audio/useEngine';
-import { InstrumentCard } from '../../components/instruments/InstrumentCard';
+import { InstrumentCard, volumeWord } from '../../components/instruments/InstrumentCard';
 import { Lanes } from '../../components/viz/Lanes';
 import { Explore } from '../../components/viz/Explore';
 import { SyncCard } from '../../components/viz/SyncCard';
@@ -9,7 +9,7 @@ import { Segmented } from '../../components/ui/controls';
 import { Icon } from '../../components/ui/Icon';
 import { SONGS } from '../../config/songs';
 import { logEvent } from '../../store/log';
-import { updateProfile, useProfile } from '../../store/profile';
+import { effectiveInstGain, gainRange, updateProfile, useProfile } from '../../store/profile';
 import { useProbeState } from '../../store/probe';
 import {
   INSTRUMENTS, INSTRUMENT_LABEL,
@@ -25,6 +25,9 @@ import './room.css';
 const openedSongs = new Set<SongId>();
 let syncCardDismissed = false;
 let recalibPending = false;
+
+/** 처음 설정 단계 이름(보정 화면 순서와 같다) */
+const CALIB_STEPS = ['듣기 환경', '편안한 크기', '좌우', '소리 색', '악기 섞기', '저음 도움'];
 
 const MOTIONS: { v: MotionLevel; label: string }[] = [
   { v: 'off', label: '끄기' },
@@ -57,7 +60,7 @@ function RoomInner({ song }: { song: SongId }) {
   const [syncOpen, setSyncOpen] = useState(false);
   const [blind, setBlind] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const [blindNums, setBlindNums] = useState<Record<InstrumentId, 1 | 2 | 3>>({ cajon: 1, bass: 2, trumpet: 3 });
+  const [blindNums, setBlindNums] = useState<Record<InstrumentId, number>>(() => Object.fromEntries(INSTRUMENTS.map((id, i) => [id, i + 1])) as Record<InstrumentId, number>);
   const [live, setLive] = useState('');
 
   // 마운트: 곡 불러오기, 듣기 우선 흐름, 곡 바꾼 뒤 카드
@@ -156,17 +159,29 @@ function RoomInner({ song }: { song: SongId }) {
     if (!engine.state.playing) engine.play();
   };
 
+  // 카드 아래 크기 조절: 바로 이 곡에 저장한다
+  const gains = effectiveInstGain(profile, song);
+  const range = gainRange(profile);
+  const setGain = (id: InstrumentId, v: number) => {
+    const from = gains[id];
+    if (from === v) return;
+    if (st.bypass) engine.setBypass(false); // 보정 없이 듣는 중이면 바꾼 크기가 안 들리므로 끈다
+    updateProfile((p) => ({ songOverrides: { ...p.songOverrides, [song]: { instGainDb: { ...effectiveInstGain(p, song), [id]: v } } } }));
+    logEvent({ type: 'gain', instrument: id, fromDb: from, toDb: v, song });
+    setLive(`${blind && !revealed ? `악기 ${blindNums[id]}` : INSTRUMENT_LABEL[id]} ${volumeWord(v)}`);
+  };
+
   const changeMode = (m: RoomMode) => {
     setMode(m);
-    setLive(m === 'solo' ? '한 악기만 듣기' : '켜고 끄기');
+    setLive(m === 'solo' ? '골라 듣기: 누른 악기만 들려요' : '빼고 듣기: 누른 악기를 켜고 꺼요');
   };
 
   const toggleBlind = (v: boolean) => {
     setBlind(v);
     setRevealed(false);
     if (v) {
-      const nums = [1, 2, 3].sort(() => Math.random() - 0.5) as (1 | 2 | 3)[];
-      setBlindNums({ cajon: nums[0], bass: nums[1], trumpet: nums[2] });
+      const nums = INSTRUMENTS.map((_, i) => i + 1).sort(() => Math.random() - 0.5);
+      setBlindNums(Object.fromEntries(INSTRUMENTS.map((id, i) => [id, nums[i]])) as Record<InstrumentId, number>);
     }
   };
 
@@ -243,7 +258,7 @@ function RoomInner({ song }: { song: SongId }) {
           </button>
           <h1>{SONGS[song].title}</h1>
           <button type="button" className="btn btn-sm" aria-expanded={showCalib} onClick={() => setShowCalib(!showCalib)}>
-            <Icon name="sliders" size={18} />소리 맞춤
+            <Icon name="sliders" size={18} />처음 설정
           </button>
         </header>
 
@@ -258,12 +273,12 @@ function RoomInner({ song }: { song: SongId }) {
           </div>
         )}
         {showCalib && (
-          <div className="card stack" role="group" aria-label="소리 맞춤 단계">
+          <div className="card stack" role="group" aria-label="처음 설정 단계">
             <p style={{ margin: 0 }}>다시 맞출 단계를 골라 주세요.</p>
             <div className="row">
-              {[1, 2, 3, 4, 5, 6].map((n) => (
-                <Link key={n} className="btn btn-sm" to={`/calibrate/${n}?only=1&next=/room/${song}`}>
-                  {'①②③④⑤⑥'[n - 1]} 단계
+              {CALIB_STEPS.map((label, i) => (
+                <Link key={label} className="btn btn-sm" to={`/calibrate/${i + 1}?only=1&next=/room/${song}`}>
+                  {label}
                 </Link>
               ))}
             </div>
@@ -296,7 +311,7 @@ function RoomInner({ song }: { song: SongId }) {
           label="모드"
           value={mode}
           onChange={changeMode}
-          options={[{ value: 'solo', label: '한 악기만' }, { value: 'toggle', label: '켜고 끄기' }]}
+          options={[{ value: 'solo', label: '골라 듣기' }, { value: 'toggle', label: '빼고 듣기' }]}
         />
 
         <div className="room-cards">
@@ -313,6 +328,7 @@ function RoomInner({ song }: { song: SongId }) {
               revealed={revealed}
               onPress={() => press(id, mode === 'toggle')}
               onLongPress={() => press(id, mode === 'solo')}
+              volume={{ value: gains[id], min: range.min, max: range.max, step: range.step, onChange: (v) => setGain(id, v) }}
             />
           ))}
         </div>
@@ -323,7 +339,7 @@ function RoomInner({ song }: { song: SongId }) {
 
         {blind && !revealed && (
           <div className="card card-soft row" role="note" style={{ justifyContent: 'space-between' }}>
-            <p>눈 가리고 듣기 중이라 그림 보기를 잠시 숨겼어요. 켜고 끈 뒤 [공개]를 눌러 보세요.</p>
+            <p>그림 없이 맞혀 보는 중이라 그림을 잠시 숨겼어요. 들어 보고 [공개]를 눌러 정답을 확인하세요.</p>
             <button type="button" className="btn btn-primary" onClick={() => { setRevealed(true); logEvent({ type: 'blind', value: 'reveal' }); }}>공개</button>
           </div>
         )}
