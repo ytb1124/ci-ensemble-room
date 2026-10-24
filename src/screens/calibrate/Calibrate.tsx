@@ -10,9 +10,17 @@ import {
   CONFIG_LABEL, MAKER_LABEL, ROUTE_LABEL, isBalanceMode,
   Step1, Step2, Step3, Step4, Step5, Step6, type Draft,
 } from './steps';
+import { tx } from '../../i18n';
 import './calibrate.css';
 
-const TITLES = ['듣기 환경', '편안한 크기', '좌우', '소리 색', '악기 섞기', '저음 도움 (선택)'];
+const titles = () => [
+  tx('듣기 환경', 'Your setup'),
+  tx('편안한 크기', 'Comfortable volume'),
+  tx('좌우', 'Left/right'),
+  tx('소리 색', 'Tone'),
+  tx('악기 섞기', 'Instrument mix'),
+  tx('저음 도움 (선택)', 'Bass help (optional)'),
+];
 const SUMMARY = 7;
 
 const pickDraft = (p: Profile): Draft => ({
@@ -94,10 +102,10 @@ export default function Calibrate() {
     engine.pause();
     if (step >= 2 && step <= 5) {
       const [a, b] = song.calibLoopBeats;
-      engine.setSection({ id: 'calib', label: '소리 맞추기', start: beatToSec(song, a), end: beatToSec(song, b) }, true);
+      engine.setSection({ id: 'calib', label: tx('소리 맞추기', 'Sound setup'), start: beatToSec(song, a), end: beatToSec(song, b) }, true);
     } else if (step === 6) {
       const [a, b] = song.bassLoopBeats;
-      engine.setSection({ id: 'bassloop', label: '베이스', start: beatToSec(song, a), end: beatToSec(song, b) }, true);
+      engine.setSection({ id: 'bassloop', label: tx('베이스', 'Bass'), start: beatToSec(song, a), end: beatToSec(song, b) }, true);
       engine.solo('bass');
     } else {
       engine.setSection(null, false);
@@ -143,16 +151,16 @@ export default function Calibrate() {
 
   const header = (
     <div className="cal-head">
-      <h1 className="cal-step-title" style={{ fontSize: 28 }}>소리 맞추기</h1>
+      <h1 className="cal-step-title" style={{ fontSize: 28 }}>{tx('소리 맞추기', 'Sound setup')}</h1>
       {!only && (
         <Steps
           total={6}
           current={step <= 6 ? step : 0}
           done={profile.calibStepsDone.filter((n) => n >= 1 && n <= 6)}
-          labels={TITLES}
+          labels={titles()}
         />
       )}
-      <p className="muted" style={{ margin: 0 }}>시험이 아니에요. 지금 나에게 편한 소리를 고르면 돼요.</p>
+      <p className="muted" style={{ margin: 0 }}>{tx('시험이 아니에요. 지금 나에게 편한 소리를 고르면 돼요.', 'This is not a test. Just pick the sound that feels comfortable for you now.')}</p>
     </div>
   );
 
@@ -160,26 +168,26 @@ export default function Calibrate() {
     return (
       <main className="page page-narrow stack-lg">
         {header}
-        <p role="alert" style={{ color: 'var(--error)', fontWeight: 600 }}>소리를 불러오지 못했어요. 페이지를 새로고침해 주세요.</p>
+        <p role="alert" style={{ color: 'var(--error)', fontWeight: 600 }}>{tx('소리를 불러오지 못했어요. 페이지를 새로고침해 주세요.', 'The sound could not load. Please refresh the page.')}</p>
       </main>
     );
   }
 
   if (step === SUMMARY) {
     const lines: { n: number; label: string; value: string }[] = [
-      { n: 1, label: '듣기 환경', value: `${profile.config ? CONFIG_LABEL[profile.config] : '아직 안 골랐어요'} · ${profile.route ? ROUTE_LABEL[profile.route].split(' (')[0] : '듣는 방법 안 골랐어요'}${profile.maker ? ` · ${MAKER_LABEL[profile.maker]}` : ''}` },
-      { n: 2, label: '편안한 크기', value: `앱 음량 ${sign(profile.masterGainDb)}` },
-      { n: 3, label: '좌우', value: profile.stereo ? `${profile.balance === -1 ? '왼쪽' : profile.balance === 1 ? '오른쪽' : '가운데'}${profile.spread ? ' · 넓게 펼침' : ''}` : '양쪽 같은 소리(모노)' },
-      { n: 4, label: '소리 색', value: `저음 ${profile.eqLowDb ? sign(profile.eqLowDb) : '원래 소리'} · 또렷함 ${profile.eqMidDb ? `${sign(profile.eqMidDb)}${profile.eqMidHz === 3000 ? ' (약 3 kHz)' : ''}` : '원래 소리'}` },
-      { n: 5, label: '악기 섞기', value: INSTRUMENTS.map((i) => `${INSTRUMENT_SHORT[i]} ${sign(profile.instGainDb[i], '')}`.trim()).join(' · ') },
-      { n: 6, label: '저음 도움', value: profile.bassAssist === 'boost' ? '저음 키우기' : profile.bassAssist === 'octaveUp' ? '베이스를 높게 겹쳐 듣기' : profile.bassVizEmphasis ? '원래 소리 (그림에서 베이스 박자를 더 눈에 띄게)' : '원래 소리' },
+      { n: 1, label: tx('듣기 환경', 'Your setup'), value: `${profile.config ? CONFIG_LABEL[profile.config] : tx('아직 안 골랐어요', 'Not picked yet')} · ${profile.route ? ROUTE_LABEL[profile.route].split(' (')[0] : tx('듣는 방법 안 골랐어요', 'How you listen not picked')}${profile.maker ? ` · ${MAKER_LABEL[profile.maker]}` : ''}` },
+      { n: 2, label: tx('편안한 크기', 'Comfortable volume'), value: `${tx('앱 음량', 'App volume')} ${sign(profile.masterGainDb)}` },
+      { n: 3, label: tx('좌우', 'Left/right'), value: profile.stereo ? `${profile.balance === -1 ? tx('왼쪽', 'Left') : profile.balance === 1 ? tx('오른쪽', 'Right') : tx('가운데', 'Center')}${profile.spread ? tx(' · 넓게 펼침', ' · Wide stereo') : ''}` : tx('양쪽 같은 소리(모노)', 'Same sound on both sides (mono)') },
+      { n: 4, label: tx('소리 색', 'Tone'), value: `${tx('저음', 'Bass')} ${profile.eqLowDb ? sign(profile.eqLowDb) : tx('원래 소리', 'Original sound')} · ${tx('또렷함', 'Clarity')} ${profile.eqMidDb ? `${sign(profile.eqMidDb)}${profile.eqMidHz === 3000 ? tx(' (약 3 kHz)', ' (about 3 kHz)') : ''}` : tx('원래 소리', 'Original sound')}` },
+      { n: 5, label: tx('악기 섞기', 'Instrument mix'), value: INSTRUMENTS.map((i) => `${INSTRUMENT_SHORT[i]} ${sign(profile.instGainDb[i], '')}`.trim()).join(' · ') },
+      { n: 6, label: tx('저음 도움', 'Bass help'), value: profile.bassAssist === 'boost' ? tx('저음 키우기', 'Boost bass') : profile.bassAssist === 'octaveUp' ? tx('베이스를 높게 겹쳐 듣기', 'Add bass an octave up') : profile.bassVizEmphasis ? tx('원래 소리 (그림에서 베이스 박자를 더 눈에 띄게)', 'Original sound (bass beat easier to see in the picture)') : tx('원래 소리', 'Original sound') },
     ];
     return (
       <main className="page page-narrow stack-lg">
         {header}
         <section className="card stack-lg" aria-labelledby="cal-sum-h">
-          <h2 id="cal-sum-h" style={{ margin: 0 }}>지금 설정으로 합주실에 들어갈까요?</h2>
-          <p className="muted" style={{ margin: 0 }}>모두 처음 권하는 값이에요. 합주실에서도 언제든 바꿀 수 있어요.</p>
+          <h2 id="cal-sum-h" style={{ margin: 0 }}>{tx('지금 설정으로 합주실에 들어갈까요?', 'Go to the Ensemble Room with these settings?')}</h2>
+          <p className="muted" style={{ margin: 0 }}>{tx('모두 처음 권하는 값이에요. 합주실에서도 언제든 바꿀 수 있어요.', 'These are all starting suggestions. You can change them any time in the room.')}</p>
           <ul className="cal-sum">
             {lines.map((l) => (
               <li key={l.n}>
@@ -187,17 +195,17 @@ export default function Calibrate() {
                   <div className="cal-sum-label">{l.label}</div>
                   <div>{l.value}</div>
                 </div>
-                <Link className="btn btn-sm" to={`/calibrate/${l.n}?only=1&next=${encodeURIComponent('/calibrate/7')}`} aria-label={`${l.label} 바꾸기`}>
-                  바꾸기
+                <Link className="btn btn-sm" to={`/calibrate/${l.n}?only=1&next=${encodeURIComponent('/calibrate/7')}`} aria-label={tx(`${l.label} 바꾸기`, `Change ${l.label}`)}>
+                  {tx('바꾸기', 'Change')}
                 </Link>
               </li>
             ))}
           </ul>
           {(!profile.config || !profile.route) && (
-            <p className="cal-note" role="status">①에서 듣기 환경을 먼저 골라 주세요.</p>
+            <p className="cal-note" role="status">{tx('①에서 듣기 환경을 먼저 골라 주세요.', 'Please choose your setup in step 1 first.')}</p>
           )}
           <div className="cal-nav">
-            <button type="button" className="btn" onClick={() => goto(6)}><Icon name="chevronLeft" /> 이전</button>
+            <button type="button" className="btn" onClick={() => goto(6)}><Icon name="chevronLeft" /> {tx('이전', 'Back')}</button>
             <div className="cal-nav-right">
               <button
                 type="button"
@@ -208,7 +216,7 @@ export default function Calibrate() {
                   nav('/room/hbd');
                 }}
               >
-                합주실로 들어가기 <Icon name="chevronRight" />
+                {tx('합주실로 들어가기', 'Go to the Ensemble Room')} <Icon name="chevronRight" />
               </button>
             </div>
           </div>
@@ -233,24 +241,24 @@ export default function Calibrate() {
       {header}
       <section className="card stack-lg" aria-labelledby="cal-h">
         <h2 id="cal-h" style={{ margin: 0 }}>
-          {step}단계. {TITLES[step - 1]}
+          {tx(`${step}단계.`, `Step ${step}.`)} {titles()[step - 1]}
         </h2>
-        {st.loading || !ready ? <p role="status">소리를 준비하는 중이에요…</p> : body}
+        {st.loading || !ready ? <p role="status">{tx('소리를 준비하는 중이에요…', 'Getting the sound ready…')}</p> : body}
         <div className="cal-nav">
           {!only && step > 1 ? (
             <button type="button" className="btn" onClick={() => goto(step - 1)}>
-              <Icon name="chevronLeft" /> 이전
+              <Icon name="chevronLeft" /> {tx('이전', 'Back')}
             </button>
           ) : <span />}
           <div className="cal-nav-right">
             {only ? (
               <button type="button" className="btn btn-primary btn-lg" disabled={needsRequired} onClick={saveAndBack}>
-                <Icon name="check" /> 저장하고 돌아가기
+                <Icon name="check" /> {tx('저장하고 돌아가기', 'Save and go back')}
               </button>
             ) : (
               <>
                 {step >= 3 && (
-                  <button type="button" className="btn" onClick={skipStep}>건너뛰기 (원래 소리 유지)</button>
+                  <button type="button" className="btn" onClick={skipStep}>{tx('건너뛰기 (원래 소리 유지)', 'Skip (keep original sound)')}</button>
                 )}
                 <button
                   type="button"
@@ -261,13 +269,13 @@ export default function Calibrate() {
                     goto(step + 1);
                   }}
                 >
-                  다음 <Icon name="chevronRight" />
+                  {tx('다음', 'Next')} <Icon name="chevronRight" />
                 </button>
               </>
             )}
           </div>
         </div>
-        {!only && step <= 2 && <p className="small muted" style={{ margin: 0 }}>①과 ②는 꼭 해 주세요. 나머지는 건너뛰어도 괜찮아요.</p>}
+        {!only && step <= 2 && <p className="small muted" style={{ margin: 0 }}>{tx('①과 ②는 꼭 해 주세요. 나머지는 건너뛰어도 괜찮아요.', 'Please do steps 1 and 2. You can skip the rest.')}</p>}
       </section>
     </main>
   );

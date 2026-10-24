@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { engine } from '../../audio/engine';
 import { getProbeClip, type ClipId } from '../../audio/probeAudio';
 import { Icon } from '../../components/ui/Icon';
+import { tx } from '../../i18n';
 import './probe.css';
 
 const ORDER: ClipId[] = ['orig', 'attack', 'bright', 'contour', 'rhythm'];
@@ -50,21 +51,23 @@ export default function ProbeIntro({ onDone }: { onDone: () => void }) {
   return (
     <main className="page page-narrow probe-page">
       <div className="stack-lg">
-        <h1 style={{ margin: 0, fontSize: 24 }}>먼저 소리를 들어 볼게요</h1>
-        <p className="lead" style={{ margin: 0 }}>질문에 나올 소리 5개를 한 번씩 이어서 들려 드려요. 30초쯤 걸려요.</p>
+        <h1 style={{ margin: 0, fontSize: 24 }}>{tx('먼저 소리를 들어 볼게요', "First, let's listen to the sounds")}</h1>
+        <p className="lead" style={{ margin: 0 }}>
+          {tx('질문에 나올 소리 5개를 한 번씩 이어서 들려 드려요. 30초쯤 걸려요.', "We'll play the 5 sounds from the questions, one after another. It takes about 30 seconds.")}
+        </p>
         <div className="card stack" aria-live="polite">
-          {busy && <p style={{ margin: 0 }}>소리를 준비하고 있어요…</p>}
+          {busy && <p style={{ margin: 0 }}>{tx('소리를 준비하고 있어요…', 'Getting the sounds ready…')}</p>}
           {playing && (
             <p style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>
-              <Icon name="speaker" /> 소리 {pos + 1}/{ORDER.length}
+              <Icon name="speaker" /> {tx('소리', 'Sound')} {pos + 1}/{ORDER.length}
             </p>
           )}
-          {!busy && !playing && !finished && <p style={{ margin: 0 }}>준비되면 눌러 주세요.</p>}
-          {finished && <p style={{ margin: 0 }}>모두 들었어요. 다시 들어도 되고, 바로 시작해도 돼요.</p>}
+          {!busy && !playing && !finished && <p style={{ margin: 0 }}>{tx('준비되면 눌러 주세요.', "Press when you're ready.")}</p>}
+          {finished && <p style={{ margin: 0 }}>{tx('모두 들었어요. 다시 들어도 되고, 바로 시작해도 돼요.', 'You heard them all. You can listen again or start now.')}</p>}
           <div className="probe-actions">
             {!playing && (
               <button type="button" className="btn btn-lg" disabled={busy} onClick={start}>
-                <Icon name="play" /> {finished ? '다시 듣기' : '이어서 듣기'}
+                <Icon name="play" /> {finished ? tx('다시 듣기', 'Listen again') : tx('이어서 듣기', 'Play all')}
               </button>
             )}
             {playing && (
@@ -77,14 +80,14 @@ export default function ProbeIntro({ onDone }: { onDone: () => void }) {
                   setPos(null);
                 }}
               >
-                멈추기
+                {tx('멈추기', 'Stop')}
               </button>
             )}
           </div>
         </div>
         <div className="probe-actions">
           <button type="button" className={`btn btn-lg ${finished ? 'btn-primary' : ''}`} onClick={onDone}>
-            {finished ? '질문 시작하기' : '건너뛰기'}
+            {finished ? tx('질문 시작하기', 'Start the questions') : tx('건너뛰기', 'Skip')}
           </button>
         </div>
       </div>

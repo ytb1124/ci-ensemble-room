@@ -19,6 +19,7 @@ import { TransportBar } from './TransportBar';
 import { AdvancedPanel } from './AdvancedPanel';
 import { GuideCards } from './GuideCards';
 import { ListenFirst } from './ListenFirst';
+import { tx } from '../../i18n';
 import './room.css';
 
 // 세션(페이지를 연 동안) 기억
@@ -27,13 +28,20 @@ let syncCardDismissed = false;
 let recalibPending = false;
 
 /** 처음 설정 단계 이름(보정 화면 순서와 같다) */
-const CALIB_STEPS = ['듣기 환경', '편안한 크기', '좌우', '소리 색', '악기 섞기', '저음 도움'];
+const calibSteps = () => [
+  tx('듣기 환경', 'Your setup'),
+  tx('편안한 크기', 'Comfortable volume'),
+  tx('좌우', 'Left/right'),
+  tx('소리 색', 'Tone'),
+  tx('악기 섞기', 'Instrument mix'),
+  tx('저음 도움', 'Bass help'),
+];
 
 const MOTIONS: { v: MotionLevel; label: string }[] = [
-  { v: 'off', label: '없음' },
-  { v: 'calm', label: '적게' },
-  { v: 'normal', label: '보통' },
-  { v: 'vivid', label: '많이' },
+  { v: 'off', get label() { return tx('없음', 'None'); } },
+  { v: 'calm', get label() { return tx('적게', 'Low'); } },
+  { v: 'normal', get label() { return tx('보통', 'Medium'); } },
+  { v: 'vivid', get label() { return tx('많이', 'High'); } },
 ];
 
 export default function Room() {
@@ -135,27 +143,27 @@ function RoomInner({ song }: { song: SongId }) {
       const on = !st.on[id];
       engine.setOn(id, on);
       logEvent({ type: 'toggle', instrument: id, mode: 'toggle', songPos: pos, song, on });
-      setLive(`${INSTRUMENT_LABEL[id]} ${on ? '켜짐' : '꺼짐'}`);
+      setLive(`${INSTRUMENT_LABEL[id]} ${on ? tx('켜짐', 'on') : tx('꺼짐', 'off')}`);
     } else if (st.solo === id) {
       engine.allOn();
       logEvent({ type: 'unsolo', instrument: id, mode: 'solo', songPos: pos, song });
-      setLive('모두 함께 들려요');
+      setLive(tx('모두 함께 들려요', 'All together'));
     } else {
       engine.solo(id);
       logEvent({ type: 'solo', instrument: id, mode: 'solo', songPos: pos, song });
-      setLive(`${INSTRUMENT_LABEL[id]}만 들려요`);
+      setLive(tx(`${INSTRUMENT_LABEL[id]}만 들려요`, `Only ${INSTRUMENT_LABEL[id]} is playing`));
     }
   };
   const allTogether = () => {
     engine.allOn();
     if (st.solo) logEvent({ type: 'unsolo', instrument: st.solo, mode, songPos: engine.position(), song });
-    setLive('모두 함께 들려요');
+    setLive(tx('모두 함께 들려요', 'All together'));
   };
   const soloFromCard = (id: InstrumentId) => {
     engine.stopAlternate();
     engine.solo(id);
     logEvent({ type: 'solo', instrument: id, mode, songPos: engine.position(), song });
-    setLive(`${INSTRUMENT_LABEL[id]}만 들려요`);
+    setLive(tx(`${INSTRUMENT_LABEL[id]}만 들려요`, `Only ${INSTRUMENT_LABEL[id]} is playing`));
     if (!engine.state.playing) engine.play();
   };
 
@@ -168,12 +176,12 @@ function RoomInner({ song }: { song: SongId }) {
     if (st.bypass) engine.setBypass(false); // 보정 없이 듣는 중이면 바꾼 크기가 안 들리므로 끈다
     updateProfile((p) => ({ songOverrides: { ...p.songOverrides, [song]: { instGainDb: { ...effectiveInstGain(p, song), [id]: v } } } }));
     logEvent({ type: 'gain', instrument: id, fromDb: from, toDb: v, song });
-    setLive(`${blind && !revealed ? `악기 ${blindNums[id]}` : INSTRUMENT_LABEL[id]} ${volumeWord(v)}`);
+    setLive(`${blind && !revealed ? tx(`악기 ${blindNums[id]}`, `Instrument ${blindNums[id]}`) : INSTRUMENT_LABEL[id]} ${volumeWord(v)}`);
   };
 
   const changeMode = (m: RoomMode) => {
     setMode(m);
-    setLive(m === 'solo' ? '골라 듣기: 누른 악기만 들려요' : '빼고 듣기: 누른 악기를 끄거나 켜요');
+    setLive(m === 'solo' ? tx('골라 듣기: 누른 악기만 들려요', 'Solo: you hear only the instrument you press') : tx('빼고 듣기: 누른 악기를 끄거나 켜요', 'Mute: press an instrument to turn it off or on'));
   };
 
   const toggleBlind = (v: boolean) => {
@@ -188,8 +196,8 @@ function RoomInner({ song }: { song: SongId }) {
   // ───────── 구간·보기 컨트롤 ─────────
   const controls = (
     <>
-      <div className="room-pills" role="group" aria-label="구간">
-        <span className="small" style={{ fontWeight: 600 }}>구간</span>
+      <div className="room-pills" role="group" aria-label={tx('구간', 'Section')}>
+        <span className="small" style={{ fontWeight: 600 }}>{tx('구간', 'Section')}</span>
         {sections.map((s) => (
           <button
             key={s.id}
@@ -207,7 +215,7 @@ function RoomInner({ song }: { song: SongId }) {
           </button>
         ))}
         <button type="button" className="room-pill" aria-pressed={st.section === null} onClick={() => engine.setSection(null, false)}>
-          전체
+          {tx('전체', 'Whole song')}
         </button>
         <button
           type="button"
@@ -220,17 +228,17 @@ function RoomInner({ song }: { song: SongId }) {
           }}
         >
           <Icon name="repeat" size={18} />
-          반복
+          {tx('반복', 'Loop')}
         </button>
       </div>
       <Segmented<ViewMode>
-        label="보기"
+        label={tx('보기', 'View')}
         value={view}
         onChange={(v) => setView(v)}
-        options={[{ value: 'off', label: '끔' }, { value: 'lanes', label: '악기별' }, { value: 'explore', label: '자세히' }]}
+        options={[{ value: 'off', label: tx('끔', 'Off') }, { value: 'lanes', label: tx('악기별', 'By instrument') }, { value: 'explore', label: tx('자세히', 'Detailed') }]}
       />
       <label className="row" style={{ gap: 8 }}>
-        <span className="small" style={{ fontWeight: 600 }}>움직임</span>
+        <span className="small" style={{ fontWeight: 600 }}>{tx('움직임', 'Motion')}</span>
         <select className="room-select" value={profile.viz.motion} onChange={(e) => setMotion(e.target.value as MotionLevel)}>
           {MOTIONS.map((m) => <option key={m.v} value={m.v}>{m.label}</option>)}
         </select>
@@ -254,29 +262,29 @@ function RoomInner({ song }: { song: SongId }) {
       <div className="stack-lg">
         <header className="room-head">
           <button type="button" className="btn btn-sm" aria-expanded={showSwitch} onClick={() => setShowSwitch(!showSwitch)}>
-            <Icon name="chevronLeft" size={18} />곡 바꾸기
+            <Icon name="chevronLeft" size={18} />{tx('곡 바꾸기', 'Change song')}
           </button>
           <h1>{SONGS[song].title}</h1>
           <button type="button" className="btn btn-sm" aria-expanded={showCalib} onClick={() => setShowCalib(!showCalib)}>
-            <Icon name="sliders" size={18} />소리 맞추기
+            <Icon name="sliders" size={18} />{tx('소리 맞추기', 'Sound setup')}
           </button>
         </header>
 
         {showSwitch && (
-          <div className="card room-songlist" role="group" aria-label="곡 고르기">
+          <div className="card room-songlist" role="group" aria-label={tx('곡 고르기', 'Choose a song')}>
             {(['hbd', 'song2'] as SongId[]).map((id) => (
               <button key={id} type="button" className="btn" aria-pressed={id === song} onClick={() => changeSong(id)}>
                 <span>{SONGS[id].title}</span>
-                {SONGS[id].undecided && <span className="tag">미정</span>}
+                {SONGS[id].undecided && <span className="tag">{tx('미정', 'TBD')}</span>}
               </button>
             ))}
           </div>
         )}
         {showCalib && (
-          <div className="card stack" role="group" aria-label="소리 맞추기 단계">
-            <p style={{ margin: 0 }}>다시 맞출 단계를 골라 주세요.</p>
+          <div className="card stack" role="group" aria-label={tx('소리 맞추기 단계', 'Sound setup steps')}>
+            <p style={{ margin: 0 }}>{tx('다시 맞출 단계를 골라 주세요.', 'Choose a step to set up again.')}</p>
             <div className="row">
-              {CALIB_STEPS.map((label, i) => (
+              {calibSteps().map((label, i) => (
                 <Link key={label} className="btn btn-sm" to={`/calibrate/${i + 1}?only=1&next=/room/${song}`}>
                   {label}
                 </Link>
@@ -285,16 +293,16 @@ function RoomInner({ song }: { song: SongId }) {
           </div>
         )}
         {showRecalib && (
-          <div className="card card-tone peach stack" role="region" aria-label="크기 다시 맞추기">
-            <p style={{ margin: 0, fontWeight: 600, fontSize: 18 }}>크기만 다시 맞출까요? (10초)</p>
+          <div className="card card-tone peach stack" role="region" aria-label={tx('크기 다시 맞추기', 'Set volume again')}>
+            <p style={{ margin: 0, fontWeight: 600, fontSize: 18 }}>{tx('크기만 다시 맞출까요? (10초)', 'Set just the volume again? (10 seconds)')}</p>
             <div className="row">
-              <Link className="btn btn-primary btn-sm" to={`/calibrate/2?only=1&next=/room/${song}`}>맞추기</Link>
-              <button type="button" className="btn btn-sm" onClick={() => setShowRecalib(false)}>건너뛰기</button>
+              <Link className="btn btn-primary btn-sm" to={`/calibrate/2?only=1&next=/room/${song}`}>{tx('맞추기', 'Set up')}</Link>
+              <button type="button" className="btn btn-sm" onClick={() => setShowRecalib(false)}>{tx('건너뛰기', 'Skip')}</button>
             </div>
           </div>
         )}
 
-        {st.loading && <p className="muted" role="status">곡을 불러오는 중이에요…</p>}
+        {st.loading && <p className="muted" role="status">{tx('곡을 불러오는 중이에요…', 'Loading the song…')}</p>}
         {st.error && <p role="alert" style={{ color: 'var(--error)' }}>{st.error}</p>}
 
         {listenFirst && (
@@ -308,10 +316,10 @@ function RoomInner({ song }: { song: SongId }) {
         )}
 
         <Segmented<RoomMode>
-          label="듣는 방식"
+          label={tx('듣는 방식', 'Listening mode')}
           value={mode}
           onChange={changeMode}
-          options={[{ value: 'solo', label: '골라 듣기' }, { value: 'toggle', label: '빼고 듣기' }]}
+          options={[{ value: 'solo', label: tx('골라 듣기', 'Solo') }, { value: 'toggle', label: tx('빼고 듣기', 'Mute') }]}
         />
 
         <div className="room-cards">
@@ -333,14 +341,14 @@ function RoomInner({ song }: { song: SongId }) {
           ))}
         </div>
         <button type="button" className="btn btn-primary btn-lg btn-block" onClick={allTogether}>
-          모두 함께 듣기
+          {tx('모두 함께 듣기', 'All together')}
         </button>
         <p className="room-live" role="status" aria-live="polite">{live}</p>
 
         {blind && !revealed && (
           <div className="card card-soft row" role="note" style={{ justifyContent: 'space-between' }}>
-            <p>악기 그림과 이름을 잠시 가렸어요. 어떤 악기인지 들어 보고 [이름 보기]를 눌러 확인해 보세요.</p>
-            <button type="button" className="btn btn-primary" onClick={() => { setRevealed(true); logEvent({ type: 'blind', value: 'reveal' }); }}>이름 보기</button>
+            <p>{tx('악기 그림과 이름을 잠시 가렸어요. 어떤 악기인지 들어 보고 [이름 보기]를 눌러 확인해 보세요.', 'The instrument pictures and names are hidden for now. Listen, guess each instrument, then press [Show names] to check.')}</p>
+            <button type="button" className="btn btn-primary" onClick={() => { setRevealed(true); logEvent({ type: 'blind', value: 'reveal' }); }}>{tx('이름 보기', 'Show names')}</button>
           </div>
         )}
         {view !== 'off' && !(blind && !revealed) && (
@@ -356,19 +364,19 @@ function RoomInner({ song }: { song: SongId }) {
           syncOpen ? (
             <SyncCard onClose={() => { syncCardDismissed = true; setShowSync(false); setSyncOpen(false); }} />
           ) : (
-            <div className="card card-soft stack" role="region" aria-label="화면과 소리 맞추기 제안">
-              <h3>화면과 소리를 맞춰 볼까요? (30초)</h3>
-              <p>그림이 소리보다 늦거나 빠르게 움직이면 맞출 수 있어요. 맞추는 동안 음악은 잠시 멈춰요.</p>
+            <div className="card card-soft stack" role="region" aria-label={tx('화면과 소리 맞추기 제안', 'Suggestion: sync picture and sound')}>
+              <h3>{tx('화면과 소리를 맞춰 볼까요? (30초)', 'Sync the picture and sound? (30 seconds)')}</h3>
+              <p>{tx('그림이 소리보다 늦거나 빠르게 움직이면 맞출 수 있어요. 맞추는 동안 음악은 잠시 멈춰요.', 'If the picture moves later or earlier than the sound, you can fix it. The music pauses while you do this.')}</p>
               <div className="row">
-                <button type="button" className="btn btn-primary" onClick={() => setSyncOpen(true)}>맞추기</button>
-                <button type="button" className="btn" onClick={() => { syncCardDismissed = true; setShowSync(false); }}>나중에</button>
+                <button type="button" className="btn btn-primary" onClick={() => setSyncOpen(true)}>{tx('맞추기', 'Sync')}</button>
+                <button type="button" className="btn" onClick={() => { syncCardDismissed = true; setShowSync(false); }}>{tx('나중에', 'Later')}</button>
               </div>
             </div>
           )
         )}
 
         <div className="room-body-controls">{controls}</div>
-        {st.section?.id === 'line3' && line3Note && <p className="small muted" style={{ margin: 0 }}>3줄: {line3Note}</p>}
+        {st.section?.id === 'line3' && line3Note && <p className="small muted" style={{ margin: 0 }}>{tx('3줄:', 'Line 3:')} {line3Note}</p>}
 
         <AdvancedPanel song={song} blind={blind} onBlind={toggleBlind} onReveal={() => { setRevealed(true); logEvent({ type: 'blind', value: 'reveal' }); }} revealed={revealed} />
 
@@ -376,11 +384,11 @@ function RoomInner({ song }: { song: SongId }) {
 
         <div className="row">
           <Link className="btn btn-block" to={probeTarget}>
-            {probeTarget === '/report' ? '나의 청취 단서 보기' : '잠깐 질문 하러 가기 (4–5분)'}
+            {probeTarget === '/report' ? tx('나의 청취 단서 보기', 'See My Listening Cues') : tx('잠깐 질문 하러 가기 (4–5분)', 'Go to Quick questions (4–5 min)')}
             <Icon name="chevronRight" size={18} />
           </Link>
           {sets.includes(1) && sets.includes(2) && (
-            <Link className="btn btn-sm btn-ghost" to="/probe/set1">잠깐 질문 다시 하기</Link>
+            <Link className="btn btn-sm btn-ghost" to="/probe/set1">{tx('잠깐 질문 다시 하기', 'Do Quick questions again')}</Link>
           )}
         </div>
       </div>

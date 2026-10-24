@@ -4,6 +4,7 @@ import { engine, useAnimationFrame, useEngineState } from '../../audio/useEngine
 import { effectiveInstGain, profileStore } from '../../store/profile';
 import type { InstrumentId, MotionLevel } from '../../types';
 import { INSTRUMENTS, INSTRUMENT_SHORT } from '../../types';
+import { tx } from '../../i18n';
 import './viz.css';
 
 export interface VizColors {
@@ -149,7 +150,7 @@ export function Lanes(p: { on: Record<InstrumentId, boolean>; pitchLines: boolea
       g.fillText(INSTRUMENT_SHORT[id], 28, cy - (isOn ? 0 : 8));
       if (!isOn) {
         g.font = `600 14px system-ui, -apple-system, 'Noto Sans KR', sans-serif`;
-        g.fillText('꺼짐', 28, cy + 10);
+        g.fillText(tx('꺼짐', 'Off'), 28, cy + 10);
       }
       if (!tl) return;
 
@@ -250,14 +251,14 @@ export function Lanes(p: { on: Record<InstrumentId, boolean>; pitchLines: boolea
           ref={ref}
           className="viz-canvas"
           role="img"
-          aria-label="악기별 줄: 위에서부터 트럼펫, 피아노, 베이스, 카혼. 동그라미는 소리가 나는 순간"
+          aria-label={tx('악기별 줄: 위에서부터 트럼펫, 피아노, 베이스, 카혼. 동그라미는 소리가 나는 순간', 'One row per instrument: from the top, trumpet, piano, bass, cajon. Circles show when a sound plays')}
         />
       </div>
       <div className="viz-legend">
-        <span>카혼 줄: 아래는 가운데를 치는 '쿵', 위는 가장자리를 치는 '탁'</span>
-        <span>세로선은 지금 들리는 순간, 그 오른쪽은 곧 나올 소리</span>
+        <span>{tx("카혼 줄: 아래는 가운데를 치는 '쿵', 위는 가장자리를 치는 '탁'", 'Cajon row: bottom is the deep "boom" from the center, top is the sharp "tak" from the edge')}</span>
+        <span>{tx('세로선은 지금 들리는 순간, 그 오른쪽은 곧 나올 소리', 'The vertical line is what you hear now. To its right are sounds coming next')}</span>
       </div>
-      {p.pitchLines && (nullPitch || !hasPitch) && <p className="viz-note">음높이 선은 실제 악기 녹음이 들어오면 보여요</p>}
+      {p.pitchLines && (nullPitch || !hasPitch) && <p className="viz-note">{tx('음높이 선은 실제 악기 녹음이 들어오면 보여요', 'Pitch lines will show once real instrument recordings are added')}</p>}
     </div>
   );
 }

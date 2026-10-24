@@ -10,6 +10,7 @@ import { logStore } from './log';
 import { probeStore } from './probe';
 import { profileStore } from './profile';
 import { createStore, readJSON, writeJSON } from './storage';
+import { tx } from '../i18n';
 
 const URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
@@ -19,7 +20,7 @@ export const researchEnabled = !!(URL && KEY);
 export const CONSENT_VERSION = '2026-10-v1';
 
 /** 보관 기간 안내. 연구팀(IRB) 결정에 맞춰 고친다 */
-export const RETENTION_TEXT = '연구가 끝나면 지워요.';
+export const retentionText = () => tx('연구가 끝나면 지워요.', 'They are deleted when the study ends.');
 
 // 연구 참여 상태는 '이 기기의 모든 데이터 지우기'와 따로 둔다(서버 데이터는 설정 > 연구 참여에서 지운다)
 const STORE_KEY = 'cihall.research.v1';
@@ -83,7 +84,7 @@ async function ensureUser(): Promise<string> {
   const { data } = await sb().auth.getSession();
   if (data.session) return data.session.user.id;
   const res = await sb().auth.signInAnonymously();
-  if (res.error || !res.data.user) throw res.error ?? new Error('익명 로그인 실패');
+  if (res.error || !res.data.user) throw res.error ?? new Error(tx('익명 로그인 실패', 'Anonymous sign-in failed'));
   return res.data.user.id;
 }
 

@@ -7,6 +7,7 @@
 // - timelineUrl(선택): 오프라인 분석 JSON(구성안 7.4절). 없으면 불러올 때 버퍼에서 직접 계산한다.
 // - 구간(줄)은 박 단위로 적는다. 녹음을 클릭 트랙에 맞추면(8.2절) bpm과 startOffsetSec만 맞추면 그대로 쓸 수 있다.
 
+import { tx } from '../i18n';
 import type { SongId, StemId } from '../types';
 
 export interface StemSource {
@@ -38,7 +39,9 @@ export interface SongConfig {
 export const SONGS: Record<SongId, SongConfig> = {
   hbd: {
     id: 'hbd',
-    title: '생일 축하합니다',
+    get title() {
+      return tx('생일 축하합니다', 'Happy Birthday to You');
+    },
     undecided: false,
     meter: 3,
     bpm: 90, // 임시값
@@ -53,17 +56,25 @@ export const SONGS: Record<SongId, SongConfig> = {
     },
     // 줄 = 못갖춘마디 시작(여린박)부터 다음 줄 여린박 전까지. 1회차 선율 기준.
     lines: [
-      { id: 'line1', label: '1줄', startBeat: 2, endBeat: 8 },
-      { id: 'line2', label: '2줄', startBeat: 8, endBeat: 14 },
-      { id: 'line3', label: '3줄', startBeat: 14, endBeat: 20, note: '멜로디가 크게 뛰어오르는 곳(한 옥타브)' },
-      { id: 'line4', label: '4줄', startBeat: 20, endBeat: 26 },
+      { id: 'line1', get label() { return tx('1줄', 'Line 1'); }, startBeat: 2, endBeat: 8 },
+      { id: 'line2', get label() { return tx('2줄', 'Line 2'); }, startBeat: 8, endBeat: 14 },
+      {
+        id: 'line3',
+        get label() { return tx('3줄', 'Line 3'); },
+        startBeat: 14,
+        endBeat: 20,
+        get note() { return tx('멜로디가 크게 뛰어오르는 곳(한 옥타브)', 'Where the melody makes a big jump up (one octave)'); },
+      },
+      { id: 'line4', get label() { return tx('4줄', 'Line 4'); }, startBeat: 20, endBeat: 26 },
     ],
     calibLoopBeats: [3, 15],
     bassLoopBeats: [3, 9],
   },
   song2: {
     id: 'song2',
-    title: '곡 2 (미정)',
+    get title() {
+      return tx('곡 2 (미정)', 'Song 2 (TBD)');
+    },
     undecided: true,
     meter: 4,
     bpm: 100, // 임시값
@@ -77,10 +88,10 @@ export const SONGS: Record<SongId, SongConfig> = {
       bassOct: { url: null },
     },
     lines: [
-      { id: 'line1', label: '1줄', startBeat: 4, endBeat: 20 },
-      { id: 'line2', label: '2줄', startBeat: 20, endBeat: 36 },
-      { id: 'line3', label: '3줄', startBeat: 36, endBeat: 52 },
-      { id: 'line4', label: '4줄', startBeat: 52, endBeat: 68 },
+      { id: 'line1', get label() { return tx('1줄', 'Line 1'); }, startBeat: 4, endBeat: 20 },
+      { id: 'line2', get label() { return tx('2줄', 'Line 2'); }, startBeat: 20, endBeat: 36 },
+      { id: 'line3', get label() { return tx('3줄', 'Line 3'); }, startBeat: 36, endBeat: 52 },
+      { id: 'line4', get label() { return tx('4줄', 'Line 4'); }, startBeat: 52, endBeat: 68 },
     ],
     calibLoopBeats: [4, 20],
     bassLoopBeats: [4, 12],

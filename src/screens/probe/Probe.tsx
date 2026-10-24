@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { engine } from '../../audio/engine';
 import { buildSet } from '../../config/probes';
+import { tx } from '../../i18n';
 import { addReflection, completeSet, markPracticed, probeStore } from '../../store/probe';
 import type { CueId, ProbeItem } from '../../types';
 import ProbeA from './ProbeA';
@@ -54,8 +55,8 @@ export default function Probe() {
     <div className="probe-exit">
       {confirmExit ? (
         <>
-          <span>여기서 그만할까요? 지금까지 한 답은 저장돼 있어요.</span>
-          <button type="button" className="btn btn-sm" onClick={() => setConfirmExit(false)}>계속할게요</button>
+          <span>{tx('여기서 그만할까요? 지금까지 한 답은 저장돼 있어요.', 'Stop here? Your answers so far are saved.')}</span>
+          <button type="button" className="btn btn-sm" onClick={() => setConfirmExit(false)}>{tx('계속할게요', 'Keep going')}</button>
           <button
             type="button"
             className="btn btn-sm btn-primary"
@@ -64,11 +65,11 @@ export default function Probe() {
               nav('/room/hbd');
             }}
           >
-            그만하고 나가기
+            {tx('그만하고 나가기', 'Stop and leave')}
           </button>
         </>
       ) : (
-        <button type="button" className="btn btn-sm btn-ghost" onClick={() => setConfirmExit(true)}>그만하고 나가기</button>
+        <button type="button" className="btn btn-sm btn-ghost" onClick={() => setConfirmExit(true)}>{tx('그만하고 나가기', 'Stop and leave')}</button>
       )}
     </div>
   );
@@ -77,10 +78,12 @@ export default function Probe() {
     return (
       <main className="page page-narrow probe-page">
         <div className="stack-lg">
-          <h1 style={{ margin: 0, fontSize: 24 }}>세트 {set}까지 마쳤어요</h1>
-          <p className="lead" style={{ margin: 0 }}>수고하셨어요. 어떤 소리를 바꿨는지는 [나의 청취 단서]에서 알려 드려요.</p>
+          <h1 style={{ margin: 0, fontSize: 24 }}>{tx(`세트 ${set}까지 마쳤어요`, `You finished Set ${set}`)}</h1>
+          <p className="lead" style={{ margin: 0 }}>
+            {tx('수고하셨어요. 어떤 소리를 바꿨는지는 [나의 청취 단서]에서 알려 드려요.', 'Thank you. You can see which sounds we changed in [My Listening Cues].')}
+          </p>
           <div className="stack">
-            <Link to="/report" className="btn btn-lg btn-primary">나의 청취 단서 보기</Link>
+            <Link to="/report" className="btn btn-lg btn-primary">{tx('나의 청취 단서 보기', 'See My Listening Cues')}</Link>
             {set === 1 && (
               <button
                 type="button"
@@ -90,10 +93,10 @@ export default function Probe() {
                   nav('/probe/set2');
                 }}
               >
-                이어서 한 번 더 (세트 2)
+                {tx('이어서 한 번 더 (세트 2)', 'One more round (Set 2)')}
               </button>
             )}
-            <Link to="/room/hbd" className="btn btn-lg">합주실로</Link>
+            <Link to="/room/hbd" className="btn btn-lg">{tx('합주실로', 'To the Ensemble Room')}</Link>
           </div>
         </div>
       </main>

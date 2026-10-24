@@ -3,6 +3,7 @@ import { SoundOnButton } from '../../components/SoundGate';
 import { Icon } from '../../components/ui/Icon';
 import { engine, useEngineState } from '../../audio/useEngine';
 import { getProbeClip, type ClipId } from '../../audio/probeAudio';
+import { tx } from '../../i18n';
 import { FEEL_WORD, type CueSummary } from '../../store/reportRules';
 
 /** 한 단서의 원본 vs 편집본 A/B 다시 듣기. 세트를 끝내기 전에는 어느 쪽이 바뀐 소리인지 알려 주지 않는다 */
@@ -12,8 +13,8 @@ function Replay({ cue, revealed }: { cue: CueSummary; revealed: boolean }) {
   // 공개 전에는 단서마다 정해진 순서로 "소리 1/2"만 보여 준다
   const swap = !revealed && (cue.id.charCodeAt(0) + cue.id.length) % 2 === 0;
   const parts: { which: 'orig' | 'edit'; clip: ClipId; label: string }[] = [
-    { which: 'orig', clip: 'orig', label: revealed ? '원본 듣기' : '' },
-    { which: 'edit', clip: cue.aCue, label: revealed ? '바꾼 소리 듣기' : '' },
+    { which: 'orig', clip: 'orig', label: revealed ? tx('원본 듣기', 'Play original') : '' },
+    { which: 'edit', clip: cue.aCue, label: revealed ? tx('바꾼 소리 듣기', 'Play changed sound') : '' },
   ];
   const ordered = swap ? [parts[1], parts[0]] : parts;
 
@@ -24,7 +25,7 @@ function Replay({ cue, revealed }: { cue: CueSummary; revealed: boolean }) {
     [],
   );
 
-  if (!st.unlocked) return <SoundOnButton label="소리 켜고 들어 보기" />;
+  if (!st.unlocked) return <SoundOnButton label={tx('소리 켜고 들어 보기', 'Turn on sound and listen')} />;
 
   const play = async (p: (typeof parts)[number]) => {
     const id = `rep_${cue.id}_${p.which}`;
@@ -43,15 +44,15 @@ function Replay({ cue, revealed }: { cue: CueSummary; revealed: boolean }) {
   };
 
   return (
-    <div className="row" role="group" aria-label={`${cue.label} 다시 들어 보기`}>
+    <div className="row" role="group" aria-label={tx(`${cue.label} 다시 들어 보기`, `Listen again: ${cue.label}`)}>
       {ordered.map((p, i) => {
         const id = `rep_${cue.id}_${p.which}`;
         const playing = st.clip === id;
-        const text = revealed ? p.label : `소리 ${i + 1} 듣기`;
+        const text = revealed ? p.label : tx(`소리 ${i + 1} 듣기`, `Play sound ${i + 1}`);
         return (
           <button key={id} type="button" className="btn" aria-pressed={playing} disabled={busy === id} onClick={() => void play(p)}>
             <Icon name={playing ? 'pause' : 'play'} size={20} />
-            {busy === id ? '준비 중…' : playing ? `${text} (멈추기)` : text}
+            {busy === id ? tx('준비 중…', 'Getting ready…') : playing ? tx(`${text} (멈추기)`, `${text} (stop)`) : text}
           </button>
         );
       })}
@@ -82,52 +83,50 @@ export function CueCard({
       <div className="row" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <h3 id={headingId}>{cue.label}</h3>
         <div className="rep-tags">
-          {feel.shaky && <span className="tag">아직 흔들려요</span>}
-          {feel.once && <span className="tag">한 번만 들었어요</span>}
+          {feel.shaky && <span className="tag">{tx('아직 흔들려요', 'Still varies')}</span>}
+          {feel.once && <span className="tag">{tx('한 번만 들었어요', 'Heard only once')}</span>}
         </div>
       </div>
-      {cue.instrument && <p className="small muted">관련 악기: {cue.instrument}</p>}
+      {cue.instrument && <p className="small muted">{tx('관련 악기', 'Related instrument')}: {cue.instrument}</p>}
 
       <div className="rep-cols">
         <div className="rep-col">
-          <h4>느낀 것</h4>
+          <h4>{tx('느낀 것', 'What you felt')}</h4>
           {feel.level ? (
             <>
               <p className="rep-word">{FEEL_WORD[feel.level]}</p>
-              <p className="small muted">{feel.n}번 표시했어요</p>
-              {refCaution && <p className="small">차이가 없을 때도 다르다고 느끼는 편이에요. 값을 조심해서 보세요.</p>}
+              <p className="small muted">{tx(`${feel.n}번 표시했어요`, feel.n === 1 ? 'You rated it 1 time' : `You rated it ${feel.n} times`)}</p>
+              {refCaution && <p className="small">{tx('차이가 없을 때도 다르다고 느끼는 편이에요. 값을 조심해서 보세요.', 'You tend to feel a difference even when there is none. Read these values with care.')}</p>}
             </>
           ) : (
-            <p className="muted">아직 표시한 적이 없어요</p>
+            <p className="muted">{tx('아직 표시한 적이 없어요', "You haven't rated this yet")}</p>
           )}
         </div>
         <div className="rep-col">
-          <h4>고른 것</h4>
+          <h4>{tx('고른 것', 'What you picked')}</h4>
           {pick.appeared ? (
             <>
-              <p className="rep-word">
-                {pick.appeared}번 중 {pick.chosen}번
-              </p>
-              <p className="small">"더 또렷해요"로 골랐어요</p>
+              <p className="rep-word">{tx(`${pick.appeared}번 중 ${pick.chosen}번`, `${pick.chosen} of ${pick.appeared} times`)}</p>
+              <p className="small">{tx('"더 또렷해요"로 골랐어요', 'you picked it as clearer')}</p>
               {pick.chosen > 0 && (
                 <p className="small">
-                  {pick.sure > 0 && <span className="rep-strong">확실해요 {pick.sure}번 </span>}
-                  {pick.some > 0 && <span>조금 {pick.some}번 </span>}
-                  {pick.unsure > 0 && <span className="rep-faint">잘 모르겠어요 {pick.unsure}번</span>}
+                  {pick.sure > 0 && <span className="rep-strong">{tx(`확실해요 ${pick.sure}번`, `Sure: ${pick.sure}`)} </span>}
+                  {pick.some > 0 && <span>{tx(`조금 ${pick.some}번`, `Somewhat: ${pick.some}`)} </span>}
+                  {pick.unsure > 0 && <span className="rep-faint">{tx(`잘 모르겠어요 ${pick.unsure}번`, `Not sure: ${pick.unsure}`)}</span>}
                 </p>
               )}
-              {pick.differentGood > 0 && <p className="small">더 또렷한 쪽과 더 좋은 쪽이 달랐어요</p>}
+              {pick.differentGood > 0 && <p className="small">{tx('더 또렷한 쪽과 더 좋은 쪽이 달랐어요', 'The clearer one and the one you liked better were different')}</p>}
             </>
           ) : (
-            <p className="muted">이 단서는 아직 고르지 않았어요</p>
+            <p className="muted">{tx('이 단서는 아직 고르지 않았어요', "You haven't picked this cue yet")}</p>
           )}
         </div>
         <div className="rep-col">
-          <h4>말한 것</h4>
+          <h4>{tx('말한 것', 'What you said')}</h4>
           {say.chipCount > 0 ? (
-            <p className="rep-word">{say.chipCount}번 골랐어요</p>
+            <p className="rep-word">{tx(`${say.chipCount}번 골랐어요`, say.chipCount === 1 ? 'Picked 1 time' : `Picked ${say.chipCount} times`)}</p>
           ) : (
-            <p className="muted">아직 고른 적이 없어요</p>
+            <p className="muted">{tx('아직 고른 적이 없어요', "You haven't picked it yet")}</p>
           )}
           {say.notes.slice(0, 2).map((n, i) => (
             <p key={i} className="rep-quote small">"{n}"</p>
@@ -138,7 +137,7 @@ export function CueCard({
       <div className="stack" style={{ gap: 8 }}>
         <div>
           <button type="button" className="btn btn-sm" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-            <Icon name="headphones" size={20} /> 다시 들어 보기
+            <Icon name="headphones" size={20} /> {tx('다시 들어 보기', 'Listen again')}
           </button>
         </div>
         {open && <Replay cue={cue} revealed={revealed} />}

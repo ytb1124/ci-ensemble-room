@@ -4,7 +4,7 @@ import type { SVGProps } from 'react';
 export type IconName =
   | 'play' | 'pause' | 'restart' | 'repeat' | 'check' | 'close' | 'speaker' | 'speakerOff'
   | 'chevronLeft' | 'chevronRight' | 'chevronDown' | 'eye' | 'eyeOff' | 'settings' | 'info'
-  | 'on' | 'off' | 'sliders' | 'question' | 'download' | 'trash' | 'refresh' | 'headphones' | 'music' | 'pencil' | 'plus' | 'minus';
+  | 'on' | 'off' | 'sliders' | 'question' | 'download' | 'trash' | 'refresh' | 'headphones' | 'music' | 'pencil' | 'plus' | 'minus' | 'globe';
 
 const P: Record<IconName, string> = {
   play: 'M8 5.5v13l10.5-6.5z',
@@ -34,6 +34,7 @@ const P: Record<IconName, string> = {
   pencil: 'M17 3l4 4L7 21H3v-4z',
   plus: 'M12 5v14M5 12h14',
   minus: 'M5 12h14',
+  globe: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20',
 };
 
 const FILLED: IconName[] = ['play', 'pause', 'restart'];

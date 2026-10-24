@@ -292,12 +292,28 @@ a { color: var(--ink); }
 .topbar nav { display: flex; gap: 4px; flex-wrap: wrap; }
 .topbar nav a { min-height: 44px; display: inline-flex; align-items: center; padding: 0 12px; border-radius: var(--r-pill); text-decoration: none; color: var(--body-strong); font-weight: 500; font-size: 15px; }
 .topbar nav a.active { background: var(--surface-strong); color: var(--ink); }
+.lang-switch {
+  min-height: 44px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px;
+  border: 1.5px solid var(--hairline-strong); border-radius: var(--r-pill);
+  background: var(--canvas); color: var(--body-strong); font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+.lang-switch:hover { background: var(--surface-soft); }
+.topbar .brand { white-space: nowrap; }
+.topbar nav a { white-space: nowrap; }
+/* 좁은 화면: 첫 줄에 이름·언어, 둘째 줄에 메뉴 */
+@media (max-width: 640px) {
+  .topbar { flex-wrap: wrap; row-gap: 0; }
+  .topbar nav { order: 3; width: 100%; flex-wrap: nowrap; overflow-x: auto; margin: 0 calc(-1 * var(--s-xs)); }
+}
 
 .resume-banner {
   position: fixed; left: 50%; top: 76px; transform: translateX(-50%); z-index: 50;
   display: flex; gap: 12px; align-items: center;
   background: var(--brand-teal); color: #fff; padding: 10px 12px 10px 18px; border-radius: var(--r-pill);
   box-shadow: var(--shadow-card); max-width: calc(100vw - 32px);
+}
+@media (max-width: 640px) {
+  .resume-banner { top: 120px; } /* 메뉴가 둘째 줄로 내려가 상단 바가 높아짐 */
 }
 
 @media (prefers-reduced-motion: reduce) {

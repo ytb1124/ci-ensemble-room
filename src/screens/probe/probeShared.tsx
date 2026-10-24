@@ -3,6 +3,7 @@ import { engine } from '../../audio/engine';
 import { getProbeClip, type ClipId } from '../../audio/probeAudio';
 import { useEngineState } from '../../audio/useEngine';
 import { Icon } from '../../components/ui/Icon';
+import { tx } from '../../i18n';
 import type { CueId, EmphId, ProbeItem } from '../../types';
 import './probe.css';
 
@@ -105,7 +106,7 @@ export function ListenButton({
         <Icon name={playing ? 'speaker' : 'play'} />
         {label}
       </span>
-      {playing && <span className="small" role="status">소리 나는 중</span>}
+      {playing && <span className="small" role="status">{tx('소리 나는 중', 'Playing')}</span>}
     </button>
   );
 }
@@ -113,8 +114,8 @@ export function ListenButton({
 export function ProgressBar({ index, total, title }: { index: number; total: number; title?: string }) {
   return (
     <div className="probe-progress">
-      <h1 style={{ margin: 0, fontSize: 24 }}>{title ?? `잠깐 질문 (${index + 1}/${total})`}</h1>
-      <div className="probe-bar" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={index + 1} aria-label="진행">
+      <h1 style={{ margin: 0, fontSize: 24 }}>{title ?? tx(`잠깐 질문 (${index + 1}/${total})`, `Quick questions (${index + 1}/${total})`)}</h1>
+      <div className="probe-bar" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={index + 1} aria-label={tx('진행', 'Progress')}>
         <span style={{ width: `${((index + 1) / total) * 100}%` }} />
       </div>
     </div>

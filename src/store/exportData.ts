@@ -8,6 +8,7 @@ import { clearProbe, probeStore } from './probe';
 import type { ProbeState } from './probe';
 import { profileStore, resetProfile } from './profile';
 import { describeChange } from './reportRules';
+import { inLang } from '../i18n';
 import { KEYS, readJSON, removeKey, writeJSON } from './storage';
 import type { ProbeResponse } from '../types';
 
@@ -70,7 +71,7 @@ export function buildExport() {
       completedSets: probeStore.get().completedSets,
     },
     reportSnapshots: readSnapshots(),
-    probeManifest: PROBE_MANIFEST,
+    probeManifest: inLang('ko', () => JSON.parse(JSON.stringify(PROBE_MANIFEST))), // getter를 한국어로 고정해 펼친다
     device: {
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
       ...engine.latencyInfo(),
@@ -94,7 +95,7 @@ const CSV_HEAD = [
 
 export function buildCSV(responses: ProbeResponse[]): string {
   const rows = responses.map((r) => {
-    const changed = describeChange(r).text;
+    const changed = inLang('ko', () => describeChange(r).text); // 연구 데이터는 화면 언어와 상관없이 한국어로
     if (r.kind === 'A') {
       return [r.set, r.itemId, 'A', r.cue, r.isRepeat, r.origIsA, r.sliderStart, r.rating, r.chips.join('|'), r.otherText, r.note,
         '', '', '', '', '', r.listensA, r.listensB, r.at, changed];

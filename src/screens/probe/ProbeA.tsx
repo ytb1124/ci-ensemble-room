@@ -3,6 +3,7 @@ import { engine } from '../../audio/engine';
 import type { ClipId } from '../../audio/probeAudio';
 import { Chip } from '../../components/ui/controls';
 import { CHIPS } from '../../config/probes';
+import { tx } from '../../i18n';
 import { addProbeResponse } from '../../store/probe';
 import type { ChipId, ProbeItem } from '../../types';
 import { ListenButton, ProgressBar, useProbeClips, type ItemRand } from './probeShared';
@@ -10,7 +11,7 @@ import { ListenButton, ProgressBar, useProbeClips, type ItemRand } from './probe
 type ItemA = Extract<ProbeItem, { kind: 'A' }>;
 
 function sliderText(v: number) {
-  return v < 34 ? '똑같아요 쪽' : v > 66 ? '아주 달라요 쪽' : '중간';
+  return v < 34 ? tx('똑같아요 쪽', 'Toward exactly the same') : v > 66 ? tx('아주 달라요 쪽', 'Toward very different') : tx('중간', 'Middle');
 }
 
 export default function ProbeA({
@@ -50,7 +51,11 @@ export default function ProbeA({
 
   const heard = listens.A + listens.B > 0;
   const canNext = heard && touched;
-  const why = !heard ? '소리 A나 B를 한 번 들어 주세요.' : !touched ? '손잡이를 한 번 움직이거나 [이대로 좋아요]를 눌러 주세요.' : '';
+  const why = !heard
+    ? tx('소리 A나 B를 한 번 들어 주세요.', 'Please listen to sound A or B once.')
+    : !touched
+      ? tx('손잡이를 한 번 움직이거나 [이대로 좋아요]를 눌러 주세요.', 'Please move the slider once or press [Looks good].')
+      : '';
 
   const finish = (skip: boolean) => {
     if (done.current) return;
@@ -81,21 +86,26 @@ export default function ProbeA({
 
   return (
     <div className="stack-lg">
-      <ProgressBar index={index} total={total} title={practice ? '연습' : undefined} />
-      {practice && <p className="small" style={{ margin: 0 }}>연습이에요. 저장하지 않아요.</p>}
-      <p style={{ margin: 0 }}>두 소리를 원하는 만큼 들어 보세요. 정답은 없으니 느낀 만큼만 표시해 주세요.</p>
-      {error && <p role="alert" style={{ margin: 0 }}>소리를 준비하지 못했어요. [넘어가기]를 눌러 주세요.</p>}
-      {!bufs && !error && <p style={{ margin: 0 }} role="status">소리를 준비하고 있어요…</p>}
+      <ProgressBar index={index} total={total} title={practice ? tx('연습', 'Practice') : undefined} />
+      {practice && <p className="small" style={{ margin: 0 }}>{tx('연습이에요. 저장하지 않아요.', 'This is practice. Nothing is saved.')}</p>}
+      <p style={{ margin: 0 }}>
+        {tx(
+          '두 소리를 원하는 만큼 들어 보세요. 정답은 없으니 느낀 만큼만 표시해 주세요.',
+          'Listen to the two sounds as many times as you like. There are no right answers. Just mark what you feel.',
+        )}
+      </p>
+      {error && <p role="alert" style={{ margin: 0 }}>{tx('소리를 준비하지 못했어요. [넘어가기]를 눌러 주세요.', "We couldn't get the sounds ready. Please press [Skip].")}</p>}
+      {!bufs && !error && <p style={{ margin: 0 }} role="status">{tx('소리를 준비하고 있어요…', 'Getting the sounds ready…')}</p>}
       <div className="probe-listen-row">
-        <ListenButton label="소리 A 듣기" clipId="probe-A" disabled={!bufs} onPress={() => listen('A')} />
-        <ListenButton label="소리 B 듣기" clipId="probe-B" disabled={!bufs} onPress={() => listen('B')} />
+        <ListenButton label={tx('소리 A 듣기', 'Play sound A')} clipId="probe-A" disabled={!bufs} onPress={() => listen('A')} />
+        <ListenButton label={tx('소리 B 듣기', 'Play sound B')} clipId="probe-B" disabled={!bufs} onPress={() => listen('B')} />
       </div>
 
       <div className="stack" style={{ gap: 4 }}>
-        <label htmlFor="probe-slider" className="probe-q">두 소리가 얼마나 달라요?</label>
+        <label htmlFor="probe-slider" className="probe-q">{tx('두 소리가 얼마나 달라요?', 'How different are the two sounds?')}</label>
         <div className="probe-slider-ends" aria-hidden="true">
-          <span>똑같아요</span>
-          <span>아주 달라요</span>
+          <span>{tx('똑같아요', 'Exactly the same')}</span>
+          <span>{tx('아주 달라요', 'Very different')}</span>
         </div>
         <input
           id="probe-slider"
@@ -111,16 +121,21 @@ export default function ProbeA({
             setTouched(true);
           }}
         />
-        <p className="small" style={{ margin: 0 }}>손잡이의 처음 위치는 매번 달라요. 한 번 움직이거나 [이대로 좋아요]를 눌러 주세요.</p>
+        <p className="small" style={{ margin: 0 }}>
+          {tx(
+            '손잡이의 처음 위치는 매번 달라요. 한 번 움직이거나 [이대로 좋아요]를 눌러 주세요.',
+            'The slider starts in a different place each time. Move it once or press [Looks good].',
+          )}
+        </p>
         <div>
           <button type="button" className={`btn${touched ? ' is-selected' : ''}`} aria-pressed={touched} onClick={() => setTouched(true)}>
-            {touched ? '표시했어요' : '이대로 좋아요'}
+            {touched ? tx('표시했어요', 'Rated') : tx('이대로 좋아요', 'Looks good')}
           </button>
         </div>
       </div>
 
       <div className="stack" style={{ gap: 8 }}>
-        <p className="probe-q" id="probe-chips-l">무엇이 다르게 느껴졌나요? (여러 개 골라도 돼요)</p>
+        <p className="probe-q" id="probe-chips-l">{tx('무엇이 다르게 느껴졌나요? (여러 개 골라도 돼요)', 'What felt different? (You can pick more than one)')}</p>
         <div className="probe-chips" role="group" aria-labelledby="probe-chips-l">
           {CHIPS.map((c) => (
             <Chip key={c.id} pressed={chips.includes(c.id)} onClick={() => toggle(c.id)}>
@@ -129,16 +144,16 @@ export default function ProbeA({
           ))}
         </div>
         {chips.includes('other') && (
-          <input className="input" aria-label="기타: 어떤 점이 달랐나요" maxLength={60} value={other} onChange={(e) => setOther(e.target.value)} placeholder="어떤 점이 달랐나요?" />
+          <input className="input" aria-label={tx('기타: 어떤 점이 달랐나요', 'Other: what was different')} maxLength={60} value={other} onChange={(e) => setOther(e.target.value)} placeholder={tx('어떤 점이 달랐나요?', 'What was different?')} />
         )}
-        <input className="input" aria-label="한 줄로 적어 볼까요? (선택)" maxLength={120} value={note} onChange={(e) => setNote(e.target.value)} placeholder="예: 두 번째가 덜 톡 튀었어요" />
+        <input className="input" aria-label={tx('한 줄로 적어 볼까요? (선택)', 'Want to write a line about it? (optional)')} maxLength={120} value={note} onChange={(e) => setNote(e.target.value)} placeholder={tx('예: 두 번째가 덜 톡 튀었어요', 'e.g., The second one was less punchy')} />
       </div>
 
       <div className="stack" style={{ gap: 8 }}>
         {!canNext && <p className="probe-why small" role="status" style={{ margin: 0 }}>{why}</p>}
         <div className="probe-actions">
-          <button type="button" className="btn btn-lg btn-primary" disabled={!canNext} onClick={() => finish(false)}>다음</button>
-          <button type="button" className="btn btn-lg" onClick={() => finish(true)}>넘어가기</button>
+          <button type="button" className="btn btn-lg btn-primary" disabled={!canNext} onClick={() => finish(false)}>{tx('다음', 'Next')}</button>
+          <button type="button" className="btn btn-lg" onClick={() => finish(true)}>{tx('넘어가기', 'Skip')}</button>
         </div>
       </div>
     </div>

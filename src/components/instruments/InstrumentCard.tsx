@@ -3,6 +3,7 @@ import { engine, useAnimationFrame } from '../../audio/useEngine';
 import { Icon } from '../ui/Icon';
 import { INSTRUMENT_LABEL, type InstrumentId, type MotionLevel, type RoomMode } from '../../types';
 import { InstrumentFigure, type FigurePose } from './figures';
+import { getLang, tx } from '../../i18n';
 import './instruments.css';
 
 export { InstrumentFigure };
@@ -33,9 +34,9 @@ export interface VolumeProps {
 
 /** dB 대신 말로 보여 준다 */
 export function volumeWord(db: number): string {
-  if (db === 0) return '보통';
-  if (db > 0) return db <= 2 ? '조금 크게' : db <= 6 ? '크게' : '아주 크게';
-  return db >= -4 ? '조금 작게' : db >= -8 ? '작게' : '아주 작게';
+  if (db === 0) return tx('보통', 'Normal');
+  if (db > 0) return db <= 2 ? tx('조금 크게', 'A bit louder') : db <= 6 ? tx('크게', 'Louder') : tx('아주 크게', 'Much louder');
+  return db >= -4 ? tx('조금 작게', 'A bit softer') : db >= -8 ? tx('작게', 'Softer') : tx('아주 작게', 'Much softer');
 }
 
 function VolumeStrip({ name, v }: { name: string; v: VolumeProps }) {
@@ -43,8 +44,8 @@ function VolumeStrip({ name, v }: { name: string; v: VolumeProps }) {
   const zero = ((0 - v.min) / (v.max - v.min)) * 100;
   const set = (n: number) => v.onChange(Math.max(v.min, Math.min(v.max, n)));
   return (
-    <div className="inst-vol" role="group" aria-label={`${name} 크기`}>
-      <button type="button" className="inst-vol-btn" aria-label={`${name} 작게`} disabled={v.value <= v.min} onClick={() => set(v.value - v.step)}>
+    <div className="inst-vol" role="group" aria-label={tx(`${name} 크기`, `${name} volume`)}>
+      <button type="button" className="inst-vol-btn" aria-label={tx(`${name} 작게`, `${name} softer`)} disabled={v.value <= v.min} onClick={() => set(v.value - v.step)}>
         <Icon name="minus" size={20} />
       </button>
       <div className="inst-vol-mid">
@@ -54,7 +55,7 @@ function VolumeStrip({ name, v }: { name: string; v: VolumeProps }) {
           <span className="inst-vol-fill" style={{ width: `${pct}%` }} />
         </span>
       </div>
-      <button type="button" className="inst-vol-btn" aria-label={`${name} 크게`} disabled={v.value >= v.max} onClick={() => set(v.value + v.step)}>
+      <button type="button" className="inst-vol-btn" aria-label={tx(`${name} 크게`, `${name} louder`)} disabled={v.value >= v.max} onClick={() => set(v.value + v.step)}>
         <Icon name="plus" size={20} />
       </button>
     </div>
@@ -179,13 +180,17 @@ export function InstrumentCard(p: InstrumentCardProps) {
     p.onPress();
   };
 
-  const name = hidden ? `악기 ${blindNumber}` : INSTRUMENT_LABEL[id];
-  const onTxt = on ? '켜짐' : '꺼짐';
+  const name = hidden ? tx(`악기 ${blindNumber}`, `Instrument ${blindNumber}`) : INSTRUMENT_LABEL[id];
+  const onTxt = on ? tx('켜짐', 'On') : tx('꺼짐', 'Off');
   const hint =
     mode === 'toggle'
-      ? on ? '누르면 끄기' : '누르면 켜기'
-      : selected ? '누르면 모두 함께 들어요' : `누르면 ${hidden ? name : INSTRUMENT_LABEL[id]}만 들어요`;
-  const label = `${name}, ${onTxt}${selected ? ', 혼자 듣는 중' : ''}, ${hint}`;
+      ? on ? tx('누르면 끄기', 'Tap to turn off') : tx('누르면 켜기', 'Tap to turn on')
+      : selected
+        ? tx('누르면 모두 함께 들어요', 'Tap to hear all together')
+        : getLang() === 'en'
+          ? `Tap to hear only ${hidden ? name : INSTRUMENT_LABEL[id]}`
+          : `누르면 ${hidden ? name : INSTRUMENT_LABEL[id]}만 들어요`;
+  const label = `${name}, ${onTxt}${selected ? tx(', 혼자 듣는 중', ', Solo') : ''}, ${hint}`;
 
   const card = (
     <button
@@ -214,8 +219,8 @@ export function InstrumentCard(p: InstrumentCardProps) {
         {onTxt}
       </span>
       <span className="inst-tags" aria-hidden="true">
-        {selected && <span className="inst-tag">혼자 듣는 중</span>}
-        {blindNumber !== undefined && revealed && <span className="inst-tag is-soft">악기 {blindNumber}</span>}
+        {selected && <span className="inst-tag">{tx('혼자 듣는 중', 'Solo')}</span>}
+        {blindNumber !== undefined && revealed && <span className="inst-tag is-soft">{tx(`악기 ${blindNumber}`, `Instrument ${blindNumber}`)}</span>}
       </span>
     </button>
   );

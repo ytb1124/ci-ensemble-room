@@ -1,20 +1,22 @@
+import { tx } from './i18n';
+
 // 공용 타입. 저장 스키마는 구성안 4.3절(cihall.profile.v1)을 따른다.
 
 export type InstrumentId = 'piano' | 'cajon' | 'trumpet' | 'bass';
 /** 카드·목록 순서(팀 합의: 피아노 · 카혼 · 트럼펫 · 베이스) */
 export const INSTRUMENTS: InstrumentId[] = ['piano', 'cajon', 'trumpet', 'bass'];
 export const INSTRUMENT_LABEL: Record<InstrumentId, string> = {
-  piano: '피아노',
-  cajon: '카혼',
-  bass: '베이스',
-  trumpet: '트럼펫',
+  get piano() { return tx('피아노', 'Piano'); },
+  get cajon() { return tx('카혼', 'Cajon'); },
+  get bass() { return tx('베이스', 'Bass'); },
+  get trumpet() { return tx('트럼펫', 'Trumpet'); },
 };
 /** 짧은 라벨(좁은 화면용) */
 export const INSTRUMENT_SHORT: Record<InstrumentId, string> = {
-  piano: '피아노',
-  cajon: '카혼',
-  bass: '베이스',
-  trumpet: '트럼펫',
+  get piano() { return tx('피아노', 'Piano'); },
+  get cajon() { return tx('카혼', 'Cajon'); },
+  get bass() { return tx('베이스', 'Bass'); },
+  get trumpet() { return tx('트럼펫', 'Trumpet'); },
 };
 
 /** 엔진이 다루는 스템. bassOct = 저음 도움 보조 스템(한 옥타브 위 테이크) */

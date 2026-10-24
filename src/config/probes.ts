@@ -1,4 +1,5 @@
 // 단서 질문 세트 구성(구성안 6.3절)과 칩·단서 대응표(6.4절).
+import { tx } from '../i18n';
 import type { ChipId, CueId, EmphId, ProbeItem } from '../types';
 
 export const CUES: CueId[] = ['attack', 'bright', 'contour', 'rhythm'];
@@ -46,32 +47,32 @@ export function buildSet(set: 1 | 2, avoidRepeatCue?: CueId): ProbeItem[] {
 }
 
 export const CHIPS: { id: ChipId; label: string }[] = [
-  { id: 'attack', label: '시작 소리 (탁/부드럽게)' },
-  { id: 'bright', label: '밝기 (쨍함/둥글함)' },
-  { id: 'pitch', label: '높낮이' },
-  { id: 'rhythm', label: '리듬·박자' },
-  { id: 'loudness', label: '크기' },
-  { id: 'unsure', label: '잘 모르겠어요' },
-  { id: 'other', label: '기타' },
+  { id: 'attack', get label() { return tx('시작 소리 (탁/부드럽게)', 'Note start (sharp/soft)'); } },
+  { id: 'bright', get label() { return tx('밝기 (쨍함/둥글함)', 'Brightness (bright/mellow)'); } },
+  { id: 'pitch', get label() { return tx('높낮이', 'Pitch'); } },
+  { id: 'rhythm', get label() { return tx('리듬·박자', 'Rhythm & beat'); } },
+  { id: 'loudness', get label() { return tx('크기', 'Loudness'); } },
+  { id: 'unsure', get label() { return tx('잘 모르겠어요', 'Not sure'); } },
+  { id: 'other', get label() { return tx('기타', 'Other'); } },
 ];
 
 /** 끝 성찰 칩(6.3절) */
 export const REFLECTION_CHIPS: { id: ChipId; label: string }[] = [
-  { id: 'attack', label: '시작 소리' },
-  { id: 'bright', label: '밝기' },
-  { id: 'pitch', label: '높낮이' },
-  { id: 'rhythm', label: '리듬·박자' },
-  { id: 'loudness', label: '크기' },
-  { id: 'visual', label: '악기 그림·화면' },
-  { id: 'unsure', label: '잘 모르겠어요' },
+  { id: 'attack', get label() { return tx('시작 소리', 'Note start'); } },
+  { id: 'bright', get label() { return tx('밝기', 'Brightness'); } },
+  { id: 'pitch', get label() { return tx('높낮이', 'Pitch'); } },
+  { id: 'rhythm', get label() { return tx('리듬·박자', 'Rhythm & beat'); } },
+  { id: 'loudness', get label() { return tx('크기', 'Loudness'); } },
+  { id: 'visual', get label() { return tx('악기 그림·화면', 'Instrument pictures & screen'); } },
+  { id: 'unsure', get label() { return tx('잘 모르겠어요', 'Not sure'); } },
 ];
 
 export const EMPH_LABEL: Record<EmphId, string> = {
-  melody: '멜로디',
-  rhythm: '박·리듬',
-  bass: '저음',
-  attack: '시작 소리',
-  clarity: '또렷함',
+  get melody() { return tx('멜로디', 'Melody'); },
+  get rhythm() { return tx('박·리듬', 'Beat & rhythm'); },
+  get bass() { return tx('저음', 'Bass'); },
+  get attack() { return tx('시작 소리', 'Note start'); },
+  get clarity() { return tx('또렷함', 'Clarity'); },
 };
 
 /** 리포트 단서 ↔ 소스 대응표(6.4절) */
@@ -84,8 +85,8 @@ export const REPORT_CUES: {
   chip: ChipId;
   instrument: string | null;
 }[] = [
-  { id: 'attack', label: '시작 소리', aCue: 'attack', bEmph: 'attack', chip: 'attack', instrument: null },
-  { id: 'bright', label: '밝기·또렷함', aCue: 'bright', bEmph: 'clarity', chip: 'bright', instrument: null },
-  { id: 'pitch', label: '높낮이·멜로디', aCue: 'contour', bEmph: 'melody', chip: 'pitch', instrument: '트럼펫' },
-  { id: 'rhythm', label: '리듬·박', aCue: 'rhythm', bEmph: 'rhythm', chip: 'rhythm', instrument: '카혼' },
+  { id: 'attack', get label() { return tx('시작 소리', 'Note start'); }, aCue: 'attack', bEmph: 'attack', chip: 'attack', instrument: null },
+  { id: 'bright', get label() { return tx('밝기·또렷함', 'Brightness & clarity'); }, aCue: 'bright', bEmph: 'clarity', chip: 'bright', instrument: null },
+  { id: 'pitch', get label() { return tx('높낮이·멜로디', 'Pitch & melody'); }, aCue: 'contour', bEmph: 'melody', chip: 'pitch', get instrument() { return tx('트럼펫', 'Trumpet'); } },
+  { id: 'rhythm', get label() { return tx('리듬·박', 'Rhythm & beat'); }, aCue: 'rhythm', bEmph: 'rhythm', chip: 'rhythm', get instrument() { return tx('카혼', 'Cajon'); } },
 ];

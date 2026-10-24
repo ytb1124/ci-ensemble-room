@@ -4,6 +4,7 @@
 
 import { SONGS, beatToSec, type SongConfig } from '../config/songs';
 import { effectiveInstGain, profileStore, updateProfile } from '../store/profile';
+import { tx } from '../i18n';
 import { createStore } from '../store/storage';
 import type { InstrumentId, PlaceholderShape, Profile, SectionDef, SongId, StemId } from '../types';
 import { INSTRUMENTS } from '../types';
@@ -292,7 +293,7 @@ class AudioEngine {
       this.applySettings();
     } catch (e) {
       if (seq !== this.loadSeq) return;
-      this.patch({ loading: false, error: '소리를 불러오지 못했어요. 다시 시도해 주세요.' });
+      this.patch({ loading: false, error: tx('소리를 불러오지 못했어요. 다시 시도해 주세요.', "We couldn't load the sound. Please try again.") });
       console.warn(e);
     }
   }

@@ -3,8 +3,9 @@
 import { useState, type ReactNode } from 'react';
 import { engine, useEngineState } from '../audio/useEngine';
 import { Icon } from './ui/Icon';
+import { tx } from '../i18n';
 
-export function SoundOnButton({ onDone, label = '소리 켜기' }: { onDone?: () => void; label?: string }) {
+export function SoundOnButton({ onDone, label = tx('소리 켜기', 'Turn on sound') }: { onDone?: () => void; label?: string }) {
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   return (
@@ -23,14 +24,14 @@ export function SoundOnButton({ onDone, label = '소리 켜기' }: { onDone?: ()
         }}
       >
         <Icon name="speaker" size={26} />
-        {busy ? '켜는 중…' : label}
+        {busy ? tx('켜는 중…', 'Turning on…') : label}
       </button>
       <p className="small muted" style={{ textAlign: 'center' }}>
-        아이폰이라면 무음 모드를 꺼 주세요.
+        {tx('아이폰이라면 무음 모드를 꺼 주세요.', 'On an iPhone, please turn off silent mode.')}
       </p>
       {failed && (
         <p role="alert" style={{ color: 'var(--error)', fontWeight: 600 }}>
-          소리를 켜지 못했어요. 한 번 더 눌러 주세요.
+          {tx('소리를 켜지 못했어요. 한 번 더 눌러 주세요.', 'Could not turn on the sound. Please press again.')}
         </p>
       )}
     </div>
@@ -43,8 +44,8 @@ export function SoundGate({ children }: { children: ReactNode }) {
   return (
     <main className="page page-narrow">
       <div className="card stack-lg" style={{ alignItems: 'center', textAlign: 'center', marginTop: 32 }}>
-        <h2>먼저 소리를 켜 주세요</h2>
-        <p>브라우저에서는 버튼을 한 번 눌러야 소리가 나요.</p>
+        <h2>{tx('먼저 소리를 켜 주세요', 'Please turn on the sound first')}</h2>
+        <p>{tx('브라우저에서는 버튼을 한 번 눌러야 소리가 나요.', 'In a browser, you need to press a button once to hear sound.')}</p>
         <SoundOnButton />
       </div>
     </main>
@@ -57,9 +58,9 @@ export function ResumeBanner() {
   if (!st.unlocked || st.ctxState === 'running' || st.ctxState === 'none') return null;
   return (
     <div className="resume-banner" role="status">
-      <span>소리가 멈췄어요.</span>
+      <span>{tx('소리가 멈췄어요.', 'The sound stopped.')}</span>
       <button type="button" className="btn btn-sm" style={{ background: '#fffaf0', color: '#0a0a0a' }} onClick={() => void engine.unlock()}>
-        <Icon name="speaker" size={18} /> 다시 켜기
+        <Icon name="speaker" size={18} /> {tx('다시 켜기', 'Turn on again')}
       </button>
     </div>
   );

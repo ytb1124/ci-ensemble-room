@@ -3,6 +3,7 @@ import { engine, useAnimationFrame, useEngineState } from '../../audio/useEngine
 import { Icon } from '../../components/ui/Icon';
 import { logEvent } from '../../store/log';
 import type { SongId } from '../../types';
+import { tx } from '../../i18n';
 
 function fmt(t: number) {
   const s = Math.max(0, Math.floor(t));
@@ -23,7 +24,7 @@ export function TransportBar({ song, extra }: { song: SongId; extra?: ReactNode 
     if (txt !== lastText.current && timeRef.current) {
       lastText.current = txt;
       timeRef.current.textContent = txt;
-      rangeRef.current?.setAttribute('aria-valuetext', txt.replace('/', '중'));
+      rangeRef.current?.setAttribute('aria-valuetext', txt.replace('/', tx('중', 'of')));
     }
     if (!dragging.current && rangeRef.current) rangeRef.current.value = String(t);
   }, true);
@@ -39,14 +40,14 @@ export function TransportBar({ song, extra }: { song: SongId; extra?: ReactNode 
   };
 
   return (
-    <div className="room-transport" role="region" aria-label="재생 막대">
+    <div className="room-transport" role="region" aria-label={tx('재생 막대', 'Playback bar')}>
       <div className="room-transport-in">
         <div className="room-tp-main">
           <button
             type="button"
             className="btn btn-primary room-play"
             onClick={toggle}
-            aria-label={st.playing ? '일시정지' : '재생'}
+            aria-label={st.playing ? tx('일시정지', 'Pause') : tx('재생', 'Play')}
             disabled={st.loading || dur === 0}
           >
             <Icon name={st.playing ? 'pause' : 'play'} size={26} />
@@ -54,7 +55,7 @@ export function TransportBar({ song, extra }: { song: SongId; extra?: ReactNode 
           <button
             type="button"
             className="btn btn-sm btn-round"
-            aria-label="처음으로"
+            aria-label={tx('처음으로', 'Back to start')}
             disabled={dur === 0}
             onClick={() => {
               engine.seek(st.section ? st.section.start : 0);
@@ -62,7 +63,7 @@ export function TransportBar({ song, extra }: { song: SongId; extra?: ReactNode 
             }}
           >
             <Icon name="restart" size={20} />
-            <span className="sr-only">처음으로</span>
+            <span className="sr-only">{tx('처음으로', 'Back to start')}</span>
           </button>
           <span ref={timeRef} className="room-tp-time" aria-hidden="true">0:00 / {fmt(dur)}</span>
           <input
@@ -73,7 +74,7 @@ export function TransportBar({ song, extra }: { song: SongId; extra?: ReactNode 
             max={Math.max(dur, 0.1)}
             step={0.1}
             defaultValue={0}
-            aria-label="재생 위치"
+            aria-label={tx('재생 위치', 'Playback position')}
             disabled={dur === 0}
             onPointerDown={() => (dragging.current = true)}
             onChange={(e) => engine.seek(Number(e.target.value))}

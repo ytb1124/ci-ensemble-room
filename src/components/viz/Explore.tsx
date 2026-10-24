@@ -7,13 +7,14 @@ import { Segmented } from '../ui/controls';
 import type { InstrumentId } from '../../types';
 import { INSTRUMENTS, INSTRUMENT_SHORT } from '../../types';
 import { readColors, useFitCanvas, type VizColors } from './Lanes';
+import { tx } from '../../i18n';
 import './viz.css';
 
 type View = 'wave' | 'spec' | 'sgram';
 const HELP: Record<View, { title: string; text: string }> = {
-  wave: { title: '파형', text: '선이 높을수록 큰 소리예요. 가운데 세로선이 지금 들리는 순간이에요.' },
-  spec: { title: '스펙트럼', text: '왼쪽은 낮은 소리, 오른쪽은 높은 소리예요. 막대가 높을수록 그 높이의 소리가 커요.' },
-  sgram: { title: '스펙트로그램', text: '위로 갈수록 높은 소리, 밝을수록 큰 소리예요. 시간이 지나면 오른쪽으로 쌓여요.' },
+  wave: { get title() { return tx('파형', 'Waveform'); }, get text() { return tx('선이 높을수록 큰 소리예요. 가운데 세로선이 지금 들리는 순간이에요.', 'The higher the line, the louder the sound. The vertical line in the middle is what you hear now.'); } },
+  spec: { get title() { return tx('스펙트럼', 'Spectrum'); }, get text() { return tx('왼쪽은 낮은 소리, 오른쪽은 높은 소리예요. 막대가 높을수록 그 높이의 소리가 커요.', 'Low sounds are on the left, high sounds on the right. A taller bar means that pitch is louder.'); } },
+  sgram: { get title() { return tx('스펙트로그램', 'Spectrogram'); }, get text() { return tx('위로 갈수록 높은 소리, 밝을수록 큰 소리예요. 시간이 지나면 오른쪽으로 쌓여요.', 'Higher up means a higher sound, and brighter means louder. Over time, it fills in toward the right.'); } },
 };
 const FONT = "system-ui, -apple-system, 'Noto Sans KR', sans-serif";
 
@@ -21,16 +22,16 @@ export function Explore(p: { on: Record<InstrumentId, boolean> }) {
   const [view, setView] = useState<View>('wave');
   return (
     <div className="viz-explore">
-      <p className="viz-note">처음에는 낯설 수 있어요. 소리를 들으면서 여러 번 보면 익숙해져요.</p>
+      <p className="viz-note">{tx('처음에는 낯설 수 있어요. 소리를 들으면서 여러 번 보면 익숙해져요.', 'This may feel unfamiliar at first. It gets easier if you watch it a few times while listening.')}</p>
       <Segmented
-        label="자세히 보기 종류"
+        label={tx('자세히 보기 종류', 'Detailed view type')}
         hideLabel
         value={view}
         onChange={setView}
         options={[
-          { value: 'wave', label: '파형' },
-          { value: 'spec', label: '스펙트럼' },
-          { value: 'sgram', label: '스펙트로그램' },
+          { value: 'wave', label: tx('파형', 'Waveform') },
+          { value: 'spec', label: tx('스펙트럼', 'Spectrum') },
+          { value: 'sgram', label: tx('스펙트로그램', 'Spectrogram') },
         ]}
       />
       <div className="card card-soft viz-help" aria-live="polite">
@@ -52,7 +53,7 @@ function Legend() {
     setC(readColors(document.documentElement));
   }, []);
   return (
-    <div className="viz-legend" aria-label="악기 색과 선 모양">
+    <div className="viz-legend" aria-label={tx('악기 색과 선 모양', 'Instrument colors and line styles')}>
       {INSTRUMENTS.map((id) => (
         <span key={id} className="viz-legend-item">
           <span
@@ -128,7 +129,7 @@ function WaveView({ on }: { on: Record<InstrumentId, boolean> }) {
   useAnimationFrame(draw, true);
   return (
     <div className="viz-canvas-box">
-      <canvas ref={ref} className="viz-canvas" role="img" aria-label="악기별 소리 크기 곡선. 선이 높을수록 큰 소리" />
+      <canvas ref={ref} className="viz-canvas" role="img" aria-label={tx('악기별 소리 크기 곡선. 선이 높을수록 큰 소리', 'Loudness curve for each instrument. A higher line means a louder sound')} />
     </div>
   );
 }
@@ -248,7 +249,7 @@ function SpectrumView({ on }: { on: Record<InstrumentId, boolean> }) {
         g.font = `700 14px ${FONT}`;
         g.textBaseline = 'top';
         g.fillStyle = col.body;
-        g.fillText(INSTRUMENT_SHORT[pn.id] + (isOn ? '' : ' (꺼짐)'), 6, y0 + 3);
+        g.fillText(INSTRUMENT_SHORT[pn.id] + (isOn ? '' : tx(' (꺼짐)', ' (off)')), 6, y0 + 3);
       }
       if (k > 0) {
         g.strokeStyle = col.hair;
@@ -265,20 +266,20 @@ function SpectrumView({ on }: { on: Record<InstrumentId, boolean> }) {
   return (
     <div className="viz-wrap">
       <Segmented
-        label="보기 범위"
+        label={tx('보기 범위', 'Show')}
         value={mode}
         onChange={setMode}
         options={[
-          { value: 'all', label: '전체' },
-          { value: 'each', label: '악기별' },
+          { value: 'all', label: tx('전체', 'All') },
+          { value: 'each', label: tx('악기별', 'By instrument') },
         ]}
       />
       <div className="viz-canvas-box">
-        <canvas ref={ref} className="viz-canvas" role="img" aria-label="소리 높이별 크기를 보여 주는 막대. 왼쪽 낮은 소리, 오른쪽 높은 소리" />
+        <canvas ref={ref} className="viz-canvas" role="img" aria-label={tx('소리 높이별 크기를 보여 주는 막대. 왼쪽 낮은 소리, 오른쪽 높은 소리', 'Bars showing how loud each pitch is. Low sounds on the left, high sounds on the right')} />
       </div>
       <div className="viz-axis" aria-hidden="true">
-        <span>낮은 소리</span>
-        <span>높은 소리</span>
+        <span>{tx('낮은 소리', 'Low sounds')}</span>
+        <span>{tx('높은 소리', 'High sounds')}</span>
       </div>
     </div>
   );
@@ -421,21 +422,21 @@ function SgramView() {
     <div className="viz-wrap">
       <div className="viz-sgram-row">
         <div className="viz-sgram-axis" aria-hidden="true">
-          <span>높은 소리</span>
-          <span>낮은 소리</span>
+          <span>{tx('높은 소리', 'High sounds')}</span>
+          <span>{tx('낮은 소리', 'Low sounds')}</span>
         </div>
         <div className="viz-canvas-box" style={{ background: '#0a0a14' }}>
           <canvas
             ref={ref}
             className="viz-canvas"
             role="img"
-            aria-label="시간에 따라 쌓이는 소리 높이 그림. 세로는 높이, 밝을수록 큰 소리"
+            aria-label={tx('시간에 따라 쌓이는 소리 높이 그림. 세로는 높이, 밝을수록 큰 소리', 'Picture of pitch building up over time. Up and down is pitch, brighter means louder')}
           />
         </div>
       </div>
       <div className="viz-axis" aria-hidden="true">
         <span />
-        <span>지금 →</span>
+        <span>{tx('지금 →', 'Now →')}</span>
       </div>
     </div>
   );
