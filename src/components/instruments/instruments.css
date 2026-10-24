@@ -78,6 +78,7 @@
   border: 2px solid var(--hairline-strong);
   color: var(--ink);
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: 56px; line-height: 1;
 }
 .is-compact .inst-blind-num { max-width: 56px; font-size: 30px; }

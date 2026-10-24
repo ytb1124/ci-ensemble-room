@@ -250,14 +250,14 @@ export function Lanes(p: { on: Record<InstrumentId, boolean>; pitchLines: boolea
           ref={ref}
           className="viz-canvas"
           role="img"
-          aria-label="합주 레인: 위에서부터 트럼펫, 베이스, 카혼. 원은 소리가 나는 순간"
+          aria-label="악기별 줄: 위에서부터 트럼펫, 피아노, 베이스, 카혼. 동그라미는 소리가 나는 순간"
         />
       </div>
       <div className="viz-legend">
-        <span>카혼 레인: 아래 = 베이스 톤, 위 = 슬랩 톤</span>
-        <span>세로선 = 지금 들리는 순간, 오른쪽이 앞으로 올 소리</span>
+        <span>카혼 줄: 아래는 가운데를 치는 '쿵', 위는 가장자리를 치는 '탁'</span>
+        <span>세로선은 지금 들리는 순간, 그 오른쪽은 곧 나올 소리</span>
       </div>
-      {p.pitchLines && (nullPitch || !hasPitch) && <p className="viz-note">피치 라인은 실제 녹음을 넣으면 보여요</p>}
+      {p.pitchLines && (nullPitch || !hasPitch) && <p className="viz-note">음높이 선은 실제 악기 녹음이 들어오면 보여요</p>}
     </div>
   );
 }

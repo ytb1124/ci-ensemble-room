@@ -29,7 +29,7 @@ function TopBar() {
           <rect x="31" y="14" width="5" height="27" rx="2.5" fill="#ffb084" />
           <path d="M36 14c8 2 12 6 12 12" stroke="#ffb084" strokeWidth="5" fill="none" strokeLinecap="round" />
         </svg>
-        합주실
+        인공와우 합주실
       </NavLink>
       {!minimal && (
         <nav aria-label="주 메뉴">

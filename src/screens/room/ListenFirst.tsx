@@ -4,11 +4,11 @@ import { logEvent } from '../../store/log';
 
 const STEPS = [
   { title: '① 소리만 듣기', text: '먼저 소리만 들어 보세요.', view: 'off' as const },
-  { title: '② 보며 듣기', text: '이번엔 그림과 함께 들어 보세요. 소리가 날 때 원이 커져요.', view: 'lanes' as const },
-  { title: '③ 다시 소리만', text: '다시 소리만. 아까 그림에서 본 것이 들리나요?', view: 'off' as const },
-  { title: '④ 한 줄 기록', text: '무엇이 들렸나요?', view: null },
+  { title: '② 보며 듣기', text: '이번에는 그림과 함께 들어 보세요. 소리가 날 때마다 동그라미가 커져요.', view: 'lanes' as const },
+  { title: '③ 다시 소리만 듣기', text: '다시 소리만 들어 보세요. 그림에서 본 것이 들리나요?', view: 'off' as const },
+  { title: '④ 들린 것 고르기', text: '무엇이 들렸나요?', view: null },
 ];
-const CHIPS = ['박', '높낮이', '악기 구분', '잘 모르겠어요'];
+const CHIPS = ['박자', '높낮이', '악기 구분', '잘 모르겠어요'];
 
 export function ListenFirst({ onView, onDone }: { onView: (v: 'off' | 'lanes') => void; onDone: () => void }) {
   const [step, setStep] = useState(0);

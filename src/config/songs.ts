@@ -55,7 +55,7 @@ export const SONGS: Record<SongId, SongConfig> = {
     lines: [
       { id: 'line1', label: '1줄', startBeat: 2, endBeat: 8 },
       { id: 'line2', label: '2줄', startBeat: 8, endBeat: 14 },
-      { id: 'line3', label: '3줄', startBeat: 14, endBeat: 20, note: '노래가 크게 올라가는 곳(옥타브 도약)' },
+      { id: 'line3', label: '3줄', startBeat: 14, endBeat: 20, note: '멜로디가 크게 뛰어오르는 곳(한 옥타브)' },
       { id: 'line4', label: '4줄', startBeat: 20, endBeat: 26 },
     ],
     calibLoopBeats: [3, 15],

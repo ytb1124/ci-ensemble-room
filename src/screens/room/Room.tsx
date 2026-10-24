@@ -30,10 +30,10 @@ let recalibPending = false;
 const CALIB_STEPS = ['듣기 환경', '편안한 크기', '좌우', '소리 색', '악기 섞기', '저음 도움'];
 
 const MOTIONS: { v: MotionLevel; label: string }[] = [
-  { v: 'off', label: '끄기' },
-  { v: 'calm', label: '차분' },
+  { v: 'off', label: '없음' },
+  { v: 'calm', label: '적게' },
   { v: 'normal', label: '보통' },
-  { v: 'vivid', label: '화려' },
+  { v: 'vivid', label: '많이' },
 ];
 
 export default function Room() {
@@ -173,7 +173,7 @@ function RoomInner({ song }: { song: SongId }) {
 
   const changeMode = (m: RoomMode) => {
     setMode(m);
-    setLive(m === 'solo' ? '골라 듣기: 누른 악기만 들려요' : '빼고 듣기: 누른 악기를 켜고 꺼요');
+    setLive(m === 'solo' ? '골라 듣기: 누른 악기만 들려요' : '빼고 듣기: 누른 악기를 끄거나 켜요');
   };
 
   const toggleBlind = (v: boolean) => {
@@ -227,7 +227,7 @@ function RoomInner({ song }: { song: SongId }) {
         label="보기"
         value={view}
         onChange={(v) => setView(v)}
-        options={[{ value: 'off', label: '끔' }, { value: 'lanes', label: '레인' }, { value: 'explore', label: '탐색' }]}
+        options={[{ value: 'off', label: '끔' }, { value: 'lanes', label: '악기별' }, { value: 'explore', label: '자세히' }]}
       />
       <label className="row" style={{ gap: 8 }}>
         <span className="small" style={{ fontWeight: 600 }}>움직임</span>
@@ -258,7 +258,7 @@ function RoomInner({ song }: { song: SongId }) {
           </button>
           <h1>{SONGS[song].title}</h1>
           <button type="button" className="btn btn-sm" aria-expanded={showCalib} onClick={() => setShowCalib(!showCalib)}>
-            <Icon name="sliders" size={18} />처음 설정
+            <Icon name="sliders" size={18} />소리 맞추기
           </button>
         </header>
 
@@ -273,7 +273,7 @@ function RoomInner({ song }: { song: SongId }) {
           </div>
         )}
         {showCalib && (
-          <div className="card stack" role="group" aria-label="처음 설정 단계">
+          <div className="card stack" role="group" aria-label="소리 맞추기 단계">
             <p style={{ margin: 0 }}>다시 맞출 단계를 골라 주세요.</p>
             <div className="row">
               {CALIB_STEPS.map((label, i) => (
@@ -308,7 +308,7 @@ function RoomInner({ song }: { song: SongId }) {
         )}
 
         <Segmented<RoomMode>
-          label="모드"
+          label="듣는 방식"
           value={mode}
           onChange={changeMode}
           options={[{ value: 'solo', label: '골라 듣기' }, { value: 'toggle', label: '빼고 듣기' }]}
@@ -339,8 +339,8 @@ function RoomInner({ song }: { song: SongId }) {
 
         {blind && !revealed && (
           <div className="card card-soft row" role="note" style={{ justifyContent: 'space-between' }}>
-            <p>그림 없이 맞혀 보는 중이라 그림을 잠시 숨겼어요. 들어 보고 [공개]를 눌러 정답을 확인하세요.</p>
-            <button type="button" className="btn btn-primary" onClick={() => { setRevealed(true); logEvent({ type: 'blind', value: 'reveal' }); }}>공개</button>
+            <p>악기 그림과 이름을 잠시 가렸어요. 어떤 악기인지 들어 보고 [이름 보기]를 눌러 확인해 보세요.</p>
+            <button type="button" className="btn btn-primary" onClick={() => { setRevealed(true); logEvent({ type: 'blind', value: 'reveal' }); }}>이름 보기</button>
           </div>
         )}
         {view !== 'off' && !(blind && !revealed) && (
@@ -358,7 +358,7 @@ function RoomInner({ song }: { song: SongId }) {
           ) : (
             <div className="card card-soft stack" role="region" aria-label="화면과 소리 맞추기 제안">
               <h3>화면과 소리를 맞춰 볼까요? (30초)</h3>
-              <p>그림이 소리보다 늦거나 빠르면 맞출 수 있어요. 맞추는 동안 음악은 잠시 멈춰요.</p>
+              <p>그림이 소리보다 늦거나 빠르게 움직이면 맞출 수 있어요. 맞추는 동안 음악은 잠시 멈춰요.</p>
               <div className="row">
                 <button type="button" className="btn btn-primary" onClick={() => setSyncOpen(true)}>맞추기</button>
                 <button type="button" className="btn" onClick={() => { syncCardDismissed = true; setShowSync(false); }}>나중에</button>
@@ -376,11 +376,11 @@ function RoomInner({ song }: { song: SongId }) {
 
         <div className="row">
           <Link className="btn btn-block" to={probeTarget}>
-            {probeTarget === '/report' ? '리포트 보기' : '잠깐 질문 하러 가기 (4–5분)'}
+            {probeTarget === '/report' ? '나의 청취 단서 보기' : '잠깐 질문 하러 가기 (4–5분)'}
             <Icon name="chevronRight" size={18} />
           </Link>
           {sets.includes(1) && sets.includes(2) && (
-            <Link className="btn btn-sm btn-ghost" to="/probe/set1">질문 다시 보기</Link>
+            <Link className="btn btn-sm btn-ghost" to="/probe/set1">잠깐 질문 다시 하기</Link>
           )}
         </div>
       </div>

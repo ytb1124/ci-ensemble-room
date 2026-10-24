@@ -12,7 +12,7 @@ export default function Reflection({ onSubmit }: { onSubmit: (chips: ChipId[], t
     <div className="stack-lg">
       <h1 style={{ margin: 0, fontSize: 24 }}>마지막 질문이에요</h1>
       <p className="lead" style={{ margin: 0 }}>
-        오늘 합주실에서 소리를 구별할 때 무엇에 가장 기대었나요? 하나만 골라도 되고, 한 줄로 설명해 주시면 나중에 다시 볼 수 있어요.
+        오늘 소리를 구별할 때 무엇에 가장 기댔나요? 고르기만 해도 되고, 한 줄로 적어도 돼요. 적은 내용은 나중에 다시 볼 수 있어요.
       </p>
       <div className="probe-chips" role="group" aria-label="기댄 것">
         {REFLECTION_CHIPS.map((c) => (
@@ -22,7 +22,7 @@ export default function Reflection({ onSubmit }: { onSubmit: (chips: ChipId[], t
         ))}
       </div>
       <div className="stack" style={{ gap: 8 }}>
-        <label htmlFor="probe-refl" className="probe-q">한 줄 설명 (선택)</label>
+        <label htmlFor="probe-refl" className="probe-q">한 줄로 적기 (선택)</label>
         <input id="probe-refl" className="input" maxLength={200} value={text} onChange={(e) => setText(e.target.value)} />
       </div>
       <div className="probe-actions">

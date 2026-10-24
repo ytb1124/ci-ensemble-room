@@ -55,12 +55,12 @@ export default function Report() {
         <h1>나의 청취 단서</h1>
         <div className="card card-tone lavender stack" style={{ gap: 8 }}>
           <p>
-            이 화면은 점수가 아니라 <strong>이번 세션의 경향</strong>이에요. 연구에서는 수백 쌍을 들어야 단서를 가늠하는데, 여기서는
+            이 화면은 점수가 아니라 <strong>이번에 들은 결과의 경향</strong>이에요. 연구에서는 소리를 수백 쌍 들어야 단서를 가늠하는데, 여기서는
             몇 문항만 들었어요. 다른 날 다시 해 보면 달라질 수 있고, 그것도 자연스러운 일이에요.
           </p>
           {data.hasResponses && (
             <p className="small">
-              지금까지 {data.counts.total}개 질문에 답하셨어요
+              지금까지 질문 {data.counts.total}개에 답했어요
               {data.counts.skipped > 0 ? ` (넘어간 질문 ${data.counts.skipped}개)` : ''}.
             </p>
           )}
@@ -70,9 +70,9 @@ export default function Report() {
 
       {!data.hasResponses && (
         <section className="card stack" aria-labelledby="rep-empty">
-          <h2 id="rep-empty">아직 답하신 질문이 없어요</h2>
+          <h2 id="rep-empty">아직 답한 질문이 없어요</h2>
           <p>
-            합주실에서 곡을 들어 본 뒤 몇 가지 잠깐 질문에 답하면, 여기에 느낀 것·고른 것·말한 것이 나란히 모여요. 정답은 없어요.
+            합주실에서 곡을 들어 보고 잠깐 질문에 답하면, 여기에 내가 느낀 것·고른 것·말한 것이 나란히 모여요. 정답은 없어요.
           </p>
           <div className="row">
             <Link to="/probe/set1" className="btn btn-primary btn-lg">잠깐 질문 하러 가기</Link>
@@ -86,11 +86,11 @@ export default function Report() {
           <section className="stack" aria-labelledby="rep-cues">
             <h2 id="rep-cues">단서별로 나란히 보기</h2>
             <p className="small muted">
-              수치나 순위는 없어요. "느낀 것"은 두 소리가 얼마나 달랐는지, "고른 것"은 어느 쪽이 더 또렷했는지, "말한 것"은 구별할 때
-              무엇에 기댔다고 말했는지예요.
+              점수나 순위는 없어요. "느낀 것"은 두 소리가 얼마나 다르게 느껴졌는지, "고른 것"은 어느 쪽을 더 또렷하다고 골랐는지, "말한 것"은 구별할 때
+              무엇에 기댔다고 답했는지예요.
             </p>
             {data.ref.n === 0 && (
-              <p className="small">원본끼리 비교한 질문이 없어서, 기준 없이 평정만 보여 드려요.</p>
+              <p className="small">원본끼리 비교한 질문이 없어서, 기준 없이 표시한 값만 보여 드려요.</p>
             )}
             {data.cues.map((c) => (
               <CueCard key={c.id} cue={c} revealed={revealed} refCaution={data.ref.caution} openRequest={openRequest} />
@@ -138,7 +138,7 @@ export default function Report() {
 
       {data.hasResponses && reflections.length > 0 && (
         <section className="stack" aria-labelledby="rep-say">
-          <h2 id="rep-say">말씀하신 것</h2>
+          <h2 id="rep-say">직접 적은 것</h2>
           {reflections.map((r) => (
             <div key={r.set} className="card card-soft">
               <ReflectionRevise reflection={r} />
@@ -149,9 +149,9 @@ export default function Report() {
 
       {data.consistency.length > 0 && (
         <section className="stack" aria-labelledby="rep-consist">
-          <h2 id="rep-consist">나의 일관성</h2>
+          <h2 id="rep-consist">같은 소리를 다시 들었을 때</h2>
           <p className="small muted">
-            같은 두 소리를 다시 들었을 때 평정이 어땠는지 돌려드리는 정보예요. 좋고 나쁨을 뜻하지 않아요.
+            같은 두 소리를 한 번 더 들었을 때 표시가 얼마나 비슷했는지 보여 드려요. 좋고 나쁨을 뜻하지 않아요.
           </p>
           <ul className="rep-list">
             {data.consistency.map((c, i) => (
@@ -165,7 +165,7 @@ export default function Report() {
 
       {data.hasResponses && (
         <section className="stack" aria-labelledby="rep-reveal">
-          <h2 id="rep-reveal">각 질문에서 무엇을 바꿨는지</h2>
+          <h2 id="rep-reveal">질문마다 바꾼 소리</h2>
           {revealed && reveal.length > 0 ? (
             <div className="card" style={{ overflowX: 'auto' }}>
               <table className="rep-table">
@@ -191,7 +191,7 @@ export default function Report() {
             </div>
           ) : (
             <p className="card card-soft">
-              어떤 소리를 바꿨는지는 세트를 끝낸 뒤에 알려 드려요. 중간에 알면 다음 답이 달라질 수 있어서예요.
+              어떤 소리를 바꿨는지는 세트를 끝낸 뒤에 알려 드려요. 미리 알면 답이 달라질 수 있어서예요.
             </p>
           )}
         </section>
@@ -217,7 +217,7 @@ export default function Report() {
             </div>
           )}
           <div>
-            <Link to="/settings" className="btn btn-sm"><Icon name="sliders" size={20} /> 처음 설정 바꾸기</Link>
+            <Link to="/settings" className="btn btn-sm"><Icon name="sliders" size={20} /> 소리 맞추기 다시 하기</Link>
           </div>
         </div>
       </section>
@@ -229,7 +229,7 @@ export default function Report() {
           <div>
             {data.next.kind === 'shaky' && data.next.cue ? (
               <button type="button" className="btn btn-primary" onClick={() => goCue(data.next.cue!)}>
-                해당 카드로 가서 다시 듣기
+                그 카드로 가서 다시 듣기
               </button>
             ) : (
               <Link to={data.next.href ?? '/probe/set2'} className="btn btn-primary">
@@ -241,7 +241,7 @@ export default function Report() {
       )}
 
       <section className="stack" aria-labelledby="rep-actions">
-        <h2 id="rep-actions">이어서</h2>
+        <h2 id="rep-actions">이어서 하기</h2>
         <div className="row">
           <Link to={`/probe/set${nextSet}`} className="btn btn-lg">
             <Icon name="refresh" /> 다시 해 보기 (세트 {nextSet})
@@ -256,7 +256,7 @@ export default function Report() {
           <summary id="rep-how">이 결과는 어떻게 만들었나요?</summary>
           <div className="stack" style={{ marginTop: 12 }}>
             <p className="small muted">
-              아래 기준값(예: {RULES.feelSome}, {RULES.feelBig}, {RULES.shaky})은 모두 설계할 때 정한 값이고, 근거가 있는 값이 아니에요.
+              아래 기준값(예: {RULES.feelSome}, {RULES.feelBig}, {RULES.shaky})은 모두 설계하면서 정한 값이에요. 연구로 확인된 값은 아니에요.
             </p>
             <h3>규칙</h3>
             <ul className="rep-list">

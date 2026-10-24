@@ -83,7 +83,7 @@ export default function ProbeA({
     <div className="stack-lg">
       <ProgressBar index={index} total={total} title={practice ? '연습' : undefined} />
       {practice && <p className="small" style={{ margin: 0 }}>연습이에요. 저장하지 않아요.</p>}
-      <p style={{ margin: 0 }}>두 소리를 원하는 만큼 들어 보세요. 정답은 없어요. 느낀 만큼만 표시해 주세요.</p>
+      <p style={{ margin: 0 }}>두 소리를 원하는 만큼 들어 보세요. 정답은 없으니 느낀 만큼만 표시해 주세요.</p>
       {error && <p role="alert" style={{ margin: 0 }}>소리를 준비하지 못했어요. [넘어가기]를 눌러 주세요.</p>}
       {!bufs && !error && <p style={{ margin: 0 }} role="status">소리를 준비하고 있어요…</p>}
       <div className="probe-listen-row">
@@ -111,7 +111,7 @@ export default function ProbeA({
             setTouched(true);
           }}
         />
-        <p className="small" style={{ margin: 0 }}>손잡이는 아무 곳에서나 시작해요. 한 번 움직이거나 [이대로 좋아요]를 눌러 주세요.</p>
+        <p className="small" style={{ margin: 0 }}>손잡이의 처음 위치는 매번 달라요. 한 번 움직이거나 [이대로 좋아요]를 눌러 주세요.</p>
         <div>
           <button type="button" className={`btn${touched ? ' is-selected' : ''}`} aria-pressed={touched} onClick={() => setTouched(true)}>
             {touched ? '표시했어요' : '이대로 좋아요'}

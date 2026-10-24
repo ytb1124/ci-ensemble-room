@@ -43,22 +43,22 @@ export const RULES = {
 
 /** 화면에 그대로 보여 줄 규칙 문장 */
 export const RULE_TEXT: string[] = [
-  `느낀 차이: 원본끼리 비교한 기준 쌍의 평정 평균이 "기준값"이에요. 단서값 = 그 단서를 바꾼 소리의 평정 평균 − 기준값 (0보다 작으면 0). 단서값이 ${RULES.feelBig} 이상이면 "크게 느낌", ${RULES.feelSome}–${RULES.feelBig - 1}이면 "조금 느낌", ${RULES.feelSome} 미만이면 "거의 못 느낌"이라고 말해요. 건너뛴 문항은 빼요.`,
-  `흔들림: 같은 단서의 두 평정이 ${RULES.shaky} 이상 차이 나면 "아직 흔들려요"라고 적어요. 한 번만 들은 단서는 "한 번만 들었어요"라고 적어요.`,
+  `느낀 차이: 원본끼리 비교한 기준 쌍에 표시한 값의 평균이 "기준값"이에요. 단서값 = 그 단서를 바꾼 소리에 표시한 값의 평균 − 기준값 (0보다 작으면 0). 단서값이 ${RULES.feelBig} 이상이면 "크게 느낌", ${RULES.feelSome}–${RULES.feelBig - 1}이면 "조금 느낌", ${RULES.feelSome} 미만이면 "거의 못 느낌"이라고 말해요. 건너뛴 문항은 빼요.`,
+  `흔들림: 같은 단서에 표시한 두 값이 ${RULES.shaky} 이상 차이 나면 "아직 흔들려요"라고 적어요. 한 번만 들은 단서는 "한 번만 들었어요"라고 적어요.`,
   `주의문: 기준값이 ${RULES.refCaution} 이상이면 "차이가 없을 때도 다르다고 느끼는 편이에요. 값을 조심해서 보세요."를 보여 줘요.`,
-  `일관성: 같은 두 소리를 다시 들은 두 평정의 차이가 ${RULES.consistSame} 미만이면 "비슷하게", ${RULES.consistSame}–${RULES.consistDiff - 1}이면 "조금 달랐어요", ${RULES.consistDiff} 이상이면 "꽤 달랐어요"라고 적어요. 좋고 나쁨을 말하지 않아요.`,
-  '고른 것: 단서마다 그 단서를 강조한 소리를 "더 또렷해요"로 고른 횟수를, 그 단서가 나온 쌍의 수와 함께 보여 줘요. 확신도는 확실해요(진하게)·조금·잘 모르겠어요(연하게)로 따로 적어요. "더 좋은 쪽"이 "더 또렷한 쪽"과 다르면 "또렷함과 좋음이 달랐어요"라고 따로 적어요.',
-  '말한 것: 단서별 칩은 질문 직후에 고른 칩과 끝 성찰 칩을 합쳐 센 횟수예요. 한 줄 설명은 그대로 인용해요.',
+  `다시 들었을 때: 같은 두 소리를 다시 들었을 때 표시한 두 값의 차이가 ${RULES.consistSame} 미만이면 "비슷하게", ${RULES.consistSame}–${RULES.consistDiff - 1}이면 "조금 달랐어요", ${RULES.consistDiff} 이상이면 "꽤 달랐어요"라고 적어요. 좋고 나쁨을 말하지 않아요.`,
+  '고른 것: 단서마다 그 단서를 강조한 소리를 "더 또렷해요"로 고른 횟수를, 그 단서가 나온 쌍의 수와 함께 보여 줘요. 확신도는 확실해요(진하게)·조금·잘 모르겠어요(연하게)로 따로 적어요. "더 좋은 쪽"이 "더 또렷한 쪽"과 다르면 "더 또렷한 쪽과 더 좋은 쪽이 달랐어요"라고 따로 적어요.',
+  '말한 것: 질문마다 고른 칩과 마지막 질문에서 고른 칩을 단서별로 합쳐 센 횟수예요. 한 줄로 적은 내용은 그대로 옮겨요.',
   '한 것: 합주실 기록에서 악기 이름으로만 말해요. 기록을 단서로 바꾸지 않아요(타악을 키운 것이 리듬 때문인지 멜로디가 안 들려서인지 알 수 없어요).',
   `일치·엇갈림 문장: ①크게 느낌 ②선택 ${RULES.pickMin}회 이상 ③칩 ${RULES.chipMany}회 이상, 이 세 가지 중 2개 이상이 같은 단서를 가리키면 "같은 방향", 크게 느꼈는데 칩·선택에 한 번도 없으면 "흥미로운 차이", 칩은 많은데 거의 못 느꼈으면 "다른 단서가 섞였을 수 있어요"라고 적어요. 최대 ${RULES.maxSentences}개예요.`,
-  '다음에 해 볼 것: "아직 흔들려요" 단서가 있으면 그 질문 다시 듣기, 없으면 엇갈림이 있는 단서의 안내 카드, 둘 다 없으면 세트 2 해 보기 순서로 하나만 골라요.',
+  '다음에 해 볼 것: "아직 흔들려요" 단서가 있으면 그 질문 다시 듣기, 없으면 엇갈린 단서의 안내 카드, 둘 다 없으면 세트 2 해 보기 순으로 하나만 골라요.',
 ];
 
 /** 6.5절 한계 요약 */
 export const LIMIT_TEXT: string[] = [
   '연구에서는 단서를 가늠하려고 수백 쌍을 들었어요. 여기서는 단서당 두세 번만 들었어요. 이 정도로 개인의 단서를 믿을 만하게 알 수 있는지는 확인된 적이 없어요.',
   '내가 말한 것과 실제로 쓴 단서가 얼마나 일치하는지도 인공와우 음악에서는 연구된 적이 없어요.',
-  '일관성은 "같은 소리를 다시 들었을 때 어땠는지"를 돌려드리는 정보예요. 단서 결과가 믿을 만하다는 보증은 아니에요.',
+  '"같은 소리를 다시 들었을 때"는 표시가 얼마나 비슷했는지 보여 줄 뿐이에요. 단서 결과가 믿을 만하다는 보증은 아니에요.',
   '바꾼 소리의 처리 강도에 따라 결과가 달라져요. 너무 약하게 바꾼 단서는 "거의 못 느낌"으로 나올 수 있고, 그건 내 귀 때문이 아닐 수 있어요. 무엇을 얼마나 바꿨는지는 아래 표와 내보내기 파일에 적어 두었어요.',
 ];
 
@@ -251,9 +251,9 @@ function consistencyLevel(diff: number): ConsistencyItem['level'] {
   return diff < RULES.consistSame ? 'same' : diff < RULES.consistDiff ? 'little' : 'quite';
 }
 const CONSIST_TEXT: Record<ConsistencyItem['level'], string> = {
-  same: '이 두 소리를 두 번 모두 비슷하게 평정하셨어요',
-  little: '두 번의 평정이 조금 달랐어요',
-  quite: '두 번의 평정이 꽤 달랐어요. 그날 컨디션이나 듣는 순서에 따라 달라질 수 있어요',
+  same: '두 번 모두 비슷하게 표시했어요',
+  little: '두 번의 표시가 조금 달랐어요',
+  quite: '두 번의 표시가 꽤 달랐어요. 그날 컨디션이나 듣는 순서에 따라 달라질 수 있어요',
 };
 function cueName(c: CueId | 'ref'): string {
   if (c === 'ref') return '원본끼리 비교';
@@ -299,13 +299,13 @@ function buildLogFacts(events: LogEvent[]): LogFacts {
     parts.push({ lead: name, rest: `${josa(name, '을', '를').slice(name.length)} ${tail}` });
   };
   const solo = topBy(s.soloSeconds, 1);
-  if (solo && s.soloSeconds[solo] >= RULES.soloMinSec) add(solo, '가장 오래 혼자 들으셨어요(추정).');
+  if (solo && s.soloSeconds[solo] >= RULES.soloMinSec) add(solo, '가장 오래 혼자 들었어요.');
   const up = topBy(s.netGainDb, 1);
-  if (up) add(up, '가장 많이 키우셨어요(추정).');
+  if (up) add(up, '가장 많이 키웠어요.');
   const down = topBy(s.netGainDb, -1);
-  if (down) add(down, '가장 많이 줄이셨어요(추정).');
+  if (down) add(down, '가장 많이 줄였어요.');
   const alt = topBy(s.alternateCount, 1);
-  if (alt) add(alt, '번갈아 가며 가장 많이 들으셨어요(추정).');
+  if (alt) add(alt, '가장 많이 켰다 껐다 하며 들었어요.');
   return { lines: parts.map((p) => p.lead + p.rest), parts, any: parts.length > 0 };
 }
 
@@ -321,14 +321,14 @@ function buildSentences(cues: CueSummary[], log: LogFacts): ReportSentence[] {
         kind: 'agree',
         cue: c.id,
         lead: c.shortName,
-        rest: `${josa(c.shortName, '은', '는').slice(c.shortName.length)} 여러 방법에서 같은 방향으로 나왔어요. 이번 세션에서 나에게 두드러진 단서였던 것 같아요.`,
+        rest: `${josa(c.shortName, '은', '는').slice(c.shortName.length)} 여러 방법에서 같은 방향으로 나왔어요. 이번에는 나에게 두드러진 단서였던 것 같아요.`,
       });
     } else if (c.sources.feelBig && c.say.chipCount === 0 && c.pick.chosen === 0) {
       differBig.push({
         kind: 'differ',
         cue: c.id,
         lead: c.shortName,
-        rest: ' 변화는 크게 느끼셨는데, 구별할 때 쓴 단서로는 고르지 않으셨어요. 흥미로운 차이예요. 다시 들어 볼까요?',
+        rest: ' 변화는 크게 느꼈는데, 구별할 때 쓴 단서로는 고르지 않았어요. 흥미로운 차이예요. 다시 들어 볼까요?',
       });
     }
     if (c.say.chipCount >= RULES.chipMany && c.feel.level === 'none') {
@@ -336,7 +336,7 @@ function buildSentences(cues: CueSummary[], log: LogFacts): ReportSentence[] {
         kind: 'differ',
         cue: c.id,
         lead: c.shortName,
-        rest: `${josa(c.shortName, '을', '를').slice(c.shortName.length)} 자주 말씀하셨지만, ${c.shortName}만 바꾼 버전은 원곡과 거의 같다고 느끼셨어요. 다른 단서가 ${c.shortName}처럼 느껴졌을 수도 있어요.`,
+        rest: `${josa(c.shortName, '을', '를').slice(c.shortName.length)} 자주 골랐지만, ${c.shortName}만 바꾼 소리는 원본과 거의 같다고 느꼈어요. 다른 단서가 ${c.shortName}처럼 느껴졌을 수도 있어요.`,
       });
     }
   }
@@ -357,7 +357,7 @@ function buildNext(cues: CueSummary[]): NextStep {
   if (differ) {
     return { kind: 'differ', cue: differ.id, text: `합주실에서 "${differ.label}"${withParticle(differ.label)} 관련된 안내 카드 열기`, href: '/room/hbd' };
   }
-  return { kind: 'set2', text: '곡 2에서 같은 질문 해 보기(세트 2)', href: '/probe/set2' };
+  return { kind: 'set2', text: '곡 2로 같은 질문 해 보기(세트 2)', href: '/probe/set2' };
 }
 
 // ───────── 공개 표 ─────────
@@ -450,38 +450,38 @@ export function reflectionAsText(r: Reflection): string {
 const CONFIG_LABEL: Record<string, string> = {
   bilateral: '양쪽 인공와우',
   unilateral: '한쪽 인공와우',
-  bimodal: '인공와우 + 보청기',
-  ssd: '인공와우 + 반대쪽 자연 청력',
+  bimodal: '인공와우 + 반대쪽 보청기',
+  ssd: '인공와우 + 반대쪽은 잘 들림',
   unknown: '잘 모르겠어요',
 };
 const ROUTE_LABEL: Record<string, string> = {
-  direct: '프로세서로 바로',
+  direct: '프로세서에 직접 연결',
   speaker: '스피커',
-  headphones: '헤드폰',
+  headphones: '이어폰·헤드폰',
 };
-const ASSIST_LABEL: Record<string, string> = { none: '쓰지 않아요', boost: '저음 강조', octaveUp: '베이스를 높게 겹쳐 듣기' };
+const ASSIST_LABEL: Record<string, string> = { none: '원래 소리', boost: '저음 키우기', octaveUp: '베이스를 높게 겹쳐 듣기' };
 const SIGNED = (v: number) => `${v > 0 ? '+' : ''}${v} dB`;
 
 export function profileLines(p: Profile): { label: string; value: string }[] {
   const none = '아직 정하지 않았어요';
   const bal = p.balance === -1 ? '왼쪽' : p.balance === 1 ? '오른쪽' : '가운데';
   return [
-    { label: '듣는 환경', value: p.config ? CONFIG_LABEL[p.config] ?? p.config : none },
-    { label: '듣는 경로', value: p.route ? ROUTE_LABEL[p.route] ?? p.route : none },
-    { label: '앱 안 소리 크기', value: SIGNED(p.masterGainDb) },
+    { label: '듣기 환경', value: p.config ? CONFIG_LABEL[p.config] ?? p.config : none },
+    { label: '듣는 방법', value: p.route ? ROUTE_LABEL[p.route] ?? p.route : none },
+    { label: '앱 음량', value: SIGNED(p.masterGainDb) },
     { label: '좌우', value: p.stereo ? `스테레오(${bal}${p.spread ? ', 넓게 펼침' : ''})` : '양쪽에 같은 소리(모노)' },
-    { label: '저음', value: p.eqLowDb ? `${SIGNED(p.eqLowDb)} 더` : '원래대로' },
-    { label: '또렷함', value: p.eqMidDb ? `${SIGNED(p.eqMidDb)} 더(${p.eqMidHz} Hz 근처)` : '원래대로' },
+    { label: '저음', value: p.eqLowDb ? `${SIGNED(p.eqLowDb)} 더` : '원래 소리' },
+    { label: '또렷함', value: p.eqMidDb ? `${SIGNED(p.eqMidDb)} 더(${p.eqMidHz} Hz 근처)` : '원래 소리' },
     { label: '악기 섞기', value: INSTRUMENTS.map((i) => `${INSTRUMENT_LABEL[i]} ${SIGNED(p.instGainDb[i])}`).join(' · ') },
     { label: '저음 도움', value: ASSIST_LABEL[p.bassAssist] ?? p.bassAssist },
   ];
 }
 
 const HISTORY_KEY_LABEL: Record<string, string> = {
-  config: '듣는 환경',
-  route: '듣는 경로',
-  maker: '기기 제조사',
-  masterGainDb: '앱 안 소리 크기',
+  config: '듣기 환경',
+  route: '듣는 방법',
+  maker: '인공와우 회사',
+  masterGainDb: '앱 음량',
   stereo: '모노/스테레오',
   balance: '좌우',
   spread: '넓게 펼침',
@@ -489,9 +489,9 @@ const HISTORY_KEY_LABEL: Record<string, string> = {
   eqMidDb: '또렷함',
   eqMidHz: '또렷함 대역',
   instGainDb: '악기 섞기',
-  allowPlus12: '+12 dB 허용',
+  allowPlus12: '더 크게 키울 수 있게(+12 dB)',
   bassAssist: '저음 도움',
-  bassVizEmphasis: '저음 그림 강조',
+  bassVizEmphasis: '그림에서 베이스 박자 강조',
   soloLoudnessMatch: '혼자 들어도 같은 크기로',
   songOverrides: '곡별 섞기',
 };

@@ -18,8 +18,8 @@ const QUESTIONS: Q[] = [
     options: [
       ['bilateral', '양쪽 인공와우'],
       ['unilateral', '한쪽 인공와우'],
-      ['bimodal', '인공와우 + 다른 쪽 보청기'],
-      ['ssd', '인공와우 + 다른 쪽은 잘 들림'],
+      ['bimodal', '인공와우 + 반대쪽 보청기'],
+      ['ssd', '인공와우 + 반대쪽은 잘 들림'],
       ['unknown', '잘 모르겠어요'],
     ],
   },
@@ -31,7 +31,7 @@ const QUESTIONS: Q[] = [
   },
   { key: 'maker', title: '인공와우 회사', options: [['cochlear', '코클리어'], ['medel', '메드엘'], ['ab', '어드밴스드 바이오닉스'], ['oticon', '오티콘'], ['unknown', '잘 모르겠어요']] },
   { key: 'music', title: '음악 경험', options: [['none', '배운 적 없어요'], ['some', '조금 배웠어요'], ['regular', '꾸준히 하거나 했어요']] },
-  { key: 'route', title: '이 앱을 주로 듣는 방법', options: [['direct', '직접 연결(블루투스·선)'], ['speaker', '스피커'], ['headphones', '헤드폰']] },
+  { key: 'route', title: '이 앱을 주로 듣는 방법', options: [['direct', '프로세서에 직접 연결'], ['speaker', '스피커'], ['headphones', '이어폰·헤드폰']] },
 ];
 
 export default function Join() {
@@ -85,9 +85,9 @@ export default function Join() {
         <section className="card stack" aria-labelledby="join-what">
           <h2 id="join-what" style={{ margin: 0 }}>무엇을 모으나요?</h2>
           <ul className="stack" style={{ margin: 0, paddingLeft: 20, gap: 6 }}>
-            <li>처음 설정에서 고른 소리(크기, 소리 색, 저음 도움 등)</li>
-            <li>합주실에서 누른 기록(골라 듣기, 빼고 듣기, 크기 조절)</li>
-            <li>잠깐 질문에 고른 답</li>
+            <li>소리 맞추기에서 고른 값(크기, 소리 색, 저음 도움 등)</li>
+            <li>합주실에서 누른 기록(골라 듣기, 빼고 듣기, 크기 바꾸기)</li>
+            <li>잠깐 질문의 답</li>
             <li>아래 배경 질문의 답(인공와우 사용 정보 포함)</li>
           </ul>
           <p style={{ margin: 0 }}>참여하기 전에 이 기기에 쌓인 기록도 함께 보내요.</p>
@@ -95,7 +95,7 @@ export default function Join() {
           <p style={{ margin: 0 }}>이름, 연락처, 이메일, 목소리 녹음은 받지 않아요. 무작위 번호로만 구분해요.</p>
           <h2 style={{ margin: 0 }}>보관과 그만두기</h2>
           <p style={{ margin: 0 }}>
-            연구팀 서버에 보관하고, 연구에만 써요. {RETENTION_TEXT} 언제든 [설정 → 연구 참여]에서 그만두면 보낸 기록이 모두 지워져요.
+            연구팀 서버에 보관하고, 연구에만 써요. {RETENTION_TEXT} [설정 → 연구 참여]에서 언제든 그만둘 수 있고, 그만두면 보낸 기록이 모두 지워져요.
           </p>
         </section>
       )}
@@ -103,7 +103,7 @@ export default function Join() {
       <section className="card stack-lg" aria-labelledby="join-survey">
         <div className="stack" style={{ gap: 4 }}>
           <h2 id="join-survey" style={{ margin: 0 }}>배경 질문 (1분)</h2>
-          <p className="small muted" style={{ margin: 0 }}>답하고 싶지 않은 질문은 건너뛰어도 돼요. 다시 누르면 선택이 풀려요.</p>
+          <p className="small muted" style={{ margin: 0 }}>답하고 싶지 않은 질문은 건너뛰어도 돼요. 고른 답을 한 번 더 누르면 선택이 풀려요.</p>
         </div>
         {QUESTIONS.map((q) => (
           <div className="stack" key={q.key} role="group" aria-label={q.title} style={{ gap: 8 }}>

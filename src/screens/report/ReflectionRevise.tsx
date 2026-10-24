@@ -39,12 +39,12 @@ export function ReflectionRevise({ reflection }: { reflection: Reflection }) {
       ) : (
         <p className="rep-quote">{original ? `"${original}"` : '적은 설명이 없어요.'}</p>
       )}
-      {revised && <p className="small muted">바뀐 단서 단어는 굵게 보여요. 어느 쪽이 맞다는 뜻은 아니에요.</p>}
+      {revised && <p className="small muted">바뀐 단서 낱말은 굵게 표시했어요. 어느 쪽이 맞다는 뜻은 아니에요.</p>}
 
       {mode === 'idle' && !revised && (
         <>
           <p>
-            {hasText ? '아까 이렇게 적으셨어요.' : '아까 이 칩을 고르셨어요.'} 방금 각 질문에서 무엇을 바꿨는지 보셨어요. 지금 보니
+            {hasText ? '아까 이렇게 적었어요.' : '아까 이 칩을 골랐어요.'} 방금 질문마다 바꾼 소리를 확인했어요. 지금 보니
             고치거나 덧붙이고 싶은 곳이 있나요?
           </p>
           <div className="row">

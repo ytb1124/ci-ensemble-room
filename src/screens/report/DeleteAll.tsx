@@ -10,7 +10,7 @@ export function DeleteAll() {
   if (done) {
     return (
       <p role="status" style={{ fontWeight: 600 }}>
-        이 기기에 있던 설정, 기록, 응답을 모두 지웠어요.
+        이 기기에 있던 설정, 기록, 답을 모두 지웠어요.
       </p>
     );
   }
@@ -26,8 +26,8 @@ export function DeleteAll() {
       <h3 id="set-del-title">{step === 1 ? '모두 지울까요?' : '마지막으로 확인해요'}</h3>
       <p>
         {step === 1
-          ? '처음 설정, 합주실 기록, 단서 질문 응답, 결과 기록이 이 기기에서 지워져요.'
-          : '지우면 되돌릴 수 없어요. 필요하면 먼저 내보내기를 해 두세요.'}
+          ? '소리 맞추기 설정, 합주실 기록, 잠깐 질문의 답, 나의 청취 단서가 이 기기에서 지워져요.'
+          : '지우면 되돌릴 수 없어요. 필요하면 먼저 [내보내기]로 파일을 받아 두세요.'}
       </p>
       <div className="row">
         <button type="button" className="btn btn-primary" autoFocus onClick={() => setStep(0)}>

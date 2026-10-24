@@ -26,7 +26,7 @@ export function SoundOnButton({ onDone, label = '소리 켜기' }: { onDone?: ()
         {busy ? '켜는 중…' : label}
       </button>
       <p className="small muted" style={{ textAlign: 'center' }}>
-        아이폰은 옆면 무음 스위치를 꺼 주세요.
+        아이폰이라면 무음 모드를 꺼 주세요.
       </p>
       {failed && (
         <p role="alert" style={{ color: 'var(--error)', fontWeight: 600 }}>
@@ -44,7 +44,7 @@ export function SoundGate({ children }: { children: ReactNode }) {
     <main className="page page-narrow">
       <div className="card stack-lg" style={{ alignItems: 'center', textAlign: 'center', marginTop: 32 }}>
         <h2>먼저 소리를 켜 주세요</h2>
-        <p>브라우저는 버튼을 눌러야 소리를 낼 수 있어요.</p>
+        <p>브라우저에서는 버튼을 한 번 눌러야 소리가 나요.</p>
         <SoundOnButton />
       </div>
     </main>

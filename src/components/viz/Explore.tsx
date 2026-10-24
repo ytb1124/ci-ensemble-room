@@ -11,9 +11,9 @@ import './viz.css';
 
 type View = 'wave' | 'spec' | 'sgram';
 const HELP: Record<View, { title: string; text: string }> = {
-  wave: { title: '파형 보기', text: '선이 높을수록 큰 소리예요. 가운데 세로선이 지금 들리는 순간이에요.' },
-  spec: { title: '스펙트럼 막대', text: '왼쪽은 낮은 소리, 오른쪽은 높은 소리예요. 막대가 높을수록 그 높이의 소리가 커요.' },
-  sgram: { title: '스펙트로그램', text: '세로 = 높이, 밝을수록 큰 소리예요. 시간은 오른쪽으로 쌓여요.' },
+  wave: { title: '파형', text: '선이 높을수록 큰 소리예요. 가운데 세로선이 지금 들리는 순간이에요.' },
+  spec: { title: '스펙트럼', text: '왼쪽은 낮은 소리, 오른쪽은 높은 소리예요. 막대가 높을수록 그 높이의 소리가 커요.' },
+  sgram: { title: '스펙트로그램', text: '위로 갈수록 높은 소리, 밝을수록 큰 소리예요. 시간이 지나면 오른쪽으로 쌓여요.' },
 };
 const FONT = "system-ui, -apple-system, 'Noto Sans KR', sans-serif";
 
@@ -21,9 +21,9 @@ export function Explore(p: { on: Record<InstrumentId, boolean> }) {
   const [view, setView] = useState<View>('wave');
   return (
     <div className="viz-explore">
-      <p className="viz-note">익숙해지려면 여러 번 봐야 해요. 소리를 들으면서 보세요.</p>
+      <p className="viz-note">처음에는 낯설 수 있어요. 소리를 들으면서 여러 번 보면 익숙해져요.</p>
       <Segmented
-        label="탐색 보기"
+        label="자세히 보기 종류"
         hideLabel
         value={view}
         onChange={setView}

@@ -54,7 +54,7 @@ export default function Probe() {
     <div className="probe-exit">
       {confirmExit ? (
         <>
-          <span>여기서 그만할까요? 지금까지 한 답은 남아요.</span>
+          <span>여기서 그만할까요? 지금까지 한 답은 저장돼 있어요.</span>
           <button type="button" className="btn btn-sm" onClick={() => setConfirmExit(false)}>계속할게요</button>
           <button
             type="button"
@@ -77,8 +77,8 @@ export default function Probe() {
     return (
       <main className="page page-narrow probe-page">
         <div className="stack-lg">
-          <h1 style={{ margin: 0, fontSize: 24 }}>세트 {set}을 마쳤어요</h1>
-          <p className="lead" style={{ margin: 0 }}>수고하셨어요. 어떤 소리를 바꿨는지는 리포트에서 알려 드려요.</p>
+          <h1 style={{ margin: 0, fontSize: 24 }}>세트 {set}까지 마쳤어요</h1>
+          <p className="lead" style={{ margin: 0 }}>수고하셨어요. 어떤 소리를 바꿨는지는 [나의 청취 단서]에서 알려 드려요.</p>
           <div className="stack">
             <Link to="/report" className="btn btn-lg btn-primary">나의 청취 단서 보기</Link>
             {set === 1 && (

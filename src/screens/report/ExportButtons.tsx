@@ -30,7 +30,7 @@ export function ExportButtons() {
         </button>
       </div>
       <p className="small muted">
-        이름이나 연락처는 받지 않아요. 파일은 직접 누를 때만 이 기기에 저장되고, 어디에도 자동으로 보내지 않아요.
+        이름이나 연락처는 들어 있지 않아요. 파일은 버튼을 누를 때만 이 기기에 저장되고, 어디로도 자동으로 보내지 않아요.
       </p>
       <p className="small" role="status" aria-live="polite" style={{ minHeight: 20, margin: 0 }}>
         {done}

@@ -51,7 +51,7 @@ export default function ProbeIntro({ onDone }: { onDone: () => void }) {
     <main className="page page-narrow probe-page">
       <div className="stack-lg">
         <h1 style={{ margin: 0, fontSize: 24 }}>먼저 소리를 들어 볼게요</h1>
-        <p className="lead" style={{ margin: 0 }}>어떤 소리들이 나오는지 먼저 들어 보세요. 소리 5개를 한 번씩 이어서 들려 드려요. 약 30초 걸려요.</p>
+        <p className="lead" style={{ margin: 0 }}>질문에 나올 소리 5개를 한 번씩 이어서 들려 드려요. 30초쯤 걸려요.</p>
         <div className="card stack" aria-live="polite">
           {busy && <p style={{ margin: 0 }}>소리를 준비하고 있어요…</p>}
           {playing && (

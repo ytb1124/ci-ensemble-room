@@ -86,7 +86,7 @@ export function CueCard({
           {feel.once && <span className="tag">한 번만 들었어요</span>}
         </div>
       </div>
-      {cue.instrument && <p className="small muted">참고로 관련된 악기: {cue.instrument}</p>}
+      {cue.instrument && <p className="small muted">관련 악기: {cue.instrument}</p>}
 
       <div className="rep-cols">
         <div className="rep-col">
@@ -94,11 +94,11 @@ export function CueCard({
           {feel.level ? (
             <>
               <p className="rep-word">{FEEL_WORD[feel.level]}</p>
-              <p className="small muted">{feel.n}번 평정했어요</p>
+              <p className="small muted">{feel.n}번 표시했어요</p>
               {refCaution && <p className="small">차이가 없을 때도 다르다고 느끼는 편이에요. 값을 조심해서 보세요.</p>}
             </>
           ) : (
-            <p className="muted">아직 평정이 없어요</p>
+            <p className="muted">아직 표시한 적이 없어요</p>
           )}
         </div>
         <div className="rep-col">
@@ -116,7 +116,7 @@ export function CueCard({
                   {pick.unsure > 0 && <span className="rep-faint">잘 모르겠어요 {pick.unsure}번</span>}
                 </p>
               )}
-              {pick.differentGood > 0 && <p className="small">또렷함과 좋음이 달랐어요</p>}
+              {pick.differentGood > 0 && <p className="small">더 또렷한 쪽과 더 좋은 쪽이 달랐어요</p>}
             </>
           ) : (
             <p className="muted">이 단서는 아직 고르지 않았어요</p>
@@ -125,9 +125,9 @@ export function CueCard({
         <div className="rep-col">
           <h4>말한 것</h4>
           {say.chipCount > 0 ? (
-            <p className="rep-word">칩 {say.chipCount}번</p>
+            <p className="rep-word">{say.chipCount}번 골랐어요</p>
           ) : (
-            <p className="muted">칩으로 고르지 않았어요</p>
+            <p className="muted">아직 고른 적이 없어요</p>
           )}
           {say.notes.slice(0, 2).map((n, i) => (
             <p key={i} className="rep-quote small">"{n}"</p>

@@ -12,7 +12,7 @@ import {
 } from './steps';
 import './calibrate.css';
 
-const TITLES = ['나의 듣기 환경', '편안한 크기', '좌우', '소리 색', '악기 섞기', '저음 도움 (선택)'];
+const TITLES = ['듣기 환경', '편안한 크기', '좌우', '소리 색', '악기 섞기', '저음 도움 (선택)'];
 const SUMMARY = 7;
 
 const pickDraft = (p: Profile): Draft => ({
@@ -94,7 +94,7 @@ export default function Calibrate() {
     engine.pause();
     if (step >= 2 && step <= 5) {
       const [a, b] = song.calibLoopBeats;
-      engine.setSection({ id: 'calib', label: '보정', start: beatToSec(song, a), end: beatToSec(song, b) }, true);
+      engine.setSection({ id: 'calib', label: '소리 맞추기', start: beatToSec(song, a), end: beatToSec(song, b) }, true);
     } else if (step === 6) {
       const [a, b] = song.bassLoopBeats;
       engine.setSection({ id: 'bassloop', label: '베이스', start: beatToSec(song, a), end: beatToSec(song, b) }, true);
@@ -152,7 +152,7 @@ export default function Calibrate() {
           labels={TITLES}
         />
       )}
-      <p className="muted" style={{ margin: 0 }}>시험이 아니에요. 지금 내게 편한 소리를 고르는 거예요.</p>
+      <p className="muted" style={{ margin: 0 }}>시험이 아니에요. 지금 나에게 편한 소리를 고르면 돼요.</p>
     </div>
   );
 
@@ -160,26 +160,26 @@ export default function Calibrate() {
     return (
       <main className="page page-narrow stack-lg">
         {header}
-        <p role="alert" style={{ color: 'var(--error)', fontWeight: 600 }}>소리를 불러오지 못했어요. 새로고침해 주세요.</p>
+        <p role="alert" style={{ color: 'var(--error)', fontWeight: 600 }}>소리를 불러오지 못했어요. 페이지를 새로고침해 주세요.</p>
       </main>
     );
   }
 
   if (step === SUMMARY) {
     const lines: { n: number; label: string; value: string }[] = [
-      { n: 1, label: '듣기 환경', value: `${profile.config ? CONFIG_LABEL[profile.config] : '아직 안 골랐어요'} · ${profile.route ? ROUTE_LABEL[profile.route].split(' (')[0] : '경로 안 골랐어요'}${profile.maker ? ` · ${MAKER_LABEL[profile.maker]}` : ''}` },
+      { n: 1, label: '듣기 환경', value: `${profile.config ? CONFIG_LABEL[profile.config] : '아직 안 골랐어요'} · ${profile.route ? ROUTE_LABEL[profile.route].split(' (')[0] : '듣는 방법 안 골랐어요'}${profile.maker ? ` · ${MAKER_LABEL[profile.maker]}` : ''}` },
       { n: 2, label: '편안한 크기', value: `앱 음량 ${sign(profile.masterGainDb)}` },
       { n: 3, label: '좌우', value: profile.stereo ? `${profile.balance === -1 ? '왼쪽' : profile.balance === 1 ? '오른쪽' : '가운데'}${profile.spread ? ' · 넓게 펼침' : ''}` : '양쪽 같은 소리(모노)' },
       { n: 4, label: '소리 색', value: `저음 ${profile.eqLowDb ? sign(profile.eqLowDb) : '원래 소리'} · 또렷함 ${profile.eqMidDb ? `${sign(profile.eqMidDb)}${profile.eqMidHz === 3000 ? ' (약 3 kHz)' : ''}` : '원래 소리'}` },
       { n: 5, label: '악기 섞기', value: INSTRUMENTS.map((i) => `${INSTRUMENT_SHORT[i]} ${sign(profile.instGainDb[i], '')}`.trim()).join(' · ') },
-      { n: 6, label: '저음 도움', value: profile.bassAssist === 'boost' ? '저음 강조' : profile.bassAssist === 'octaveUp' ? '베이스를 높게 겹쳐 듣기' : profile.bassVizEmphasis ? '원래 소리 (그림에서 저음 박을 더 눈에 띄게)' : '원래 소리' },
+      { n: 6, label: '저음 도움', value: profile.bassAssist === 'boost' ? '저음 키우기' : profile.bassAssist === 'octaveUp' ? '베이스를 높게 겹쳐 듣기' : profile.bassVizEmphasis ? '원래 소리 (그림에서 베이스 박자를 더 눈에 띄게)' : '원래 소리' },
     ];
     return (
       <main className="page page-narrow stack-lg">
         {header}
         <section className="card stack-lg" aria-labelledby="cal-sum-h">
           <h2 id="cal-sum-h" style={{ margin: 0 }}>지금 설정으로 합주실에 들어갈까요?</h2>
-          <p className="muted" style={{ margin: 0 }}>모두 추천 시작점이에요. 합주실에서도 언제든 바꿀 수 있어요.</p>
+          <p className="muted" style={{ margin: 0 }}>모두 처음 권하는 값이에요. 합주실에서도 언제든 바꿀 수 있어요.</p>
           <ul className="cal-sum">
             {lines.map((l) => (
               <li key={l.n}>
@@ -267,7 +267,7 @@ export default function Calibrate() {
             )}
           </div>
         </div>
-        {!only && step <= 2 && <p className="small muted" style={{ margin: 0 }}>①과 ②는 꼭 필요해요. 나머지는 건너뛰어도 괜찮아요.</p>}
+        {!only && step <= 2 && <p className="small muted" style={{ margin: 0 }}>①과 ②는 꼭 해 주세요. 나머지는 건너뛰어도 괜찮아요.</p>}
       </section>
     </main>
   );

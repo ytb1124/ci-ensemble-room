@@ -20,12 +20,12 @@ export interface StepProps {
 export const CONFIG_LABEL: Record<DeviceConfig, string> = {
   bilateral: '양쪽 인공와우',
   unilateral: '한쪽 인공와우',
-  bimodal: '인공와우 + 보청기',
-  ssd: '인공와우 + 반대쪽 자연 청력',
+  bimodal: '인공와우 + 반대쪽 보청기',
+  ssd: '인공와우 + 반대쪽은 잘 들림',
   unknown: '잘 모르겠어요',
 };
 export const ROUTE_LABEL: Record<Route, string> = {
-  direct: '프로세서로 바로 (블루투스·스트리머·케이블)',
+  direct: '프로세서에 직접 연결 (블루투스·스트리머·선)',
   speaker: '스피커',
   headphones: '이어폰·헤드폰',
 };
@@ -34,16 +34,16 @@ export const MAKER_LABEL: Record<NonNullable<Maker>, string> = {
   medel: '메드엘',
   ab: '어드밴스드 바이오닉스',
   oticon: '오티콘',
-  unknown: '모름',
+  unknown: '잘 모르겠어요',
 };
 const ROUTE_REC: Partial<Record<DeviceConfig, Route>> = {
   ssd: 'speaker', bimodal: 'speaker', unilateral: 'direct', bilateral: 'direct',
 };
 const ROUTE_REC_TEXT: Record<DeviceConfig, string> = {
-  ssd: '스피커로 양쪽 귀가 함께 듣는 쪽을 더 좋아한 분이 많았어요. 직접 연결과 비교해 봐도 좋아요.',
-  bimodal: '스피커로 양쪽 귀가 함께 듣는 쪽을 더 좋아한 분이 많았어요. 직접 연결과 비교해 봐도 좋아요. 보청기도 함께 끼고 들어 보세요.',
-  unilateral: '이 경우 직접 연결을 약간 더 좋아하거나 차이가 없었어요.',
-  bilateral: '이 경우 직접 연결을 약간 더 좋아하거나 차이가 없었어요.',
+  ssd: '스피커로 양쪽 귀로 함께 듣는 쪽을 더 좋아한 분이 많았어요. 직접 연결과 비교해 봐도 좋아요.',
+  bimodal: '스피커로 양쪽 귀로 함께 듣는 쪽을 더 좋아한 분이 많았어요. 직접 연결과 비교해 봐도 좋아요. 보청기도 함께 끼고 들어 보세요.',
+  unilateral: '이런 분들은 직접 연결을 조금 더 좋아하거나, 차이를 크게 느끼지 않았어요.',
+  bilateral: '이런 분들은 직접 연결을 조금 더 좋아하거나, 차이를 크게 느끼지 않았어요.',
   unknown: '지금 듣는 방식 그대로 시작해요.',
 };
 export const recRoute = (c: DeviceConfig | null) => (c ? ROUTE_REC[c] ?? null : null);
@@ -81,9 +81,9 @@ export function Step1({ d, set }: StepProps) {
   const makers: NonNullable<Maker>[] = ['cochlear', 'medel', 'ab', 'oticon', 'unknown'];
   return (
     <div className="stack-lg">
-      <p className="cal-note">기본값을 고르는 데만 써요. 시험이 아니에요.</p>
+      <p className="cal-note">처음 소리를 정하는 데만 써요. 시험이 아니에요.</p>
       <div className="stack" role="group" aria-labelledby="cal-q-config">
-        <h3 className="cal-group-title" id="cal-q-config">어떻게 듣고 계세요?</h3>
+        <h3 className="cal-group-title" id="cal-q-config">어떻게 듣고 있나요?</h3>
         <div className="cal-choices">
           {configs.map((c) => (
             <Choice
@@ -107,12 +107,12 @@ export function Step1({ d, set }: StepProps) {
         </div>
         {d.config && (
           <p className="cal-note" aria-live="polite">
-            {ROUTE_REC_TEXT[d.config]} (처음 권하는 값일 뿐, 바꿀 수 있어요.)
+            {ROUTE_REC_TEXT[d.config]} (처음 권하는 방법일 뿐이에요. 바꿔도 돼요.)
           </p>
         )}
       </div>
       <div className="stack" role="group" aria-labelledby="cal-q-maker">
-        <h3 className="cal-group-title" id="cal-q-maker">제조사 (선택)</h3>
+        <h3 className="cal-group-title" id="cal-q-maker">인공와우 회사 (선택)</h3>
         <div className="cal-choices">
           {makers.map((m) => (
             <Choice key={m} selected={d.maker === m} onClick={() => set({ maker: d.maker === m ? null : m })}>
@@ -122,7 +122,7 @@ export function Step1({ d, set }: StepProps) {
         </div>
       </div>
       <p className="small muted">
-        프로세서에서 저음·고음을 따로 바꿔 두셨다면 평소 설정 그대로 두고 맞춰 주세요.
+        프로세서에서 저음·고음을 따로 바꿔 두었다면, 평소 설정 그대로 두고 맞춰 주세요.
       </p>
     </div>
   );
@@ -134,8 +134,8 @@ export function Step2({ d, set, onCommit }: StepProps & { onCommit: (v: number) 
     <div className="stack-lg">
       <ol className="cal-list">
         <li>음악이 편안하게 들릴 때까지 휴대폰(또는 프로세서) 음량을 조절해 주세요.</li>
-        <li>앱 안에서 조금 더 맞춰도 돼요.</li>
-        <li>이제부터는 기기 음량을 되도록 그대로 두세요.</li>
+        <li>아래 [앱 음량]으로 조금 더 맞춰도 돼요.</li>
+        <li>다 맞췄으면 기기 음량은 되도록 그대로 두세요.</li>
       </ol>
       <LoopPlayer />
       <DbSlider
@@ -188,7 +188,7 @@ export function Step3({ d, set }: StepProps) {
             <Icon name={d.spread ? 'on' : 'off'} />
             넓게 펼쳐 듣기 {d.spread ? '켜짐' : '꺼짐'} (선택)
           </button>
-          <p className="small muted">카혼은 왼쪽, 트럼펫은 오른쪽, 베이스는 가운데에서 들려요.</p>
+          <p className="small muted">카혼은 왼쪽, 피아노는 조금 왼쪽, 베이스는 가운데, 트럼펫은 오른쪽에서 들려요.</p>
         </>
       )}
     </div>
@@ -274,7 +274,7 @@ export function Step4({ d, set, onHzTest }: StepProps & { onHzTest: () => void }
         <details>
           <summary className="btn btn-sm" style={{ cursor: 'pointer' }}>다른 또렷함도 비교해 보기 (약 3 kHz)</summary>
           <div className="stack" style={{ gap: 8, marginTop: 8 }}>
-            <p className="small muted">파일럿용 비교예요. 더 또렷하게 들리는 쪽을 골라 보세요.</p>
+            <p className="small muted">시험 운영을 위한 비교예요. 더 또렷하게 들리는 쪽을 골라 보세요.</p>
             <ABChoice<Two>
               options={[
                 { value: 'A', label: 'A 기본 또렷함' },
@@ -293,7 +293,7 @@ export function Step4({ d, set, onHzTest }: StepProps & { onHzTest: () => void }
           </div>
         </details>
       </Tone>
-      <p className="small muted">몇 번이든 다시 들어도 돼요. 모르겠으면 그대로 두세요.</p>
+      <p className="small muted">몇 번이든 다시 들어도 돼요. 잘 모르겠으면 그대로 두세요.</p>
     </div>
   );
 }
@@ -334,7 +334,7 @@ export function Step5({ d, set, range }: StepProps & { range: { min: number; max
 export function Step6({ d, set, pick, setPick }: StepProps & { pick: BassAssist | 'unsure' | null; setPick: (p: BassAssist | 'unsure') => void }) {
   const opts: { v: BassAssist; l: string }[] = [
     { v: 'none', l: '원래 소리' },
-    { v: 'boost', l: '저음 강조' },
+    { v: 'boost', l: '저음 키우기' },
     { v: 'octaveUp', l: '베이스를 높게 겹쳐 듣기' },
   ];
   const listen = (v: BassAssist) => {
@@ -344,7 +344,7 @@ export function Step6({ d, set, pick, setPick }: StepProps & { pick: BassAssist 
   };
   return (
     <div className="stack-lg">
-      <p className="lead" style={{ margin: 0 }}>베이스만 연주해요. 줄을 튕기는 소리나 박이 느껴지나요?</p>
+      <p className="lead" style={{ margin: 0 }}>베이스만 연주해요. 줄을 튕기는 소리나 박자가 느껴지나요?</p>
       <LoopPlayer label="베이스 2마디 반복" />
       <div className="cal-choices cal-3" role="group" aria-label="저음 도움 비교">
         {opts.map((o, i) => (
@@ -368,7 +368,7 @@ export function Step6({ d, set, pick, setPick }: StepProps & { pick: BassAssist 
       {pick === 'unsure' && (
         <p className="cal-note">괜찮아요. 소리는 그대로 두고, 합주실 그림에서 저음의 박을 조금 더 눈에 띄게 보여 드릴게요.</p>
       )}
-      <p className="small muted">현재 선택: {d.bassAssist === 'none' ? '원래 소리' : d.bassAssist === 'boost' ? '저음 강조' : '베이스를 높게 겹쳐 듣기'}</p>
+      <p className="small muted">지금 선택: {d.bassAssist === 'none' ? '원래 소리' : d.bassAssist === 'boost' ? '저음 키우기' : '베이스를 높게 겹쳐 듣기'}</p>
     </div>
   );
 }

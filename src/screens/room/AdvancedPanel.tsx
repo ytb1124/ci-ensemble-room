@@ -23,7 +23,7 @@ export function AdvancedPanel({
     });
   };
   const assists: { v: BassAssist; label: string }[] = [
-    { v: 'none', label: '쓰지 않기' },
+    { v: 'none', label: '원래 소리' },
     { v: 'boost', label: '저음 키우기' },
     { v: 'octaveUp', label: '베이스를 높게 겹쳐 듣기' },
   ];
@@ -45,12 +45,12 @@ export function AdvancedPanel({
         <div id="room-adv" className="stack-lg">
           <div className="stack">
             <p className="small muted" style={{ margin: 0 }} role="status">
-              {saved ? '악기 크기는 카드 아래 [−][+]로 바꾸고, 이 곡에 바로 저장돼요.' : '악기 크기는 카드 아래 [−][+]로 바꿔요. 바꾸면 이 곡에 바로 저장돼요.'}
+              {saved ? '악기 크기는 카드 아래 [−][+]로 바꿔요. 바꾼 크기는 이 곡에 바로 저장돼요.' : '악기 크기는 카드 아래 [−][+]로 바꿔요. 바꾼 크기는 이 곡에 바로 저장돼요.'}
             </p>
             {saved && (
               <div className="row">
                 <button type="button" className="btn btn-sm" onClick={revert}>
-                  내 기본 설정으로
+                  내 기본 설정으로 되돌리기
                 </button>
               </div>
             )}
@@ -72,7 +72,7 @@ export function AdvancedPanel({
               혼자 들어도 같은 크기로
             </Chip>
             <Chip pressed={st.bypass} onClick={() => engine.setBypass(!st.bypass)}>
-              보정 없이 비교 듣기
+              내 설정 끄고 비교하기
             </Chip>
             <Chip
               pressed={blind}
@@ -81,15 +81,15 @@ export function AdvancedPanel({
                 logEvent({ type: 'blind', value: !blind ? 'on' : 'off' });
               }}
             >
-              그림 없이 맞혀 보기
+              악기 이름 가리고 듣기
             </Chip>
             {blind && !revealed && (
-              <button type="button" className="btn btn-sm" onClick={onReveal}>공개</button>
+              <button type="button" className="btn btn-sm" onClick={onReveal}>이름 보기</button>
             )}
           </div>
           <p className="small muted" style={{ margin: 0 }}>
-            {st.bypass ? '지금은 내 설정을 잠시 끄고 원본을 들어요. 다시 누르면 돌아가요.' : '[보정 없이 비교 듣기]를 켜면 내 설정을 잠시 끄고 원본과 비교할 수 있어요.'}
-            {' '}[혼자 들어도 같은 크기로]는 한 악기만 들을 때 소리가 작아지지 않게 해 줘요.
+            {st.bypass ? '지금은 내 설정을 잠시 끄고 원래 소리를 들어요. 다시 누르면 내 설정으로 돌아가요.' : '[내 설정 끄고 비교하기]를 켜면 원래 소리와 비교할 수 있어요.'}
+            {' '}[혼자 들어도 같은 크기로]를 켜면 한 악기만 들을 때도 소리가 작아지지 않아요.
           </p>
         </div>
       )}

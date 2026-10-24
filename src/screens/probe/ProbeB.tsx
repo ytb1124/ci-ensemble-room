@@ -64,7 +64,7 @@ export default function ProbeB({
   return (
     <div className="stack-lg">
       <ProgressBar index={index} total={total} />
-      <p className="probe-q">두 버전을 들어 보세요. 어느 쪽이 나에게 더 또렷하게 들려요?</p>
+      <p className="probe-q">두 소리를 들어 보세요. 어느 쪽이 나에게 더 또렷하게 들리나요?</p>
       {error && <p role="alert" style={{ margin: 0 }}>소리를 준비하지 못했어요. [넘어가기]를 눌러 주세요.</p>}
       {!bufs && !error && <p style={{ margin: 0 }} role="status">소리를 준비하고 있어요…</p>}
       <div className="probe-listen-row">
@@ -92,7 +92,7 @@ export default function ProbeB({
         ]}
       />
       <Choices
-        label="더 좋은 쪽도 같나요?"
+        label="더 좋게 들리는 쪽도 같은가요?"
         value={preferSame}
         onChange={setPreferSame}
         options={[

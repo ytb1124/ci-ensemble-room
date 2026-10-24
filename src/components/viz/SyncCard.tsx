@@ -64,7 +64,7 @@ export function SyncCard({ onClose }: { onClose: () => void }) {
     <div className="card viz-sync" role="group" aria-label="화면과 소리 맞추기">
       <div>
         <h3 style={{ margin: 0, letterSpacing: 0 }}>화면과 소리 맞추기</h3>
-        <p style={{ margin: '4px 0 0' }}>깜빡임과 소리가 같이 날 때까지 슬라이더를 움직여 주세요.</p>
+        <p style={{ margin: '4px 0 0' }}>동그라미가 깜빡이는 순간과 소리가 딱 맞을 때까지 막대를 움직여 주세요.</p>
       </div>
       {!ready && <p className="muted" role="status">먼저 소리를 켜 주세요.</p>}
       <div className="viz-sync-stage" aria-hidden="true">
@@ -82,7 +82,7 @@ export function SyncCard({ onClose }: { onClose: () => void }) {
         onChange={change}
         formatValue={(v) => (v > 0 ? `+${v} ms (그림을 늦춤)` : v < 0 ? `${v} ms (그림을 당김)` : '0 ms')}
       />
-      {btHint && <p className="viz-note" role="note">블루투스는 지연이 클 수 있어요.</p>}
+      {btHint && <p className="viz-note" role="note">블루투스로 들으면 소리가 늦게 도착할 수 있어요.</p>}
       <div className="viz-sync-actions">
         <button type="button" className="btn btn-primary btn-lg" onClick={save}>
           <Icon name="check" />

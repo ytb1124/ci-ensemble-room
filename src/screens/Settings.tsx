@@ -43,20 +43,20 @@ export default function Settings() {
   const ms = (v: number | null) => (v === null ? '알 수 없어요' : `${Math.round(v * 1000)} ms`);
 
   const syncMethod =
-    p.sync.method === 'tap' ? '탭 보정' : p.sync.method === 'preset-bt' ? '블루투스 프리셋' : p.sync.userOffsetMs !== 0 ? '수동' : '자동';
+    p.sync.method === 'tap' ? '탭으로 맞춤' : p.sync.method === 'preset-bt' ? '블루투스 기본값' : p.sync.userOffsetMs !== 0 ? '직접 맞춤' : '자동';
 
   return (
     <main className="page page-narrow stack-lg">
       <h1>설정</h1>
 
       <section className="card stack" aria-labelledby="set-calib">
-        <h2 id="set-calib">처음 설정</h2>
+        <h2 id="set-calib">소리 맞추기</h2>
         <ul className="set-steps">
           {STEPS.map((name, i) => (
             <li key={name}>
               <span>
                 <strong>{'①②③④⑤⑥'[i]}</strong> {name}
-                <span className="small muted"> · {p.calibStepsDone.includes(i + 1) ? '해 봤어요' : '아직'}</span>
+                <span className="small muted"> · {p.calibStepsDone.includes(i + 1) ? '완료' : '아직 안 함'}</span>
               </span>
               <Link to={`/calibrate/${i + 1}?only=1&next=/settings`} className="btn btn-sm" aria-label={`${name} 다시 맞추기`}>
                 바꾸기
@@ -92,8 +92,8 @@ export default function Settings() {
             value={p.viz.defaultView}
             options={[
               { value: 'off', label: '끔' },
-              { value: 'lanes', label: '레인' },
-              { value: 'explore', label: '탐색' },
+              { value: 'lanes', label: '악기별' },
+              { value: 'explore', label: '자세히' },
             ]}
             onChange={(v) => {
               setViz({ defaultView: v });
@@ -101,7 +101,7 @@ export default function Settings() {
             }}
           />
         </div>
-        <Switch label="피치 라인" checked={p.viz.pitchLines} onChange={(v) => setViz({ pitchLines: v })} />
+        <Switch label="음높이 선" checked={p.viz.pitchLines} onChange={(v) => setViz({ pitchLines: v })} />
         <div className="set-row">
           <span className="set-label">움직임 강도</span>
           <Segmented<MotionLevel>
@@ -109,10 +109,10 @@ export default function Settings() {
             hideLabel
             value={p.viz.motion}
             options={[
-              { value: 'off', label: '끄기' },
-              { value: 'calm', label: '차분' },
+              { value: 'off', label: '없음' },
+              { value: 'calm', label: '적게' },
               { value: 'normal', label: '보통' },
-              { value: 'vivid', label: '화려' },
+              { value: 'vivid', label: '많이' },
             ]}
             onChange={(v) => {
               setViz({ motion: v });
@@ -121,19 +121,19 @@ export default function Settings() {
           />
         </div>
         <Switch
-          label="곡 처음 열 때 소리만 듣기"
+          label="곡을 처음 열면 소리만 먼저 듣기"
           checked={p.viz.listenFirst}
           onChange={(v) => setViz({ listenFirst: v })}
-          hint="켜 두면 처음에는 그림 없이 듣고, 원할 때 보기를 켜요."
+          hint="켜 두면 처음에는 그림 없이 듣고, 원할 때 그림을 켤 수 있어요."
         />
         <div className="set-row">
-          <span className="set-label">배경</span>
+          <span className="set-label">화면 색</span>
           <Segmented<Theme>
-            label="배경"
+            label="화면 색"
             hideLabel
             value={p.viz.theme}
             options={[
-              { value: 'system', label: '기기 설정 따름' },
+              { value: 'system', label: '기기 설정대로' },
               { value: 'light', label: '밝게' },
               { value: 'dark', label: '어둡게' },
             ]}
@@ -145,10 +145,10 @@ export default function Settings() {
       <section className="card stack" aria-labelledby="set-sync">
         <h2 id="set-sync">화면-소리 맞추기</h2>
         <p className="small muted">
-          소리와 그림이 어긋나 보이면 맞춰 보세요. 지금 방식: <strong>{syncMethod}</strong>
+          그림이 소리보다 늦거나 빠르면 맞춰 보세요. 지금 방식: <strong>{syncMethod}</strong>
         </p>
         <DbSlider
-          label="수동으로 맞추기"
+          label="직접 맞추기"
           value={p.sync.userOffsetMs}
           min={-300}
           max={300}
@@ -175,7 +175,7 @@ export default function Settings() {
         {!st.unlocked && !syncOpen && <SoundOnButton label="소리 켜고 탭으로 맞추기" />}
         {syncOpen && st.unlocked && <SyncCard onClose={() => setSyncOpen(false)} />}
         <dl className="set-kv">
-          <dt>이 기기 지연(참고)</dt>
+          <dt>이 기기의 소리 지연 (참고)</dt>
           <dd>
             {st.unlocked
               ? `기본 ${ms(lat.baseLatency)} · 출력 ${ms(lat.outputLatency)}`
@@ -193,7 +193,7 @@ export default function Settings() {
           hint="한 악기만 골라 들을 때도 함께 들을 때와 비슷한 크기로 들려요."
         />
         <Switch
-          label="+12 dB까지 허용"
+          label="더 크게 키울 수 있게 (+12 dB)"
           checked={p.allowPlus12}
           onChange={(v) =>
             updateProfile((cur) => {
@@ -209,21 +209,21 @@ export default function Settings() {
               return { allowPlus12: false, instGainDb: clamp(cur.instGainDb), songOverrides: so };
             })
           }
-          hint="악기 섞기에서 더 크게 키울 수 있어요. 소리가 커지니 조심해서 써 주세요."
+          hint="악기 섞기에서 한 악기를 더 크게 키울 수 있어요. 소리가 갑자기 커질 수 있으니 조심해 주세요."
         />
         <div className="set-row">
           <span className="set-label">
-            자리표시 소리 모양
+            임시 소리 모양
             <span className="small muted" style={{ display: 'block', fontWeight: 400 }}>
               실제 악기 녹음이 들어오면 이 설정은 사라져요.
             </span>
           </span>
           <Segmented<PlaceholderShape>
-            label="자리표시 소리 모양"
+            label="임시 소리 모양"
             hideLabel
             value={p.placeholderShape}
             options={[
-              { value: 'rhythm', label: '박자에 맞춰 끊기는 잡음(기본)' },
+              { value: 'rhythm', label: '박자에 맞춰 끊기는 잡음 (기본)' },
               { value: 'steady', label: '계속 나는 잡음' },
             ]}
             onChange={(v) => {
@@ -240,17 +240,17 @@ export default function Settings() {
         <h2 id="set-data">데이터</h2>
         {!storageAvailable() && (
           <p role="status" style={{ fontWeight: 600 }}>
-            이 기기에서는 기록이 남지 않아요. 창을 닫으면 설정과 응답이 사라져요. 필요하면 내보내기로 파일을 받아 두세요.
+            이 기기에서는 기록이 남지 않아요. 창을 닫으면 설정과 응답이 사라져요. 필요하면 아래 [내보내기]로 파일을 받아 두세요.
           </p>
         )}
-        <p className="small muted">이름이나 연락처는 받지 않아요. 연구에 참여하지 않았다면 모든 기록은 이 기기 안에만 있어요. 아래 [지우기]는 이 기기만 지워요. 연구에 보낸 기록은 위 [연구 참여]에서 지워요.</p>
+        <p className="small muted">이름이나 연락처는 받지 않아요. 연구에 참여하지 않았다면 모든 기록은 이 기기 안에만 있어요. 아래 [지우기]는 이 기기의 기록만 지워요. 연구팀에 보낸 기록은 위 [연구 참여]에서 지울 수 있어요.</p>
         <ExportButtons />
         <DeleteAll />
       </section>
 
       <p>
         <Link to="/about" className="btn">
-          <Icon name="info" size={20} /> 이 프로그램은 무엇인가요?
+          <Icon name="info" size={20} /> 이 앱은 무엇인가요?
         </Link>
       </p>
     </main>
