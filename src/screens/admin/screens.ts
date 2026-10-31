@@ -28,9 +28,18 @@ const RULES: [RegExp, Screen][] = [
 ];
 const OTHER: Screen = { name: '그 밖의 문구', route: '/' };
 
+// 처음 설정 단계 함수 밖에 있지만 한 단계에서만(또는 그 단계에서 모두) 보이는 문구
+const STEP_OF: Record<string, number> = {
+  'screens/calibrate/steps.tsx#LoudnessRating': 2,
+  // 0–10 크기 척도: 2단계 크기 표에 11개가 모두 나온다(5단계와 합주실 악기 카드에도 쓰임)
+  'config/loudness.ts#': 2,
+};
+
 export function screenOf(p: Place): Screen {
   // 처음 설정은 단계마다 따로 연다(steps.tsx의 Step1–Step6)
-  const step = p.file === 'screens/calibrate/steps.tsx' ? /^Step(\d)$/.exec(p.fn)?.[1] : undefined;
+  const step =
+    STEP_OF[`${p.file}#${p.fn}`] ?? STEP_OF[`${p.file}#`] ??
+    (p.file === 'screens/calibrate/steps.tsx' ? /^Step(\d)$/.exec(p.fn)?.[1] : undefined);
   if (step) return { name: `처음 설정 ${step}단계 · ${STEP_NAMES[+step - 1]}`, route: `/calibrate/${step}` };
   return RULES.find(([r]) => r.test(p.file))?.[1] ?? OTHER;
 }
