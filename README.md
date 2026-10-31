@@ -40,6 +40,7 @@ npm run dev
 | `#/report` | 나의 청취 단서 | S3, 6.4 |
 | `#/settings` | 설정 / 데이터 | S4, 7.3 |
 | `#/about` | 이 프로그램에 대해 | 3.1 |
+| `#/admin` | 관리자 문구 수정(한국어만) | — |
 
 ## 구조
 
@@ -70,6 +71,21 @@ src/
 ```
 
 모든 시각화와 연주자 애니메이션은 `engine.songTime()` 하나로 "지금 스피커에서 나는 곡 위치"를 구해요(`getOutputTimestamp` 우선, 없으면 `baseLatency + outputLatency`, 그리고 사용자 오프셋).
+
+## 관리자 문구 수정 (`#/admin`)
+
+관리자가 사이트의 **한국어 문구**를 하나씩 고칠 수 있어요. 영어 문구는 다루지 않아요.
+
+- 목록: 빌드할 때 소스의 모든 `tx('한국어', 'English')`를 읽어 만들어요([`scripts/ko-catalog.ts`](scripts/ko-catalog.ts)). 화면별로 묶어서 보여 줘요.
+- 저장: Supabase `text_overrides` 표(키 = 코드에 적힌 원래 문구, 값 = 바꾼 문구). 방문자는 로그인 없이 읽고, `admins`에 등록된 계정만 써요. 방문자 기기에도 마지막 값을 남겨서 서버가 끊겨도 그 문구로 보여요.
+- 변수가 들어간 문구는 코드에서 `` tx(ko`안내 ${i} / ${n}`, …) ``처럼 `ko` 태그를 붙이고, 관리자 화면에서는 `{0}`, `{1}` 자리로 보여요. 새 문구를 추가할 때도 이 규칙을 따라야 목록에 들어가요.
+- 코드에서 원래 문구를 바꾸면 그 문구의 수정 기록은 더는 쓰이지 않아요. 관리자 화면 아래 "더는 쓰이지 않는 수정"에서 지울 수 있어요.
+
+처음 한 번 준비:
+1. Supabase SQL Editor에서 [`supabase/schema.sql`](supabase/schema.sql)을 다시 실행해요(`admins`, `text_overrides` 표가 생겨요).
+2. Authentication → Users → **Add user**로 관리자 이메일·비밀번호 계정을 만들어요.
+3. SQL Editor에서 `insert into public.admins (user_id) select id from auth.users where email = '관리자 이메일';`을 실행해요.
+4. 배포 사이트에서 쓰려면 GitHub 저장소 Settings → Secrets and variables → Actions → **Variables**에 `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`(`.env.local`과 같은 값)를 넣어요. 없으면 배포 빌드에서 연구 참여와 문구 수정이 꺼져요.
 
 ## 핑크노이즈를 실제 음원으로 바꾸는 방법
 

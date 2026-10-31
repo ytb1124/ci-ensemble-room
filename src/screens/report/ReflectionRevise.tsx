@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { getLang, tx } from '../../i18n';
+import { getLang, ko, tx } from '../../i18n';
 import { reviseReflection } from '../../store/probe';
 import { diffRevision, reflectionAsText, type TextSeg } from '../../store/reportRules';
 import type { Reflection } from '../../types';
@@ -25,7 +25,7 @@ export function ReflectionRevise({ reflection }: { reflection: Reflection }) {
 
   return (
     <div className="stack" style={{ gap: 12 }}>
-      <h3>{tx(`세트 ${reflection.set}에서 적어 주신 설명`, `What you wrote in Set ${reflection.set}`)}</h3>
+      <h3>{tx(ko`세트 ${reflection.set}에서 적어 주신 설명`, `What you wrote in Set ${reflection.set}`)}</h3>
       {revised && diff ? (
         <div className="rep-pair">
           <div className="rep-col">

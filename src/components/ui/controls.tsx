@@ -1,7 +1,7 @@
 // 공용 컨트롤. 모든 화면은 이 컴포넌트와 index.css의 클래스(.btn .seg .card .chip .tag .range .input)를 쓴다.
 import { useId, type ReactNode } from 'react';
 import { Icon } from './Icon';
-import { tx } from '../../i18n';
+import { ko, tx } from '../../i18n';
 
 /** pill 세그먼트 컨트롤(DESIGN 0.3: 모드·보기 전환). role=radiogroup */
 export function Segmented<T extends string>({
@@ -184,7 +184,7 @@ export function Steps({ total, current, done, labels }: { total: number; current
               color: isCur ? 'var(--on-primary)' : 'var(--body-strong)',
             }}
           >
-            <span className="sr-only">{labels?.[n - 1] ?? tx(`${n}단계`, `Step ${n}`)} {isDone ? tx('완료', 'done') : ''}</span>
+            <span className="sr-only">{labels?.[n - 1] ?? tx(ko`${n}단계`, `Step ${n}`)} {isDone ? tx('완료', 'done') : ''}</span>
             <span aria-hidden="true">{isDone && !isCur ? '✓' : n}</span>
           </li>
         );

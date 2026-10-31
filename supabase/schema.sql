@@ -89,3 +89,40 @@ select
 from public.participants p
 left join public.participant_state s on s.participant_id = p.id and s.kind = 'profile';
 revoke all on public.participant_overview from anon, authenticated;
+
+-- ───────── 관리자 문구 수정(#/admin) ─────────
+-- 관리자: 이메일·비밀번호 계정. 대시보드 → Authentication → Users → Add user로 만들고 아래처럼 등록한다.
+--   insert into public.admins (user_id) select id from auth.users where email = '관리자 이메일';
+create table if not exists public.admins (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+alter table public.admins enable row level security;
+revoke all on public.admins from anon, authenticated;
+grant select on public.admins to authenticated;
+drop policy if exists "see own admin row" on public.admins;
+create policy "see own admin row" on public.admins
+  for select to authenticated
+  using (user_id = (select auth.uid()));
+
+-- 고친 한국어 문구. key = 코드에 적힌 원래 문구(변수 자리는 {0}, {1} …), value = 바꾼 문구.
+-- 방문자 누구나 읽고(로그인 없이), admins에 있는 계정만 쓴다. 참여자 익명 계정도 authenticated라서 역할이 아니라 admins로 막는다.
+create table if not exists public.text_overrides (
+  key text primary key,
+  value text not null,
+  updated_at timestamptz not null default now(),
+  updated_by uuid default auth.uid() references auth.users (id) on delete set null
+);
+alter table public.text_overrides enable row level security;
+revoke all on public.text_overrides from anon, authenticated;
+grant select on public.text_overrides to anon, authenticated;
+grant insert, update, delete on public.text_overrides to authenticated;
+drop policy if exists "anyone reads overrides" on public.text_overrides;
+create policy "anyone reads overrides" on public.text_overrides
+  for select to anon, authenticated
+  using (true);
+drop policy if exists "admins write overrides" on public.text_overrides;
+create policy "admins write overrides" on public.text_overrides
+  for all to authenticated
+  using (exists (select 1 from public.admins a where a.user_id = (select auth.uid())))
+  with check (exists (select 1 from public.admins a where a.user_id = (select auth.uid())));

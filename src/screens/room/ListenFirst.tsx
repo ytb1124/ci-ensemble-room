@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Chip } from '../../components/ui/controls';
 import { logEvent } from '../../store/log';
-import { tx } from '../../i18n';
+import { ko, tx } from '../../i18n';
 
 const STEPS = [
   { get title() { return tx('① 소리만 듣기', '① Sound only'); }, get text() { return tx('먼저 소리만 들어 보세요.', 'First, just listen to the sound.'); }, view: 'off' as const },
@@ -37,7 +37,7 @@ export function ListenFirst({ onView, onDone }: { onView: (v: 'off' | 'lanes') =
 
   return (
     <section className="card card-soft room-steps" aria-label={tx('듣기 순서', 'Listening steps')}>
-      <p className="small" style={{ margin: 0, fontWeight: 700 }}>{tx(`듣기 순서 ${step + 1} / 4`, `Listening step ${step + 1} of 4`)} · {s.title}</p>
+      <p className="small" style={{ margin: 0, fontWeight: 700 }}>{tx(ko`듣기 순서 ${step + 1} / 4`, `Listening step ${step + 1} of 4`)} · {s.title}</p>
       <p style={{ margin: 0, fontSize: 18, fontWeight: 600 }} role="status">{s.text}</p>
       {step === 3 && (
         <div className="row" role="group" aria-label={tx('들린 것', 'What you heard')}>

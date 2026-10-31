@@ -10,7 +10,7 @@ import {
   CONFIG_LABEL, MAKER_LABEL, ROUTE_LABEL, isBalanceMode,
   Step1, Step2, Step3, Step4, Step5, Step6, type Draft,
 } from './steps';
-import { tx } from '../../i18n';
+import { ko, tx } from '../../i18n';
 import './calibrate.css';
 
 const titles = () => [
@@ -195,7 +195,7 @@ export default function Calibrate() {
                   <div className="cal-sum-label">{l.label}</div>
                   <div>{l.value}</div>
                 </div>
-                <Link className="btn btn-sm" to={`/calibrate/${l.n}?only=1&next=${encodeURIComponent('/calibrate/7')}`} aria-label={tx(`${l.label} 바꾸기`, `Change ${l.label}`)}>
+                <Link className="btn btn-sm" to={`/calibrate/${l.n}?only=1&next=${encodeURIComponent('/calibrate/7')}`} aria-label={tx(ko`${l.label} 바꾸기`, `Change ${l.label}`)}>
                   {tx('바꾸기', 'Change')}
                 </Link>
               </li>
@@ -241,7 +241,7 @@ export default function Calibrate() {
       {header}
       <section className="card stack-lg" aria-labelledby="cal-h">
         <h2 id="cal-h" style={{ margin: 0 }}>
-          {tx(`${step}단계.`, `Step ${step}.`)} {titles()[step - 1]}
+          {tx(ko`${step}단계.`, `Step ${step}.`)} {titles()[step - 1]}
         </h2>
         {st.loading || !ready ? <p role="status">{tx('소리를 준비하는 중이에요…', 'Getting the sound ready…')}</p> : body}
         <div className="cal-nav">

@@ -3,7 +3,7 @@ import { engine, useAnimationFrame } from '../../audio/useEngine';
 import { Icon } from '../ui/Icon';
 import { INSTRUMENT_LABEL, type InstrumentId, type MotionLevel, type RoomMode } from '../../types';
 import { InstrumentFigure, type FigurePose } from './figures';
-import { getLang, tx } from '../../i18n';
+import { getLang, ko, tx } from '../../i18n';
 import './instruments.css';
 
 export { InstrumentFigure };
@@ -44,8 +44,8 @@ function VolumeStrip({ name, v }: { name: string; v: VolumeProps }) {
   const zero = ((0 - v.min) / (v.max - v.min)) * 100;
   const set = (n: number) => v.onChange(Math.max(v.min, Math.min(v.max, n)));
   return (
-    <div className="inst-vol" role="group" aria-label={tx(`${name} 크기`, `${name} volume`)}>
-      <button type="button" className="inst-vol-btn" aria-label={tx(`${name} 작게`, `${name} softer`)} disabled={v.value <= v.min} onClick={() => set(v.value - v.step)}>
+    <div className="inst-vol" role="group" aria-label={tx(ko`${name} 크기`, `${name} volume`)}>
+      <button type="button" className="inst-vol-btn" aria-label={tx(ko`${name} 작게`, `${name} softer`)} disabled={v.value <= v.min} onClick={() => set(v.value - v.step)}>
         <Icon name="minus" size={20} />
       </button>
       <div className="inst-vol-mid">
@@ -55,7 +55,7 @@ function VolumeStrip({ name, v }: { name: string; v: VolumeProps }) {
           <span className="inst-vol-fill" style={{ width: `${pct}%` }} />
         </span>
       </div>
-      <button type="button" className="inst-vol-btn" aria-label={tx(`${name} 크게`, `${name} louder`)} disabled={v.value >= v.max} onClick={() => set(v.value + v.step)}>
+      <button type="button" className="inst-vol-btn" aria-label={tx(ko`${name} 크게`, `${name} louder`)} disabled={v.value >= v.max} onClick={() => set(v.value + v.step)}>
         <Icon name="plus" size={20} />
       </button>
     </div>
@@ -180,7 +180,7 @@ export function InstrumentCard(p: InstrumentCardProps) {
     p.onPress();
   };
 
-  const name = hidden ? tx(`악기 ${blindNumber}`, `Instrument ${blindNumber}`) : INSTRUMENT_LABEL[id];
+  const name = hidden ? tx(ko`악기 ${blindNumber}`, `Instrument ${blindNumber}`) : INSTRUMENT_LABEL[id];
   const onTxt = on ? tx('켜짐', 'On') : tx('꺼짐', 'Off');
   const hint =
     mode === 'toggle'
@@ -220,7 +220,7 @@ export function InstrumentCard(p: InstrumentCardProps) {
       </span>
       <span className="inst-tags" aria-hidden="true">
         {selected && <span className="inst-tag">{tx('혼자 듣는 중', 'Solo')}</span>}
-        {blindNumber !== undefined && revealed && <span className="inst-tag is-soft">{tx(`악기 ${blindNumber}`, `Instrument ${blindNumber}`)}</span>}
+        {blindNumber !== undefined && revealed && <span className="inst-tag is-soft">{tx(ko`악기 ${blindNumber}`, `Instrument ${blindNumber}`)}</span>}
       </span>
     </button>
   );

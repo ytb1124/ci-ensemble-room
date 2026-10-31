@@ -17,7 +17,7 @@ import type {
   Reflection,
 } from '../types';
 import { INSTRUMENTS, INSTRUMENT_LABEL } from '../types';
-import { getLang, locale, tx } from '../i18n';
+import { getLang, ko, locale, tx } from '../i18n';
 
 // ───────── 기준값 ─────────
 export const RULES = {
@@ -52,19 +52,19 @@ function liveList(items: (() => string)[]): string[] {
 /** 화면에 그대로 보여 줄 규칙 문장 */
 export const RULE_TEXT: string[] = liveList([
   () => tx(
-    `느낀 차이: 원본끼리 비교한 기준 쌍에 표시한 값의 평균이 "기준값"이에요. 단서값 = 그 단서를 바꾼 소리에 표시한 값의 평균 − 기준값 (0보다 작으면 0). 단서값이 ${RULES.feelBig} 이상이면 "크게 느낌", ${RULES.feelSome}–${RULES.feelBig - 1}이면 "조금 느낌", ${RULES.feelSome} 미만이면 "거의 못 느낌"이라고 말해요. 건너뛴 문항은 빼요.`,
+    ko`느낀 차이: 원본끼리 비교한 기준 쌍에 표시한 값의 평균이 "기준값"이에요. 단서값 = 그 단서를 바꾼 소리에 표시한 값의 평균 − 기준값 (0보다 작으면 0). 단서값이 ${RULES.feelBig} 이상이면 "크게 느낌", ${RULES.feelSome}–${RULES.feelBig - 1}이면 "조금 느낌", ${RULES.feelSome} 미만이면 "거의 못 느낌"이라고 말해요. 건너뛴 문항은 빼요.`,
     `Felt difference: the "baseline" is the average of your ratings for the pairs where both sounds were the original. Cue value = the average of your ratings for the sound with that cue changed − the baseline (0 if below 0). A cue value of ${RULES.feelBig} or more is "Felt a big difference", ${RULES.feelSome}–${RULES.feelBig - 1} is "Felt some difference", and under ${RULES.feelSome} is "Barely felt a difference". Skipped questions are left out.`,
   ),
   () => tx(
-    `흔들림: 같은 단서에 표시한 두 값이 ${RULES.shaky} 이상 차이 나면 "아직 흔들려요"라고 적어요. 한 번만 들은 단서는 "한 번만 들었어요"라고 적어요.`,
+    ko`흔들림: 같은 단서에 표시한 두 값이 ${RULES.shaky} 이상 차이 나면 "아직 흔들려요"라고 적어요. 한 번만 들은 단서는 "한 번만 들었어요"라고 적어요.`,
     `Varies: if your two ratings for the same cue differ by ${RULES.shaky} or more, we write "Still varies". If you heard a cue only once, we write "Heard only once".`,
   ),
   () => tx(
-    `주의문: 기준값이 ${RULES.refCaution} 이상이면 "차이가 없을 때도 다르다고 느끼는 편이에요. 값을 조심해서 보세요."를 보여 줘요.`,
+    ko`주의문: 기준값이 ${RULES.refCaution} 이상이면 "차이가 없을 때도 다르다고 느끼는 편이에요. 값을 조심해서 보세요."를 보여 줘요.`,
     `Note: if the baseline is ${RULES.refCaution} or more, we show "You tend to hear a difference even when there is none. Read the values with care."`,
   ),
   () => tx(
-    `다시 들었을 때: 같은 두 소리를 다시 들었을 때 표시한 두 값의 차이가 ${RULES.consistSame} 미만이면 "비슷하게", ${RULES.consistSame}–${RULES.consistDiff - 1}이면 "조금 달랐어요", ${RULES.consistDiff} 이상이면 "꽤 달랐어요"라고 적어요. 좋고 나쁨을 말하지 않아요.`,
+    ko`다시 들었을 때: 같은 두 소리를 다시 들었을 때 표시한 두 값의 차이가 ${RULES.consistSame} 미만이면 "비슷하게", ${RULES.consistSame}–${RULES.consistDiff - 1}이면 "조금 달랐어요", ${RULES.consistDiff} 이상이면 "꽤 달랐어요"라고 적어요. 좋고 나쁨을 말하지 않아요.`,
     `Hearing it again: when you heard the same two sounds again, if your two ratings differ by less than ${RULES.consistSame}, we write "about the same"; ${RULES.consistSame}–${RULES.consistDiff - 1}, "a little different"; ${RULES.consistDiff} or more, "quite different". This says nothing about good or bad.`,
   ),
   () => tx(
@@ -80,7 +80,7 @@ export const RULE_TEXT: string[] = liveList([
     'What you did: from your Ensemble Room record, we only name instruments. We do not turn the record into cues (turning up the drum could be for the rhythm, or because the melody was hard to hear).',
   ),
   () => tx(
-    `일치·엇갈림 문장: ①크게 느낌 ②선택 ${RULES.pickMin}회 이상 ③칩 ${RULES.chipMany}회 이상, 이 세 가지 중 2개 이상이 같은 단서를 가리키면 "같은 방향", 크게 느꼈는데 칩·선택에 한 번도 없으면 "흥미로운 차이", 칩은 많은데 거의 못 느꼈으면 "다른 단서가 섞였을 수 있어요"라고 적어요. 최대 ${RULES.maxSentences}개예요.`,
+    ko`일치·엇갈림 문장: ①크게 느낌 ②선택 ${RULES.pickMin}회 이상 ③칩 ${RULES.chipMany}회 이상, 이 세 가지 중 2개 이상이 같은 단서를 가리키면 "같은 방향", 크게 느꼈는데 칩·선택에 한 번도 없으면 "흥미로운 차이", 칩은 많은데 거의 못 느꼈으면 "다른 단서가 섞였을 수 있어요"라고 적어요. 최대 ${RULES.maxSentences}개예요.`,
     `Agree/differ sentences: ① felt a big difference ② picked ${RULES.pickMin} or more times ③ chips ${RULES.chipMany} or more times. If 2 or more of these point to the same cue, we say it "pointed the same way". If you felt a big difference but never picked it in chips or choices, we call it "an interesting difference". If you picked the chip often but barely felt a difference, we say "another cue may have mixed in". At most ${RULES.maxSentences} sentences.`,
   ),
   () => tx(
@@ -409,7 +409,7 @@ function buildSentences(cues: CueSummary[], log: LogFacts): ReportSentence[] {
 function buildNext(cues: CueSummary[]): NextStep {
   const shaky = cues.find((c) => c.feel.shaky);
   if (shaky) {
-    return { kind: 'shaky', cue: shaky.id, text: tx(`"${shaky.label}" 질문만 다시 들어 보기`, `Listen again to just the "${shaky.label}" question`) };
+    return { kind: 'shaky', cue: shaky.id, text: tx(ko`"${shaky.label}" 질문만 다시 들어 보기`, `Listen again to just the "${shaky.label}" question`) };
   }
   const differ = cues.find(
     (c) =>

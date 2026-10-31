@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../../components/ui/Icon';
-import { getLang, tx, useLang } from '../../i18n';
+import { getLang, ko, tx, useLang } from '../../i18n';
 import { useEngineState } from '../../audio/useEngine';
 import { useLog } from '../../store/log';
 import { useProbeState } from '../../store/probe';
@@ -71,8 +71,8 @@ export default function Report() {
           </p>
           {data.hasResponses && (
             <p className="small">
-              {tx(`지금까지 질문 ${data.counts.total}개에 답했어요`, `So far you answered ${data.counts.total} ${data.counts.total === 1 ? 'question' : 'questions'}`)}
-              {data.counts.skipped > 0 ? tx(` (넘어간 질문 ${data.counts.skipped}개)`, ` (${data.counts.skipped} skipped)`) : ''}.
+              {tx(ko`지금까지 질문 ${data.counts.total}개에 답했어요`, `So far you answered ${data.counts.total} ${data.counts.total === 1 ? 'question' : 'questions'}`)}
+              {data.counts.skipped > 0 ? tx(ko` (넘어간 질문 ${data.counts.skipped}개)`, ` (${data.counts.skipped} skipped)`) : ''}.
             </p>
           )}
         </div>
@@ -287,7 +287,7 @@ export default function Report() {
         <h2 id="rep-actions">{tx('이어서 하기', 'Keep going')}</h2>
         <div className="row">
           <Link to={`/probe/set${nextSet}`} className="btn btn-lg">
-            <Icon name="refresh" /> {tx(`다시 해 보기 (세트 ${nextSet})`, `Try again (Set ${nextSet})`)}
+            <Icon name="refresh" /> {tx(ko`다시 해 보기 (세트 ${nextSet})`, `Try again (Set ${nextSet})`)}
           </Link>
           <Link to="/room/hbd" className="btn btn-lg">{tx('합주실로', 'To the Ensemble Room')}</Link>
         </div>
@@ -300,7 +300,7 @@ export default function Report() {
           <div className="stack" style={{ marginTop: 12 }}>
             <p className="small muted">
               {tx(
-                `아래 기준값(예: ${RULES.feelSome}, ${RULES.feelBig}, ${RULES.shaky})은 모두 설계하면서 정한 값이에요. 연구로 확인된 값은 아니에요.`,
+                ko`아래 기준값(예: ${RULES.feelSome}, ${RULES.feelBig}, ${RULES.shaky})은 모두 설계하면서 정한 값이에요. 연구로 확인된 값은 아니에요.`,
                 `The cutoff values below (e.g., ${RULES.feelSome}, ${RULES.feelBig}, ${RULES.shaky}) were all chosen while designing this app. They have not been confirmed by research.`,
               )}
             </p>

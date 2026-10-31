@@ -1,0 +1,53 @@
+/* 관리자 문구 수정 화면(#/admin) */
+.admin { padding-bottom: 120px; }
+.admin-head { align-items: flex-end; gap: var(--s-xs); }
+.admin-label { gap: 6px; font-weight: 600; color: var(--body-strong); }
+.admin-code {
+  margin: 0; padding: var(--s-sm); border-radius: var(--r-md);
+  background: var(--surface-strong); color: var(--ink);
+  font-size: 14px; white-space: pre-wrap; word-break: break-all;
+}
+.admin code { font-size: 0.95em; background: var(--surface-strong); padding: 1px 6px; border-radius: var(--r-xs); }
+
+.admin-tools { display: flex; flex-wrap: wrap; gap: var(--s-sm); align-items: center; }
+.admin-tools .input { flex: 1 1 260px; }
+
+.admin-group { display: flex; flex-direction: column; gap: var(--s-sm); }
+.admin-group-head {
+  display: flex; align-items: center; gap: var(--s-xs);
+  min-height: 48px; padding: 8px 4px;
+  border: 0; border-bottom: 1px solid var(--hairline); background: transparent;
+  cursor: pointer; text-align: left;
+}
+.admin-group-head h2 { font-size: 20px; }
+.admin-caret { width: 16px; color: var(--muted); }
+
+.admin-row {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: var(--s-sm) var(--s-md);
+  border-radius: var(--r-lg); border: 1px solid var(--hairline);
+  background: var(--surface-soft);
+}
+.admin-row.is-edited { border-color: var(--success); }
+.admin-row.is-dirty { border-color: var(--warning); box-shadow: inset 3px 0 0 var(--warning); }
+.admin-text { min-height: 44px; resize: vertical; line-height: 1.5; font-size: 16px; }
+.admin-where { overflow-wrap: anywhere; }
+.admin-orig, .admin-en { overflow-wrap: anywhere; }
+.admin-tag-edited { background: color-mix(in srgb, var(--success) 18%, transparent); color: var(--success); }
+.admin-tag-dirty { background: color-mix(in srgb, var(--warning) 18%, transparent); color: var(--warning); }
+
+.admin-error { color: var(--error); font-weight: 600; }
+.admin-warn { color: var(--warning); font-weight: 600; }
+.admin-ok { color: var(--success); font-weight: 600; }
+
+.admin-orphan { display: flex; flex-direction: column; gap: 4px; padding-top: var(--s-sm); border-top: 1px solid var(--hairline); align-items: flex-start; }
+
+.admin-bar {
+  position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 30;
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-xs);
+  width: min(928px, calc(100vw - 32px));
+  padding: 10px 12px 10px 18px; border-radius: var(--r-lg);
+  background: var(--canvas); border: 1.5px solid var(--hairline-strong); box-shadow: var(--shadow-card);
+}
+.admin-bar p { margin: 0; }
+.admin-bar .admin-ok, .admin-bar .admin-error { width: 100%; }

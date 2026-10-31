@@ -3,7 +3,7 @@ import { engine } from '../../audio/engine';
 import { getProbeClip, type ClipId } from '../../audio/probeAudio';
 import { useEngineState } from '../../audio/useEngine';
 import { Icon } from '../../components/ui/Icon';
-import { tx } from '../../i18n';
+import { ko, tx } from '../../i18n';
 import type { CueId, EmphId, ProbeItem } from '../../types';
 import './probe.css';
 
@@ -114,7 +114,7 @@ export function ListenButton({
 export function ProgressBar({ index, total, title }: { index: number; total: number; title?: string }) {
   return (
     <div className="probe-progress">
-      <h1 style={{ margin: 0, fontSize: 24 }}>{title ?? tx(`잠깐 질문 (${index + 1}/${total})`, `Quick questions (${index + 1}/${total})`)}</h1>
+      <h1 style={{ margin: 0, fontSize: 24 }}>{title ?? tx(ko`잠깐 질문 (${index + 1}/${total})`, `Quick questions (${index + 1}/${total})`)}</h1>
       <div className="probe-bar" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={index + 1} aria-label={tx('진행', 'Progress')}>
         <span style={{ width: `${((index + 1) / total) * 100}%` }} />
       </div>

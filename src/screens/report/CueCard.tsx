@@ -3,7 +3,7 @@ import { SoundOnButton } from '../../components/SoundGate';
 import { Icon } from '../../components/ui/Icon';
 import { engine, useEngineState } from '../../audio/useEngine';
 import { getProbeClip, type ClipId } from '../../audio/probeAudio';
-import { tx } from '../../i18n';
+import { ko, tx } from '../../i18n';
 import { FEEL_WORD, type CueSummary } from '../../store/reportRules';
 
 /** 한 단서의 원본 vs 편집본 A/B 다시 듣기. 세트를 끝내기 전에는 어느 쪽이 바뀐 소리인지 알려 주지 않는다 */
@@ -44,15 +44,15 @@ function Replay({ cue, revealed }: { cue: CueSummary; revealed: boolean }) {
   };
 
   return (
-    <div className="row" role="group" aria-label={tx(`${cue.label} 다시 들어 보기`, `Listen again: ${cue.label}`)}>
+    <div className="row" role="group" aria-label={tx(ko`${cue.label} 다시 들어 보기`, `Listen again: ${cue.label}`)}>
       {ordered.map((p, i) => {
         const id = `rep_${cue.id}_${p.which}`;
         const playing = st.clip === id;
-        const text = revealed ? p.label : tx(`소리 ${i + 1} 듣기`, `Play sound ${i + 1}`);
+        const text = revealed ? p.label : tx(ko`소리 ${i + 1} 듣기`, `Play sound ${i + 1}`);
         return (
           <button key={id} type="button" className="btn" aria-pressed={playing} disabled={busy === id} onClick={() => void play(p)}>
             <Icon name={playing ? 'pause' : 'play'} size={20} />
-            {busy === id ? tx('준비 중…', 'Getting ready…') : playing ? tx(`${text} (멈추기)`, `${text} (stop)`) : text}
+            {busy === id ? tx('준비 중…', 'Getting ready…') : playing ? tx(ko`${text} (멈추기)`, `${text} (stop)`) : text}
           </button>
         );
       })}
@@ -95,7 +95,7 @@ export function CueCard({
           {feel.level ? (
             <>
               <p className="rep-word">{FEEL_WORD[feel.level]}</p>
-              <p className="small muted">{tx(`${feel.n}번 표시했어요`, feel.n === 1 ? 'You rated it 1 time' : `You rated it ${feel.n} times`)}</p>
+              <p className="small muted">{tx(ko`${feel.n}번 표시했어요`, feel.n === 1 ? 'You rated it 1 time' : `You rated it ${feel.n} times`)}</p>
               {refCaution && <p className="small">{tx('차이가 없을 때도 다르다고 느끼는 편이에요. 값을 조심해서 보세요.', 'You tend to feel a difference even when there is none. Read these values with care.')}</p>}
             </>
           ) : (
@@ -106,13 +106,13 @@ export function CueCard({
           <h4>{tx('고른 것', 'What you picked')}</h4>
           {pick.appeared ? (
             <>
-              <p className="rep-word">{tx(`${pick.appeared}번 중 ${pick.chosen}번`, `${pick.chosen} of ${pick.appeared} times`)}</p>
+              <p className="rep-word">{tx(ko`${pick.appeared}번 중 ${pick.chosen}번`, `${pick.chosen} of ${pick.appeared} times`)}</p>
               <p className="small">{tx('"더 또렷해요"로 골랐어요', 'you picked it as clearer')}</p>
               {pick.chosen > 0 && (
                 <p className="small">
-                  {pick.sure > 0 && <span className="rep-strong">{tx(`확실해요 ${pick.sure}번`, `Sure: ${pick.sure}`)} </span>}
-                  {pick.some > 0 && <span>{tx(`조금 ${pick.some}번`, `Somewhat: ${pick.some}`)} </span>}
-                  {pick.unsure > 0 && <span className="rep-faint">{tx(`잘 모르겠어요 ${pick.unsure}번`, `Not sure: ${pick.unsure}`)}</span>}
+                  {pick.sure > 0 && <span className="rep-strong">{tx(ko`확실해요 ${pick.sure}번`, `Sure: ${pick.sure}`)} </span>}
+                  {pick.some > 0 && <span>{tx(ko`조금 ${pick.some}번`, `Somewhat: ${pick.some}`)} </span>}
+                  {pick.unsure > 0 && <span className="rep-faint">{tx(ko`잘 모르겠어요 ${pick.unsure}번`, `Not sure: ${pick.unsure}`)}</span>}
                 </p>
               )}
               {pick.differentGood > 0 && <p className="small">{tx('더 또렷한 쪽과 더 좋은 쪽이 달랐어요', 'The clearer one and the one you liked better were different')}</p>}
@@ -124,7 +124,7 @@ export function CueCard({
         <div className="rep-col">
           <h4>{tx('말한 것', 'What you said')}</h4>
           {say.chipCount > 0 ? (
-            <p className="rep-word">{tx(`${say.chipCount}번 골랐어요`, say.chipCount === 1 ? 'Picked 1 time' : `Picked ${say.chipCount} times`)}</p>
+            <p className="rep-word">{tx(ko`${say.chipCount}번 골랐어요`, say.chipCount === 1 ? 'Picked 1 time' : `Picked ${say.chipCount} times`)}</p>
           ) : (
             <p className="muted">{tx('아직 고른 적이 없어요', "You haven't picked it yet")}</p>
           )}

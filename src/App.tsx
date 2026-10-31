@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { HashRouter, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { ResumeBanner, SoundGate } from './components/SoundGate';
 import { useProfile } from './store/profile';
@@ -13,15 +13,21 @@ import Settings from './screens/Settings';
 import Start from './screens/Start';
 import Join from './screens/Join';
 import { initResearch } from './store/research';
+import { loadOverrides, useOverrides } from './store/textOverrides';
 import { Icon } from './components/ui/Icon';
 import { setLang, tx, useLang } from './i18n';
 
 // 사이트맵(구성안 3.1절). 정적 호스팅에서도 동작하도록 해시 라우터를 쓴다.
 
+// 관리자 문구 수정 화면은 문구 목록이 커서 열 때만 불러온다
+const Admin = lazy(() => import('./screens/admin/Admin'));
+
 function TopBar() {
   const { pathname } = useLocation();
   // 단서 질문 중에는 다른 곳으로 새지 않게 메뉴를 줄인다
-  const minimal = pathname.startsWith('/probe');
+  const minimal = pathname.startsWith('/probe') || pathname.startsWith('/admin');
+  // 관리자 화면은 한국어 문구만 다룬다
+  const admin = pathname.startsWith('/admin');
   return (
     <header className="topbar">
       <NavLink to="/" className="brand" aria-label={tx('인공와우 합주실 처음으로', 'CI Ensemble Room home')}>
@@ -40,7 +46,7 @@ function TopBar() {
           <NavLink to="/settings">{tx('설정', 'Settings')}</NavLink>
         </nav>
       )}
-      <LangSwitch />
+      {!admin && <LangSwitch />}
     </header>
   );
 }
@@ -102,7 +108,9 @@ function ScrollTop() {
 
 export default function App() {
   useEffect(() => initResearch(), []);
+  useEffect(() => void loadOverrides(), []);
   useLang(); // 언어가 바뀌면 전체를 다시 그린다(문구는 tx()가 그릴 때 읽는다)
+  useOverrides(); // 관리자가 고친 문구를 받아 오면 다시 그린다
   return (
     <HashRouter>
       <LangSync />
@@ -131,6 +139,7 @@ export default function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/about" element={<About />} />
           <Route path="/join" element={<Join />} />
+          <Route path="/admin" element={<Suspense fallback={<p className="page muted">불러오는 중…</p>}><Admin /></Suspense>} />
           {/* 개발용: 악기 UI 모든 상태 보기 */}
           {import.meta.env.DEV && <Route path="/dev/instruments" element={<InstrumentGallery />} />}
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -11,7 +11,7 @@ import { updateProfile, useProfile } from '../store/profile';
 import { profileLines } from '../store/reportRules';
 import { storageAvailable } from '../store/storage';
 import type { MotionLevel, PlaceholderShape, Profile, Theme, ViewMode } from '../types';
-import { getLang, tx } from '../i18n';
+import { getLang, ko, tx } from '../i18n';
 import { DeleteAll } from './report/DeleteAll';
 import { ResearchSection } from './ResearchSection';
 import { ExportButtons } from './report/ExportButtons';
@@ -192,7 +192,7 @@ export default function Settings() {
           <dt>{tx('이 기기의 소리 지연 (참고)', 'Sound delay on this device (for reference)')}</dt>
           <dd>
             {st.unlocked
-              ? tx(`기본 ${ms(lat.baseLatency)} · 출력 ${ms(lat.outputLatency)}`, `Base ${ms(lat.baseLatency)} · Output ${ms(lat.outputLatency)}`)
+              ? tx(ko`기본 ${ms(lat.baseLatency)} · 출력 ${ms(lat.outputLatency)}`, `Base ${ms(lat.baseLatency)} · Output ${ms(lat.outputLatency)}`)
               : tx('소리를 켜면 보여요', 'Shown when sound is on')}
           </dd>
         </dl>

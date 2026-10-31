@@ -19,7 +19,7 @@ import { TransportBar } from './TransportBar';
 import { AdvancedPanel } from './AdvancedPanel';
 import { GuideCards } from './GuideCards';
 import { ListenFirst } from './ListenFirst';
-import { tx } from '../../i18n';
+import { ko, tx } from '../../i18n';
 import './room.css';
 
 // 세션(페이지를 연 동안) 기억
@@ -151,7 +151,7 @@ function RoomInner({ song }: { song: SongId }) {
     } else {
       engine.solo(id);
       logEvent({ type: 'solo', instrument: id, mode: 'solo', songPos: pos, song });
-      setLive(tx(`${INSTRUMENT_LABEL[id]}만 들려요`, `Only ${INSTRUMENT_LABEL[id]} is playing`));
+      setLive(tx(ko`${INSTRUMENT_LABEL[id]}만 들려요`, `Only ${INSTRUMENT_LABEL[id]} is playing`));
     }
   };
   const allTogether = () => {
@@ -163,7 +163,7 @@ function RoomInner({ song }: { song: SongId }) {
     engine.stopAlternate();
     engine.solo(id);
     logEvent({ type: 'solo', instrument: id, mode, songPos: engine.position(), song });
-    setLive(tx(`${INSTRUMENT_LABEL[id]}만 들려요`, `Only ${INSTRUMENT_LABEL[id]} is playing`));
+    setLive(tx(ko`${INSTRUMENT_LABEL[id]}만 들려요`, `Only ${INSTRUMENT_LABEL[id]} is playing`));
     if (!engine.state.playing) engine.play();
   };
 
@@ -176,7 +176,7 @@ function RoomInner({ song }: { song: SongId }) {
     if (st.bypass) engine.setBypass(false); // 보정 없이 듣는 중이면 바꾼 크기가 안 들리므로 끈다
     updateProfile((p) => ({ songOverrides: { ...p.songOverrides, [song]: { instGainDb: { ...effectiveInstGain(p, song), [id]: v } } } }));
     logEvent({ type: 'gain', instrument: id, fromDb: from, toDb: v, song });
-    setLive(`${blind && !revealed ? tx(`악기 ${blindNums[id]}`, `Instrument ${blindNums[id]}`) : INSTRUMENT_LABEL[id]} ${volumeWord(v)}`);
+    setLive(`${blind && !revealed ? tx(ko`악기 ${blindNums[id]}`, `Instrument ${blindNums[id]}`) : INSTRUMENT_LABEL[id]} ${volumeWord(v)}`);
   };
 
   const changeMode = (m: RoomMode) => {

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { engine } from '../../audio/engine';
 import { buildSet } from '../../config/probes';
-import { tx } from '../../i18n';
+import { ko, tx } from '../../i18n';
 import { addReflection, completeSet, markPracticed, probeStore } from '../../store/probe';
 import type { CueId, ProbeItem } from '../../types';
 import ProbeA from './ProbeA';
@@ -78,7 +78,7 @@ export default function Probe() {
     return (
       <main className="page page-narrow probe-page">
         <div className="stack-lg">
-          <h1 style={{ margin: 0, fontSize: 24 }}>{tx(`세트 ${set}까지 마쳤어요`, `You finished Set ${set}`)}</h1>
+          <h1 style={{ margin: 0, fontSize: 24 }}>{tx(ko`세트 ${set}까지 마쳤어요`, `You finished Set ${set}`)}</h1>
           <p className="lead" style={{ margin: 0 }}>
             {tx('수고하셨어요. 어떤 소리를 바꿨는지는 [나의 청취 단서]에서 알려 드려요.', 'Thank you. You can see which sounds we changed in [My Listening Cues].')}
           </p>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { engine, useEngineState } from '../../audio/useEngine';
 import { logEvent } from '../../store/log';
 import type { CardAnswer, InstrumentId, SongId } from '../../types';
-import { tx } from '../../i18n';
+import { ko, tx } from '../../i18n';
 
 interface Card {
   id: string;
@@ -57,7 +57,7 @@ export function GuideCards({ song, onSolo }: { song: SongId; onSolo: (id: Instru
 
   return (
     <section className={`card card-tone ${card.tone} stack`} aria-label={tx('안내 카드', 'Guide card')}>
-      <p className="small" style={{ margin: 0, fontWeight: 600 }}>{tx(`안내 ${i + 1} / ${cards.length} · 정답은 없어요`, `Guide ${i + 1} of ${cards.length} · There is no right answer`)}</p>
+      <p className="small" style={{ margin: 0, fontWeight: 600 }}>{tx(ko`안내 ${i + 1} / ${cards.length} · 정답은 없어요`, `Guide ${i + 1} of ${cards.length} · There is no right answer`)}</p>
       <p style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>{card.text}</p>
       <div className="row">
         {card.action === 'trumpet' && <button type="button" className="btn btn-sm" onClick={() => onSolo('trumpet')}>{tx('트럼펫만 켜기', 'Trumpet only')}</button>}
