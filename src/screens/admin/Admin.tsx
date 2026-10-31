@@ -4,14 +4,16 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import catalog from 'virtual:ko-catalog';
 import { overridesEnabled, useOverrides } from '../../store/textOverrides';
-import { deleteOverride, errText, fetchOverrides, getSession, isAdmin, saveOverride, signIn, signOut } from './adminApi';
+import {
+  ADMINS, adminName, deleteOverride, errText, fetchHistory, fetchOverrides, getSession, saveOverride, signIn, signOut, type HistoryItem,
+} from './adminApi';
 import './admin.css';
 
 type Entry = (typeof catalog)[number];
 type Auth =
   | { status: 'loading' }
   | { status: 'out' }
-  | { status: 'in'; email: string; userId: string; admin: boolean };
+  | { status: 'in'; userId: string; email: string; name: string | null };
 type Filter = 'all' | 'edited' | 'vars';
 
 // 파일 위치로 화면을 나눈다. 위에서부터 처음 맞는 것
@@ -49,6 +51,9 @@ function checkVars(text: string, vars: number): { error: string | null; missing:
   return { error: null, missing };
 }
 
+const when = (iso: string) =>
+  new Date(iso).toLocaleString('ko-KR', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
 const rowsFor = (s: string) => Math.min(10, Math.max(1, s.split('\n').length, Math.ceil(s.length / 42)));
 
 export default function Admin() {
@@ -58,9 +63,9 @@ export default function Admin() {
     try {
       const s = await getSession();
       if (!s) return setAuth({ status: 'out' });
-      const admin = await isAdmin(s.user.id);
-      if (admin) await fetchOverrides();
-      setAuth({ status: 'in', email: s.user.email ?? '', userId: s.user.id, admin });
+      const name = await adminName(s.user.id);
+      if (name) await fetchOverrides();
+      setAuth({ status: 'in', userId: s.user.id, email: s.user.email ?? '', name });
     } catch {
       setAuth({ status: 'out' });
     }
@@ -80,14 +85,14 @@ export default function Admin() {
   }
   if (auth.status === 'loading') return <main className="page muted">확인하는 중…</main>;
   if (auth.status === 'out') return <Login onDone={refresh} />;
-  if (!auth.admin) {
+  if (!auth.name) {
     return (
       <main className="page page-narrow stack-lg">
         <h1>문구 관리</h1>
         <div className="card stack">
           <p><strong>{auth.email}</strong> 계정은 아직 관리자가 아니에요.</p>
-          <p className="small">Supabase 대시보드 → SQL Editor에서 아래를 한 번 실행하면 관리자가 돼요.</p>
-          <pre className="admin-code">{`insert into public.admins (user_id) values ('${auth.userId}');`}</pre>
+          <p className="small">'관리자_계정_만들기.sql'을 Supabase SQL Editor에서 실행했는지 확인해 주세요. 이 계정 하나만 등록하려면 아래를 실행해요.</p>
+          <pre className="admin-code">{`insert into public.admins (user_id, name) values ('${auth.userId}', '이름');`}</pre>
           <div className="row">
             <button type="button" className="btn" onClick={() => void refresh()}>다시 확인</button>
             <button type="button" className="btn btn-ghost" onClick={() => void signOut().then(refresh)}>로그아웃</button>
@@ -96,11 +101,11 @@ export default function Admin() {
       </main>
     );
   }
-  return <Editor email={auth.email} onSignOut={() => void signOut().then(refresh)} />;
+  return <Editor name={auth.name} onSignOut={() => void signOut().then(refresh)} />;
 }
 
 function Login({ onDone }: { onDone: () => void }) {
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -110,10 +115,10 @@ function Login({ onDone }: { onDone: () => void }) {
     setBusy(true);
     setError(null);
     try {
-      await signIn(email.trim(), password);
+      await signIn(name, password);
       onDone();
     } catch (err) {
-      setError(errText(err) === 'Invalid login credentials' ? '이메일이나 비밀번호가 맞지 않아요.' : errText(err));
+      setError(errText(err) === 'Invalid login credentials' ? '비밀번호가 맞지 않아요.' : errText(err));
     } finally {
       setBusy(false);
     }
@@ -122,25 +127,52 @@ function Login({ onDone }: { onDone: () => void }) {
   return (
     <main className="page page-narrow stack-lg">
       <h1>문구 관리</h1>
-      <p className="muted">관리자 계정으로 로그인해 주세요.</p>
+      <p className="muted">이름을 고르고 비밀번호를 넣어 주세요.</p>
       <form className="card stack" onSubmit={submit}>
-        <label className="stack admin-label">
-          이메일
-          <input className="input" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} />
-        </label>
+        <div className="stack admin-label" role="radiogroup" aria-label="관리자 이름">
+          이름
+          <div className="row">
+            {ADMINS.map((a) => (
+              <button key={a.name} type="button" role="radio" className="chip" aria-checked={name === a.name} aria-pressed={name === a.name} onClick={() => setName(a.name)}>
+                {a.name}
+              </button>
+            ))}
+          </div>
+        </div>
         <label className="stack admin-label">
           비밀번호
           <input className="input" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
         </label>
         {error && <p role="alert" className="admin-error">{error}</p>}
-        <button type="submit" className="btn btn-primary" disabled={busy}>{busy ? '로그인하는 중…' : '로그인'}</button>
+        <button type="submit" className="btn btn-primary" disabled={busy || !name}>{busy ? '로그인하는 중…' : '로그인'}</button>
       </form>
     </main>
   );
 }
 
-function Editor({ email, onSignOut }: { email: string; onSignOut: () => void }) {
+function Editor({ name, onSignOut }: { name: string; onSignOut: () => void }) {
   const overrides = useOverrides();
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [showLog, setShowLog] = useState(false);
+
+  const loadHistory = async () => {
+    try {
+      setHistory(await fetchHistory());
+      setHistoryError(null);
+    } catch (e) {
+      setHistoryError(errText(e));
+    }
+  };
+  useEffect(() => {
+    void loadHistory();
+  }, []);
+
+  const historyByKey = useMemo(() => {
+    const m = new Map<string, HistoryItem[]>();
+    for (const h of history) m.set(h.key, [...(m.get(h.key) ?? []), h]);
+    return m;
+  }, [history]);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -206,6 +238,7 @@ function Editor({ email, onSignOut }: { email: string; onSignOut: () => void }) 
       setNote({ ok: false, text: `저장하지 못했어요: ${errText(e)}` });
     } finally {
       setBusy(false);
+      void loadHistory();
     }
   };
 
@@ -244,7 +277,7 @@ function Editor({ email, onSignOut }: { email: string; onSignOut: () => void }) 
       <div className="row admin-head">
         <div className="stack" style={{ gap: 4, marginRight: 'auto' }}>
           <h1>문구 관리</h1>
-          <p className="muted small">{email} · 한국어 문구 {catalog.length}개 중 {editedCount}개 수정됨</p>
+          <p className="muted small">{name}(으)로 로그인 · 한국어 문구 {catalog.length}개 중 {editedCount}개 수정됨</p>
         </div>
         <a className="btn btn-sm" href="./#/" target="_blank" rel="noreferrer">사이트 열기</a>
         <button type="button" className="btn btn-sm btn-ghost" onClick={onSignOut}>로그아웃</button>
@@ -254,6 +287,26 @@ function Editor({ email, onSignOut }: { email: string; onSignOut: () => void }) 
         <p>사이트에 보이는 한국어 문구를 하나씩 고칠 수 있어요. 저장하면 서버에 남고, 방문자는 다음에 열거나 새로고침할 때 바뀐 문구를 봐요.</p>
         <p><code>{'{0}'}</code>, <code>{'{1}'}</code> 같은 자리에는 숫자나 악기 이름이 들어가요. 자리는 옮겨도 되지만 지우면 그 값이 안 보여요.</p>
       </div>
+
+      <section className="admin-group">
+        <button type="button" className="admin-group-head" aria-expanded={showLog} onClick={() => setShowLog((v) => !v)}>
+          <span aria-hidden="true" className="admin-caret">{showLog ? '▾' : '▸'}</span>
+          <h2>수정 기록</h2>
+          <span className="tag">{history.length}건</span>
+        </button>
+        {historyError && <p className="small admin-error">기록을 불러오지 못했어요: {historyError}</p>}
+        {showLog && (
+          history.length === 0
+            ? <p className="small muted">아직 수정한 기록이 없어요.</p>
+            : (
+              <ol className="admin-log">
+                {history.map((h) => (
+                  <HistoryLine key={h.id} item={h} showKey onFind={() => { setQuery(h.key); setFilter('all'); }} />
+                ))}
+              </ol>
+            )
+        )}
+      </section>
 
       <div className="admin-tools">
         <input
@@ -298,6 +351,7 @@ function Editor({ email, onSignOut }: { email: string; onSignOut: () => void }) 
                     value={drafts[e.key] ?? overrides[e.key] ?? e.key}
                     dirty={e.key in drafts}
                     edited={e.key in overrides}
+                    history={historyByKey.get(e.key) ?? []}
                     busy={busy}
                     onChange={(v) => setDraft(e.key, v)}
                     onSave={() => void saveOne(e.key)}
@@ -342,12 +396,13 @@ function Editor({ email, onSignOut }: { email: string; onSignOut: () => void }) 
 }
 
 function Row({
-  entry, value, dirty, edited, busy, onChange, onSave, onCancel, onReset,
+  entry, value, dirty, edited, history, busy, onChange, onSave, onCancel, onReset,
 }: {
   entry: Entry;
   value: string;
   dirty: boolean;
   edited: boolean;
+  history: HistoryItem[];
   busy: boolean;
   onChange: (v: string) => void;
   onSave: () => void;
@@ -355,12 +410,15 @@ function Row({
   onReset: () => void;
 }) {
   const { error, missing } = checkVars(value, entry.vars);
+  const [showHistory, setShowHistory] = useState(false);
+  const last = history[0];
   const id = `ko-${entry.where[0].replace(/\W/g, '-')}`;
   return (
     <div className={`admin-row${dirty ? ' is-dirty' : edited ? ' is-edited' : ''}`}>
       <div className="row" style={{ gap: 6 }}>
         {edited && <span className="tag admin-tag-edited">수정됨</span>}
         {dirty && <span className="tag admin-tag-dirty">저장 안 함</span>}
+        {last && <span className="small admin-last">{last.changed_by_name ?? '알 수 없음'} · {when(last.changed_at)}</span>}
         <span className="small muted admin-where" title={entry.where.join('\n')}>
           {entry.where[0]}{entry.where.length > 1 ? ` 외 ${entry.where.length - 1}곳` : ''}
         </span>
@@ -382,6 +440,18 @@ function Row({
       {!error && missing.length > 0 && (
         <p className="small admin-warn">{missing.map((n) => `{${n}}`).join(', ')} 자리가 빠졌어요. 그 값은 화면에 나오지 않아요.</p>
       )}
+      {history.length > 0 && (
+        <div className="stack" style={{ gap: 6 }}>
+          <button type="button" className="admin-history-toggle small" aria-expanded={showHistory} onClick={() => setShowHistory((v) => !v)}>
+            {showHistory ? '▾' : '▸'} 수정 기록 {history.length}건
+          </button>
+          {showHistory && (
+            <ol className="admin-log">
+              {history.map((h) => <HistoryLine key={h.id} item={h} original={entry.key} />)}
+            </ol>
+          )}
+        </div>
+      )}
       {(dirty || edited) && (
         <div className="row">
           {dirty && <button type="button" className="btn btn-sm btn-primary" disabled={busy || !!error} onClick={onSave}>저장</button>}
@@ -390,5 +460,29 @@ function Row({
         </div>
       )}
     </div>
+  );
+}
+
+/** 기록 한 줄: 누가, 언제, 무엇에서 무엇으로 */
+function HistoryLine({ item, original, showKey, onFind }: { item: HistoryItem; original?: string; showKey?: boolean; onFind?: () => void }) {
+  const orig = original ?? item.key;
+  const from = item.old_value ?? orig;
+  const to = item.new_value ?? orig;
+  const action = item.new_value === null ? '원래 문구로 되돌림' : item.old_value === null ? '처음 수정' : '수정';
+  return (
+    <li className="admin-log-item small">
+      <p>
+        <strong>{item.changed_by_name ?? '알 수 없음'}</strong>
+        <span className="muted"> · {when(item.changed_at)} · {action}</span>
+      </p>
+      {showKey && (
+        <p className="muted admin-orig">
+          문구: {orig.length > 60 ? orig.slice(0, 60) + '…' : orig}{' '}
+          {onFind && <button type="button" className="admin-link" onClick={onFind}>이 문구 찾기</button>}
+        </p>
+      )}
+      <p className="admin-diff"><del>{from}</del></p>
+      <p className="admin-diff"><ins>{to}</ins></p>
+    </li>
   );
 }

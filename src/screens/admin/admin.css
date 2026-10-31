@@ -51,3 +51,21 @@
 }
 .admin-bar p { margin: 0; }
 .admin-bar .admin-ok, .admin-bar .admin-error { width: 100%; }
+
+.admin-last { color: var(--body-strong); font-weight: 600; }
+.admin-history-toggle, .admin-link {
+  align-self: flex-start; min-height: 32px; padding: 4px 0;
+  border: 0; background: transparent; color: var(--ink); font-weight: 600; cursor: pointer; text-decoration: underline;
+}
+.admin-link { display: inline; min-height: 0; padding: 0; }
+.admin-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s-xs); }
+.admin-log-item {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: var(--s-xs) var(--s-sm); border-radius: var(--r-md);
+  background: var(--canvas); border: 1px solid var(--hairline);
+}
+.admin-diff { overflow-wrap: anywhere; white-space: pre-wrap; }
+.admin-diff del { color: var(--error); text-decoration: line-through; }
+.admin-diff ins { color: var(--success); text-decoration: none; font-weight: 600; }
+.admin-diff del::before { content: '전: '; color: var(--muted); text-decoration: none; display: inline-block; }
+.admin-diff ins::before { content: '후: '; color: var(--muted); font-weight: 400; }

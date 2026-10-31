@@ -91,12 +91,14 @@ left join public.participant_state s on s.participant_id = p.id and s.kind = 'pr
 revoke all on public.participant_overview from anon, authenticated;
 
 -- ───────── 관리자 문구 수정(#/admin) ─────────
--- 관리자: 이메일·비밀번호 계정. 대시보드 → Authentication → Users → Add user로 만들고 아래처럼 등록한다.
---   insert into public.admins (user_id) select id from auth.users where email = '관리자 이메일';
+-- 관리자: 화면에서는 이름 + 비밀번호로 로그인한다. 이름마다 정해진 이메일 계정이 있다(src/screens/admin/adminApi.ts의 ADMINS).
+-- 계정은 저장소 밖의 '관리자_계정_만들기.sql'로 만든다(비밀번호가 들어 있어 공개 저장소에 올리지 않는다).
 create table if not exists public.admins (
   user_id uuid primary key references auth.users (id) on delete cascade,
   created_at timestamptz not null default now()
 );
+-- 수정 기록에 남길 이름
+alter table public.admins add column if not exists name text;
 alter table public.admins enable row level security;
 revoke all on public.admins from anon, authenticated;
 grant select on public.admins to authenticated;
@@ -126,3 +128,52 @@ create policy "admins write overrides" on public.text_overrides
   for all to authenticated
   using (exists (select 1 from public.admins a where a.user_id = (select auth.uid())))
   with check (exists (select 1 from public.admins a where a.user_id = (select auth.uid())));
+
+-- 수정 기록: 누가 어떤 문구를 무엇에서 무엇으로 바꿨는지. text_overrides가 바뀔 때마다 트리거가 남긴다.
+-- old_value가 null이면 원래 문구에서 바꾼 것, new_value가 null이면 원래 문구로 되돌린 것.
+create table if not exists public.text_override_history (
+  id bigint generated always as identity primary key,
+  key text not null,
+  old_value text,
+  new_value text,
+  changed_by uuid references auth.users (id) on delete set null,
+  changed_by_name text,
+  changed_at timestamptz not null default now()
+);
+create index if not exists text_override_history_key on public.text_override_history (key, changed_at desc);
+alter table public.text_override_history enable row level security;
+revoke all on public.text_override_history from anon, authenticated;
+grant select on public.text_override_history to authenticated;
+drop policy if exists "admins read history" on public.text_override_history;
+create policy "admins read history" on public.text_override_history
+  for select to authenticated
+  using (exists (select 1 from public.admins a where a.user_id = (select auth.uid())));
+
+-- 기록은 트리거만 쓴다(관리자도 직접 고치거나 지울 수 없다)
+create or replace function public.log_text_override()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  who uuid := auth.uid();
+  who_name text := (select a.name from public.admins a where a.user_id = auth.uid());
+begin
+  if tg_op = 'DELETE' then
+    insert into public.text_override_history (key, old_value, new_value, changed_by, changed_by_name)
+    values (old.key, old.value, null, who, who_name);
+    return old;
+  end if;
+  if tg_op = 'UPDATE' and new.value is not distinct from old.value then
+    return new;
+  end if;
+  insert into public.text_override_history (key, old_value, new_value, changed_by, changed_by_name)
+  values (new.key, case when tg_op = 'UPDATE' then old.value end, new.value, who, who_name);
+  return new;
+end;
+$$;
+drop trigger if exists text_overrides_history on public.text_overrides;
+create trigger text_overrides_history
+  after insert or update or delete on public.text_overrides
+  for each row execute function public.log_text_override();

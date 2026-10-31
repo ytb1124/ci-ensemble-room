@@ -81,11 +81,13 @@ src/
 - 변수가 들어간 문구는 코드에서 `` tx(ko`안내 ${i} / ${n}`, …) ``처럼 `ko` 태그를 붙이고, 관리자 화면에서는 `{0}`, `{1}` 자리로 보여요. 새 문구를 추가할 때도 이 규칙을 따라야 목록에 들어가요.
 - 코드에서 원래 문구를 바꾸면 그 문구의 수정 기록은 더는 쓰이지 않아요. 관리자 화면 아래 "더는 쓰이지 않는 수정"에서 지울 수 있어요.
 
+- 로그인: 관리자 이름(유태빈·이현민·송기화·이한설)을 고르고 공용 비밀번호를 넣어요. 이름마다 로그인용 이메일 계정이 있어요([`adminApi.ts`](src/screens/admin/adminApi.ts)의 `ADMINS`).
+- 수정 기록: 저장하거나 되돌릴 때마다 서버 트리거가 `text_override_history`에 누가·언제·무엇에서 무엇으로 바꿨는지 남겨요. 관리자 화면 위쪽 "수정 기록"에서 전체를, 각 문구 아래 "수정 기록 N건"에서 그 문구 기록을 펼쳐 봐요. 기록은 관리자도 고치거나 지울 수 없어요.
+
 처음 한 번 준비:
-1. Supabase SQL Editor에서 [`supabase/schema.sql`](supabase/schema.sql)을 다시 실행해요(`admins`, `text_overrides` 표가 생겨요).
-2. Authentication → Users → **Add user**로 관리자 이메일·비밀번호 계정을 만들어요.
-3. SQL Editor에서 `insert into public.admins (user_id) select id from auth.users where email = '관리자 이메일';`을 실행해요.
-4. 배포 사이트에서 쓰려면 GitHub 저장소 Settings → Secrets and variables → Actions → **Variables**에 `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`(`.env.local`과 같은 값)를 넣어요. 없으면 배포 빌드에서 연구 참여와 문구 수정이 꺼져요.
+1. Supabase SQL Editor에서 [`supabase/schema.sql`](supabase/schema.sql)을 실행해요(다시 실행해도 안전).
+2. 이어서 저장소 밖에 있는 `관리자_계정_만들기.sql`을 실행해요. 관리자 4명 계정을 만들고 등록해요. 비밀번호가 들어 있어서 공개 저장소에는 넣지 않았어요.
+3. 배포 빌드는 저장소 변수 `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`를 써요(설정해 둠).
 
 ## 핑크노이즈를 실제 음원으로 바꾸는 방법
 
