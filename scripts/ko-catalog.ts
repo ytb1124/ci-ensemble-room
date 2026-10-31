@@ -6,14 +6,21 @@ import { join, relative } from 'node:path';
 import ts from 'typescript';
 import type { Plugin } from 'vite';
 
+export interface Place {
+  /** src 기준 경로 'screens/room/Room.tsx' */
+  file: string;
+  line: number;
+  /** 감싼 최상위 함수·상수 이름(어느 화면인지 가르는 데 쓴다) */
+  fn: string;
+  /** 눈에 보이지 않는 문구: JSX 속성 이름(aria-label·title·placeholder 등) 또는 화면 낭독기 알림 'live' */
+  hidden?: string;
+}
+
 export interface CatalogEntry {
   key: string;
-  /** 영어 문구(참고용). 영어 쪽이 식이면 소스 그대로 */
-  en: string;
   /** 변수 자리 개수 */
   vars: number;
-  /** 'screens/room/Room.tsx:154' 형식 */
-  where: string[];
+  where: Place[];
 }
 
 const VIRTUAL_ID = 'virtual:ko-catalog';
@@ -27,6 +34,32 @@ function walk(dir: string): string[] {
     if (d.isDirectory()) return walk(p);
     return /\.tsx?$/.test(d.name) && !d.name.endsWith('.d.ts') ? [p] : [];
   });
+}
+
+/** 문구가 화면에 글자로 보이는지. 속성 값이나 낭독기 알림이면 그 종류를 돌려준다 */
+function hiddenKind(node: ts.Node): string | undefined {
+  for (let p = node.parent; p && !ts.isSourceFile(p); p = p.parent) {
+    if (ts.isJsxAttribute(p)) {
+      // 직접 만든 부품의 label·options 같은 속성은 화면에 글자로 나온다
+      const name = p.name.getText();
+      return /^aria-|^(title|placeholder|alt)$/.test(name) ? name : undefined;
+    }
+    if (ts.isCallExpression(p) && ts.isIdentifier(p.expression) && p.expression.text === 'setLive') return 'live';
+    if (ts.isJsxExpression(p) && (ts.isJsxElement(p.parent) || ts.isJsxFragment(p.parent))) return undefined;
+  }
+  return undefined;
+}
+
+/** 감싼 최상위 선언 이름 */
+function topName(node: ts.Node): string {
+  let p: ts.Node = node;
+  while (p.parent && !ts.isSourceFile(p.parent)) p = p.parent;
+  if ((ts.isFunctionDeclaration(p) || ts.isClassDeclaration(p)) && p.name) return p.name.text;
+  if (ts.isVariableStatement(p)) {
+    const d = p.declarationList.declarations[0];
+    if (d && ts.isIdentifier(d.name)) return d.name.text;
+  }
+  return '';
 }
 
 /** 첫 인자를 키로 바꾼다. 키로 만들 수 없는 식이면 null */
@@ -55,17 +88,16 @@ export function buildCatalog(srcDir: string): { entries: CatalogEntry[]; problem
     const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, file.endsWith('x') ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
     const visit = (node: ts.Node) => {
       if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 'tx' && node.arguments.length === 2) {
-        const [koArg, enArg] = node.arguments;
         const line = sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1;
-        const where = `${rel}:${line}`;
-        const k = keyOf(koArg);
+        const k = keyOf(node.arguments[0]);
         if (!k) {
-          problems.push(`${where} tx()의 한국어 문구가 글자 그대로나 ko\`\`가 아니라서 수정 목록에서 빠져요`);
+          problems.push(`${rel}:${line} tx()의 한국어 문구가 글자 그대로나 ko\`\`가 아니라서 수정 목록에서 빠져요`);
         } else {
-          const en = ts.isStringLiteral(enArg) || ts.isNoSubstitutionTemplateLiteral(enArg) ? enArg.text : enArg.getText(sf);
+          const hidden = hiddenKind(node);
+          const place: Place = { file: rel, line, fn: topName(node), ...(hidden ? { hidden } : {}) };
           const prev = byKey.get(k.key);
-          if (prev) prev.where.push(where);
-          else byKey.set(k.key, { key: k.key, en, vars: k.vars, where: [where] });
+          if (prev) prev.where.push(place);
+          else byKey.set(k.key, { key: k.key, vars: k.vars, where: [place] });
         }
       }
       ts.forEachChild(node, visit);

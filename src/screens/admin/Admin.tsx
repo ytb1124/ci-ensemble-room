@@ -1,12 +1,13 @@
 // 관리자 문구 수정(#/admin). 사이트의 한국어 문구를 하나씩 고친다. 영어 문구는 다루지 않는다.
 // 목록은 소스의 tx() 호출에서 빌드할 때 뽑고(scripts/ko-catalog.ts), 고친 문구는 서버(text_overrides)에 저장한다.
 // 이 화면은 한국어 전용이라 tx()를 쓰지 않는다.
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import catalog from 'virtual:ko-catalog';
-import { overridesEnabled, useOverrides } from '../../store/textOverrides';
+import { overridesEnabled, useOverrides, type Overrides } from '../../store/textOverrides';
 import {
   ADMINS, adminName, deleteOverride, errText, fetchHistory, fetchOverrides, getSession, saveOverride, signIn, signOut, type HistoryItem,
 } from './adminApi';
+import { SCREEN_ORDER, hiddenLabel, screenOf } from './screens';
 import './admin.css';
 
 type Entry = (typeof catalog)[number];
@@ -16,25 +17,8 @@ type Auth =
   | { status: 'in'; userId: string; email: string; name: string | null };
 type Filter = 'all' | 'edited' | 'vars';
 
-// 파일 위치로 화면을 나눈다. 위에서부터 처음 맞는 것
-const GROUPS: [string, RegExp][] = [
-  ['상단 바·공통', /^(App|i18n)\.tsx?$/],
-  ['시작 화면', /^screens\/Start\.tsx$/],
-  ['처음 설정(보정)', /^screens\/calibrate\//],
-  ['합주실', /^screens\/room\//],
-  ['단서 질문', /^screens\/probe\//],
-  ['나의 청취 단서(리포트)', /^screens\/report\/|^store\/reportRules\.ts$/],
-  ['설정', /^screens\/(Settings|ResearchSection)\.tsx$/],
-  ['연구 참여', /^screens\/Join\.tsx$|^store\/research\.ts$/],
-  ['이 프로그램에 대해', /^screens\/About\.tsx$/],
-  ['악기·시각화 부품', /^components\//],
-];
-const OTHER = '그 밖의 문구';
-
-const groupOf = (e: Entry) => {
-  const file = e.where[0].replace(/:\d+$/, '');
-  return GROUPS.find(([, r]) => r.test(file))?.[0] ?? OTHER;
-};
+/** 문구가 나오는 화면 이름들(겹치지 않게) */
+const screensOf = (e: Entry) => [...new Set(e.where.map((p) => screenOf(p).name))];
 
 /** 변수 자리 검사. 없는 번호는 화면에 {3}처럼 그대로 보이므로 막고, 빠진 자리는 알려만 준다 */
 function checkVars(text: string, vars: number): { error: string | null; missing: number[] } {
@@ -179,6 +163,9 @@ function Editor({ name, onSignOut }: { name: string; onSignOut: () => void }) {
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
+  // 미리보기에 보여 줄 문구. 좁은 화면에서는 미리보기를 열었다 닫는다
+  const [selected, setSelected] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const dirtyKeys = Object.keys(drafts);
   const editedCount = catalog.filter((e) => e.key in overrides).length;
@@ -197,11 +184,10 @@ function Editor({ name, onSignOut }: { name: string; onSignOut: () => void }) {
       if (filter === 'edited' && !(e.key in overrides)) return false;
       if (filter === 'vars' && !e.vars) return false;
       if (!q) return true;
-      return [e.key, overrides[e.key] ?? '', e.en].some((s) => s.toLowerCase().includes(q));
+      return [e.key, overrides[e.key] ?? ''].some((s) => s.toLowerCase().includes(q));
     };
-    const map = new Map<string, Entry[]>();
-    for (const name of [...GROUPS.map(([n]) => n), OTHER]) map.set(name, []);
-    for (const e of catalog) if (match(e)) map.get(groupOf(e))!.push(e);
+    const map = new Map<string, Entry[]>(SCREEN_ORDER.map((n) => [n, []]));
+    for (const e of catalog) if (match(e)) map.get(screenOf(e.where[0]).name)?.push(e);
     return [...map].filter(([, list]) => list.length);
   }, [query, filter, overrides]);
 
@@ -271,9 +257,13 @@ function Editor({ name, onSignOut }: { name: string; onSignOut: () => void }) {
     }, '원래 문구로 되돌렸어요.');
 
   const searching = !!query.trim() || filter !== 'all';
+  const selectedEntry = selected ? catalog.find((e) => e.key === selected) ?? null : null;
+  // 미리보기에는 저장하지 않은 수정까지 합쳐서 보낸다
+  const previewMap = useMemo(() => ({ ...overrides, ...drafts }), [overrides, drafts]);
 
   return (
-    <main className="page stack-lg admin">
+    <main className="page admin">
+      <div className="stack-lg admin-main">
       <div className="row admin-head">
         <div className="stack" style={{ gap: 4, marginRight: 'auto' }}>
           <h1>문구 관리</h1>
@@ -312,7 +302,7 @@ function Editor({ name, onSignOut }: { name: string; onSignOut: () => void }) {
         <input
           className="input"
           type="search"
-          placeholder="문구 찾기 (한국어·영어 모두)"
+          placeholder="문구 찾기"
           aria-label="문구 찾기"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -353,6 +343,12 @@ function Editor({ name, onSignOut }: { name: string; onSignOut: () => void }) {
                     edited={e.key in overrides}
                     history={historyByKey.get(e.key) ?? []}
                     busy={busy}
+                    selected={selected === e.key}
+                    onSelect={() => setSelected(e.key)}
+                    onShow={() => {
+                      setSelected(e.key);
+                      setPreviewOpen(true);
+                    }}
                     onChange={(v) => setDraft(e.key, v)}
                     onSave={() => void saveOne(e.key)}
                     onCancel={() => clearDraft(e.key)}
@@ -379,6 +375,15 @@ function Editor({ name, onSignOut }: { name: string; onSignOut: () => void }) {
         </section>
       )}
 
+      </div>
+
+      <Preview
+        entry={selectedEntry}
+        map={previewMap}
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+      />
+
       {(dirtyKeys.length > 0 || note) && (
         <div className="admin-bar" role="status">
           {note && <p className={note.ok ? 'admin-ok' : 'admin-error'}>{note.text}</p>}
@@ -396,7 +401,7 @@ function Editor({ name, onSignOut }: { name: string; onSignOut: () => void }) {
 }
 
 function Row({
-  entry, value, dirty, edited, history, busy, onChange, onSave, onCancel, onReset,
+  entry, value, dirty, edited, history, busy, selected, onSelect, onShow, onChange, onSave, onCancel, onReset,
 }: {
   entry: Entry;
   value: string;
@@ -404,6 +409,9 @@ function Row({
   edited: boolean;
   history: HistoryItem[];
   busy: boolean;
+  selected: boolean;
+  onSelect: () => void;
+  onShow: () => void;
   onChange: (v: string) => void;
   onSave: () => void;
   onCancel: () => void;
@@ -412,17 +420,23 @@ function Row({
   const { error, missing } = checkVars(value, entry.vars);
   const [showHistory, setShowHistory] = useState(false);
   const last = history[0];
-  const id = `ko-${entry.where[0].replace(/\W/g, '-')}`;
+  const id = `ko-${entry.where[0].file.replace(/\W/g, '-')}-${entry.where[0].line}`;
+  const hidden = hiddenLabel(entry.where.find((p) => p.hidden)?.hidden);
   return (
-    <div className={`admin-row${dirty ? ' is-dirty' : edited ? ' is-edited' : ''}`}>
+    <div
+      className={`admin-row${dirty ? ' is-dirty' : edited ? ' is-edited' : ''}${selected ? ' is-selected' : ''}`}
+      onFocusCapture={onSelect}
+    >
       <div className="row" style={{ gap: 6 }}>
         {edited && <span className="tag admin-tag-edited">수정됨</span>}
         {dirty && <span className="tag admin-tag-dirty">저장 안 함</span>}
         {last && <span className="small admin-last">{last.changed_by_name ?? '알 수 없음'} · {when(last.changed_at)}</span>}
-        <span className="small muted admin-where" title={entry.where.join('\n')}>
-          {entry.where[0]}{entry.where.length > 1 ? ` 외 ${entry.where.length - 1}곳` : ''}
+        <span className="small admin-where" title={entry.where.map((p) => `${p.file}:${p.line}`).join('\n')}>
+          {screensOf(entry).join(' · ')}
         </span>
+        <button type="button" className="admin-link small admin-show" onClick={onShow}>화면 보기</button>
       </div>
+      {hidden && <p className="small admin-hidden">{hidden}</p>}
       {(edited || dirty) && (
         <p className="small admin-orig"><span className="muted">원래 문구:</span> {entry.key}</p>
       )}
@@ -435,7 +449,6 @@ function Row({
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={!!error}
       />
-      <p className="small muted admin-en" lang="en"><span>영어:</span> {entry.en}</p>
       {error && <p className="small admin-error">{error}</p>}
       {!error && missing.length > 0 && (
         <p className="small admin-warn">{missing.map((n) => `{${n}}`).join(', ')} 자리가 빠졌어요. 그 값은 화면에 나오지 않아요.</p>
@@ -484,5 +497,91 @@ function HistoryLine({ item, original, showKey, onFind }: { item: HistoryItem; o
       <p className="admin-diff"><del>{from}</del></p>
       <p className="admin-diff"><ins>{to}</ins></p>
     </li>
+  );
+}
+
+/** 미리보기: 실제 사이트를 작은 창으로 열어 고르는 문구가 나오는 화면을 보여 주고, 그 문구를 분홍 테두리로 표시한다 */
+function Preview({ entry, map, open, onClose }: { entry: Entry | null; map: Overrides; open: boolean; onClose: () => void }) {
+  const frame = useRef<HTMLIFrameElement>(null);
+  const [ready, setReady] = useState(false);
+  const [found, setFound] = useState<number | null>(null);
+  const [wide, setWide] = useState(false);
+  const [placeIdx, setPlaceIdx] = useState(0);
+
+  const places = entry ? [...new Map(entry.where.map((p) => [screenOf(p).name, p])).values()] : [];
+  const place = places[Math.min(placeIdx, places.length - 1)];
+  const screen = place ? screenOf(place) : null;
+  const text = entry ? map[entry.key] ?? entry.key : null;
+
+  const post = (msg: object) => frame.current?.contentWindow?.postMessage({ type: 'cihall-preview', ...msg }, location.origin);
+
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      if (e.origin !== location.origin || e.source !== frame.current?.contentWindow) return;
+      if (e.data?.type === 'cihall-preview-ready') setReady(true);
+      if (e.data?.type === 'cihall-preview-result') setFound(e.data.found as number);
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  useEffect(() => setPlaceIdx(0), [entry?.key]);
+
+  // 문구 목록(저장 안 한 수정 포함)
+  useEffect(() => {
+    if (ready) post({ overrides: map });
+  }, [ready, map]);
+
+  // 고른 문구의 화면으로 옮기고 표시한다
+  useEffect(() => {
+    if (!ready) return;
+    const win = frame.current?.contentWindow;
+    if (screen && win && win.location.hash.replace(/^#/, '') !== screen.route) win.location.hash = screen.route;
+    setFound(null);
+    post({ highlight: text ? { text } : null });
+  }, [ready, entry?.key, screen?.route, text]);
+
+  const status = !entry
+    ? '왼쪽에서 문구를 고르면 그 문구가 나오는 화면을 여기에 보여 줘요.'
+    : found === null
+      ? '화면에서 찾는 중…'
+      : found > 0
+        ? `분홍 테두리로 표시했어요${found > 1 ? ` (${found}곳)` : ''}.`
+        : '지금 화면에는 안 보여요. 버튼을 누르거나 다음으로 넘어가야 나오는 문구예요. 미리보기 안에서 직접 눌러 보면 나타날 때 표시돼요.';
+
+  return (
+    <aside className={`admin-preview${open ? ' is-open' : ''}`} aria-label="화면 미리보기">
+      <div className="admin-preview-head">
+        <div className="stack" style={{ gap: 2, marginRight: 'auto', minWidth: 0 }}>
+          <h2>{screen?.name ?? '화면 미리보기'}</h2>
+          {screen && <p className="small muted">주소 #{screen.route}</p>}
+        </div>
+        <div className="seg" role="radiogroup" aria-label="미리보기 크기">
+          <button type="button" role="radio" aria-checked={!wide} onClick={() => setWide(false)}>휴대폰</button>
+          <button type="button" role="radio" aria-checked={wide} onClick={() => setWide(true)}>넓게</button>
+        </div>
+        <button type="button" className="btn btn-sm btn-ghost admin-preview-close" onClick={onClose}>닫기</button>
+      </div>
+      {places.length > 1 && (
+        <div className="row" role="radiogroup" aria-label="나오는 화면">
+          {places.map((p, i) => (
+            <button key={screenOf(p).name} type="button" role="radio" className="chip" aria-checked={i === placeIdx} aria-pressed={i === placeIdx} onClick={() => setPlaceIdx(i)}>
+              {screenOf(p).name}
+            </button>
+          ))}
+        </div>
+      )}
+      <p className={`small${entry && found === 0 ? ' admin-warn' : ' muted'}`} role="status">{status}</p>
+      <div className="admin-preview-frame">
+        <iframe
+          ref={frame}
+          name="cihall-preview"
+          title="사이트 미리보기"
+          src="./#/"
+          style={{ width: wide ? '100%' : 390 }}
+        />
+      </div>
+      <p className="small muted">미리보기에는 저장하지 않은 수정도 바로 보여요. 미리보기 안에서 누른 것은 이 기기의 기록에 남을 수 있어요.</p>
+    </aside>
   );
 }

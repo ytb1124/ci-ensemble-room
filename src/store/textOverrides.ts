@@ -12,7 +12,13 @@ export const overridesEnabled = !!(SB_URL && SB_KEY);
 
 const CACHE_KEY = 'cihall.textOverrides.v1';
 
-export const overridesStore = createStore<Overrides>(readJSON<Overrides>(CACHE_KEY, {}), (v) => writeJSON(CACHE_KEY, v));
+/** 관리자 화면 안의 미리보기 창(iframe name="cihall-preview")으로 열렸는지. 이때는 저장하지 않은 수정도 보여 준다 */
+export const IS_PREVIEW = typeof window !== 'undefined' && window.name === 'cihall-preview';
+
+// 미리보기의 저장 안 한 수정이 이 기기 값으로 남지 않게, 미리보기 창에서는 기기에 쓰지 않는다
+export const overridesStore = createStore<Overrides>(readJSON<Overrides>(CACHE_KEY, {}), (v) => {
+  if (!IS_PREVIEW) writeJSON(CACHE_KEY, v);
+});
 
 export function useOverrides(): Overrides {
   return useSyncExternalStore(overridesStore.subscribe, overridesStore.get);

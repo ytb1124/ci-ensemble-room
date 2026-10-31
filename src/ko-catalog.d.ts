@@ -2,9 +2,8 @@
 declare module 'virtual:ko-catalog' {
   const entries: {
     key: string;
-    en: string;
     vars: number;
-    where: string[];
+    where: { file: string; line: number; fn: string; hidden?: string }[];
   }[];
   export default entries;
 }

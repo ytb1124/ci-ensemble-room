@@ -13,7 +13,8 @@ import Settings from './screens/Settings';
 import Start from './screens/Start';
 import Join from './screens/Join';
 import { initResearch } from './store/research';
-import { loadOverrides, useOverrides } from './store/textOverrides';
+import { IS_PREVIEW, loadOverrides, useOverrides } from './store/textOverrides';
+import { initPreview } from './preview';
 import { Icon } from './components/ui/Icon';
 import { setLang, tx, useLang } from './i18n';
 
@@ -107,8 +108,9 @@ function ScrollTop() {
 }
 
 export default function App() {
-  useEffect(() => initResearch(), []);
-  useEffect(() => void loadOverrides(), []);
+  // 관리자 미리보기 창: 문구는 관리자 화면이 보내 주고, 연구 데이터는 보내지 않는다
+  useEffect(() => (IS_PREVIEW ? initPreview() : initResearch()), []);
+  useEffect(() => void (IS_PREVIEW || loadOverrides()), []);
   useLang(); // 언어가 바뀌면 전체를 다시 그린다(문구는 tx()가 그릴 때 읽는다)
   useOverrides(); // 관리자가 고친 문구를 받아 오면 다시 그린다
   return (

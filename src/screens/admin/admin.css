@@ -1,5 +1,9 @@
 /* 관리자 문구 수정 화면(#/admin) */
-.admin { padding-bottom: 120px; }
+.admin {
+  max-width: 1480px; padding-bottom: 120px;
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-lg); align-items: start;
+}
+.admin-main { min-width: 0; }
 .admin-head { align-items: flex-end; gap: var(--s-xs); }
 .admin-label { gap: 6px; font-weight: 600; color: var(--body-strong); }
 .admin-code {
@@ -32,7 +36,7 @@
 .admin-row.is-dirty { border-color: var(--warning); box-shadow: inset 3px 0 0 var(--warning); }
 .admin-text { min-height: 44px; resize: vertical; line-height: 1.5; font-size: 16px; }
 .admin-where { overflow-wrap: anywhere; }
-.admin-orig, .admin-en { overflow-wrap: anywhere; }
+.admin-orig { overflow-wrap: anywhere; }
 .admin-tag-edited { background: color-mix(in srgb, var(--success) 18%, transparent); color: var(--success); }
 .admin-tag-dirty { background: color-mix(in srgb, var(--warning) 18%, transparent); color: var(--warning); }
 
@@ -69,3 +73,38 @@
 .admin-diff ins { color: var(--success); text-decoration: none; font-weight: 600; }
 .admin-diff del::before { content: '전: '; color: var(--muted); text-decoration: none; display: inline-block; }
 .admin-diff ins::before { content: '후: '; color: var(--muted); font-weight: 400; }
+
+.admin-row.is-selected { box-shadow: 0 0 0 2px var(--brand-pink); }
+.admin-row.is-dirty.is-selected { box-shadow: inset 3px 0 0 var(--warning), 0 0 0 2px var(--brand-pink); }
+.admin-where { color: var(--body-strong); font-weight: 600; }
+.admin-show { margin-left: auto; }
+.admin-hidden { color: var(--muted); font-style: italic; }
+
+/* 화면 미리보기: 넓은 화면은 오른쪽에 붙어 있고, 좁은 화면은 [화면 보기]를 누르면 덮어서 연다 */
+.admin-preview {
+  display: none; flex-direction: column; gap: var(--s-xs);
+  background: var(--surface-soft); border: 1px solid var(--hairline); border-radius: var(--r-xl);
+  padding: var(--s-md);
+}
+.admin-preview-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-xs); }
+.admin-preview-head h2 { font-size: 18px; font-family: var(--font-body); font-weight: 700; }
+.admin-preview-frame {
+  flex: 1; min-height: 0; display: flex; justify-content: center;
+  background: var(--surface-strong); border-radius: var(--r-lg); padding: 8px; overflow: hidden;
+}
+.admin-preview-frame iframe {
+  max-width: 100%; height: 100%; min-height: 480px; border: 0; border-radius: var(--r-md);
+  background: var(--canvas); box-shadow: var(--shadow-card);
+}
+.admin-preview.is-open {
+  display: flex; position: fixed; inset: 8px; z-index: 40; box-shadow: var(--shadow-card);
+}
+@media (min-width: 1100px) {
+  .admin { grid-template-columns: minmax(0, 1fr) minmax(440px, 40%); }
+  .admin-preview, .admin-preview.is-open {
+    display: flex; position: sticky; inset: auto; top: 80px; z-index: auto; box-shadow: none;
+    height: calc(100vh - 96px);
+  }
+  .admin-preview-close { display: none; }
+  .admin-bar { width: min(1448px, calc(100vw - 32px)); }
+}
