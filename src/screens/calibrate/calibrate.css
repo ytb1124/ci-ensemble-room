@@ -24,3 +24,23 @@
   .cal-choices.cal-3 .cal-choice { padding: 8px 6px; }
 }
 @media (min-width: 720px) { .cal-start-grid.cal-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.cal-program { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: start; padding: 18px 20px; }
+.cal-program-icon { width: 48px; height: 48px; border-radius: 9999px; background: #fffaf0; display: inline-flex; align-items: center; justify-content: center; }
+@media (max-width: 420px) { .cal-program { grid-template-columns: minmax(0, 1fr); } }
+/* 0–10 크기 차트(매핑 차트처럼 위가 10) */
+.cal-loud { gap: 12px; }
+.cal-loud-chart { display: grid; gap: 4px; }
+.cal-loud-row {
+  display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 4px 12px 4px 6px;
+  border-radius: 12px; border: 1.5px solid transparent; background: var(--surface-soft);
+  color: var(--body-strong); font: inherit; font-size: 16px; font-weight: 600; text-align: left; cursor: pointer;
+}
+.cal-loud-row:hover { border-color: var(--hairline-strong); }
+.cal-loud-row.is-target { border-color: var(--loud-comfy-ink); }
+.cal-loud-row[aria-pressed='true'] { border-color: var(--primary); background: var(--surface-card); }
+.cal-loud-row:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.cal-loud-word { flex: 1 1 auto; min-width: 0; }
+.cal-loud-num { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-variant-numeric: tabular-nums; color: #0a0a0a; }
+.cal-loud-num.is-soft { background: var(--loud-soft); }
+.cal-loud-num.is-comfy { background: var(--loud-comfy); }
+.cal-loud-num.is-loud { background: var(--loud-loud); }

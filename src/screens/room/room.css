@@ -31,5 +31,78 @@
 }
 .room-pill[aria-pressed='true'] { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
 .room-select { min-height: 44px; border-radius: 9999px; padding: 8px 14px; font: inherit; font-size: 15px; background: var(--surface-soft); color: var(--body-strong); border: 1px solid var(--hairline-strong); }
-.room-steps { display: flex; flex-direction: column; gap: 8px; }
 @media (prefers-reduced-motion: reduce) { .room-transport * { transition: none !important; } }
+
+/* ───────── 넓은 화면: 듣기 | 보기 나란히 (10/28 피드백) ───────── */
+.room-page { max-width: 680px; }
+.room-stage { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: 'listen' 'see' 'more'; gap: var(--s-lg); }
+.room-listen { grid-area: listen; min-width: 0; }
+.room-see { grid-area: see; min-width: 0; }
+.room-more { grid-area: more; min-width: 0; }
+.room-viz-off { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; padding: 28px 20px; color: var(--muted); }
+.room-viz-off p { margin: 0; color: var(--body-strong); font-size: 16px; }
+@media (min-width: 1024px) {
+  .room-page { max-width: 1280px; }
+  .room-stage {
+    grid-template-columns: minmax(380px, 5fr) minmax(0, 7fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 'listen see' 'more see';
+    column-gap: 32px;
+  }
+  /* 그림이 화면보다 길면 이 칸 안에서 스크롤(포커스 테두리가 잘리지 않게 안쪽 여백) */
+  .room-see { position: sticky; top: 80px; align-self: start; max-height: calc(100vh - 80px - var(--transport-h) - 8px); overflow-y: auto; padding: 4px; margin: -4px; scrollbar-width: thin; }
+  .room-listen .room-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .room-viz-off { min-height: 320px; justify-content: center; }
+}
+
+/* ───────── 듣기 순서 안내(팝업 + 떠 있는 안내) ───────── */
+.lf-backdrop {
+  position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+  padding: 16px; background: rgba(10, 10, 10, 0.45); overflow-y: auto;
+}
+.lf-modal { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 16px; padding: 28px; box-shadow: 0 24px 64px rgba(0, 0, 0, 0.3); max-height: calc(100vh - 32px); overflow-y: auto; }
+.lf-modal h2 { margin: 0; font-size: 24px; }
+.lf-kicker { margin: 0; font-size: 14px; font-weight: 700; color: var(--muted); }
+.lf-desc { margin: 0; font-size: 17px; color: var(--body-strong); line-height: 1.55; }
+.lf-overview { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.lf-overview li {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 12px; row-gap: 2px;
+  padding: 12px; border-radius: 16px; background: var(--surface-soft); border: 1px solid var(--hairline);
+}
+.lf-ov-icon { grid-row: 1 / span 2; width: 44px; height: 44px; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: var(--brand-mint); color: #0a0a0a; flex: 0 0 auto; }
+.lf-overview li:nth-child(2) .lf-ov-icon { background: var(--brand-lavender); }
+.lf-overview li:nth-child(4) .lf-ov-icon { background: var(--brand-peach); }
+.lf-ov-title { font-weight: 700; color: var(--body-strong); }
+.lf-ov-text { font-size: 15px; color: var(--body); }
+.lf-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; align-items: center; }
+.lf-actions .btn-ghost { margin-right: auto; }
+
+.lf-stepper { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; counter-reset: none; }
+.lf-stepper li { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.lf-stepper li + li::before { content: ''; position: absolute; top: 15px; right: 50%; width: 100%; height: 2px; background: var(--hairline-strong); z-index: 0; margin-right: 16px; }
+.lf-stepper li.is-done + li::before, .lf-stepper li.is-done::before { background: var(--primary); }
+.lf-dot {
+  position: relative; z-index: 1; width: 32px; height: 32px; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 15px; background: var(--canvas); color: var(--muted); border: 2px solid var(--hairline-strong);
+}
+.lf-stepper .is-now .lf-dot { background: var(--primary); color: var(--on-primary); border-color: var(--primary); box-shadow: 0 0 0 4px var(--brand-mint); }
+.lf-stepper .is-done .lf-dot { background: var(--surface-card); color: var(--ink); border-color: var(--primary); }
+.lf-dot-label { font-size: 14px; font-weight: 600; color: var(--muted); line-height: 1.2; }
+.lf-stepper .is-now .lf-dot-label { color: var(--body-strong); }
+
+.lf-float {
+  position: fixed; z-index: 30; left: 50%; transform: translateX(-50%);
+  bottom: calc(var(--transport-h, 80px) + 12px); width: min(560px, calc(100% - 24px));
+  display: flex; flex-direction: column; gap: 12px; padding: 16px 18px;
+  border: 2px solid var(--primary); box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
+}
+.lf-float-body { display: flex; gap: 12px; align-items: center; }
+.lf-float-body .lf-ov-icon { grid-row: auto; }
+.lf-float-text p { margin: 0; }
+.lf-float-title { font-weight: 700; font-size: 18px; color: var(--body-strong); }
+.lf-float-text p[role='status'] { font-size: 16px; color: var(--body); }
+@media (min-width: 1024px) {
+  /* 넓은 화면: 오른쪽 보기 칸 맨 위에 붙여 연주자 그림을 가리지 않는다 */
+  .lf-float { position: static; transform: none; width: auto; box-shadow: none; }
+}
+@media (max-width: 1023px) { .room-page:has(.lf-float) { padding-bottom: calc(var(--s-xxl) + var(--transport-h) + 240px); } }

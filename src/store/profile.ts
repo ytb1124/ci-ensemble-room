@@ -95,7 +95,8 @@ export function resetProfile() {
   profileStore.set({ ...DEFAULT_PROFILE });
 }
 
-/** 악기 크기 허용 범위 (4.2절): 기본 −12 ~ +6, 설정 시 +12 */
+/** 악기 크기 허용 범위 (4.2절): 기본 −10 ~ +6, 설정 시 +12.
+ *  아래 끝은 0–10 크기 척도의 1(겨우 들림)에 맞춰 −12에서 −10으로 올렸다(10/28 피드백, config/loudness.ts) */
 export function gainRange(p: Profile): { min: number; max: number; step: number } {
-  return { min: -12, max: p.allowPlus12 ? 12 : 6, step: 2 };
+  return { min: -10, max: p.allowPlus12 ? 12 : 6, step: 2 };
 }

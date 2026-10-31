@@ -6,14 +6,14 @@ import { rmsAt } from '../../audio/timeline';
 import { Segmented } from '../ui/controls';
 import type { InstrumentId } from '../../types';
 import { INSTRUMENTS, INSTRUMENT_SHORT } from '../../types';
-import { readColors, useFitCanvas, type VizColors } from './Lanes';
+import { readColors, useFitCanvas, withAlpha, type VizColors } from './Lanes';
 import { tx } from '../../i18n';
 import './viz.css';
 
 type View = 'wave' | 'spec' | 'sgram';
 const HELP: Record<View, { title: string; text: string }> = {
-  wave: { get title() { return tx('파형', 'Waveform'); }, get text() { return tx('선이 높을수록 큰 소리예요. 가운데 세로선이 지금 들리는 순간이에요.', 'The higher the line, the louder the sound. The vertical line in the middle is what you hear now.'); } },
-  spec: { get title() { return tx('스펙트럼', 'Spectrum'); }, get text() { return tx('왼쪽은 낮은 소리, 오른쪽은 높은 소리예요. 막대가 높을수록 그 높이의 소리가 커요.', 'Low sounds are on the left, high sounds on the right. A taller bar means that pitch is louder.'); } },
+  wave: { get title() { return tx('파형', 'Waveform'); }, get text() { return tx('악기마다 한 줄씩 보여요. 띠가 두꺼울수록 큰 소리예요. 세로선이 지금 들리는 순간이에요.', 'Each instrument has its own row. The thicker the band, the louder the sound. The vertical line is what you hear now.'); } },
+  spec: { get title() { return tx('스펙트럼', 'Spectrum'); }, get text() { return tx('왼쪽은 낮은 소리, 오른쪽은 높은 소리예요. 산이 높을수록 그 높이의 소리가 커요. 악기마다 어디가 솟는지 비교해 보세요.', 'Low sounds are on the left, high sounds on the right. A taller peak means that pitch is louder. Compare where each instrument peaks.'); } },
   sgram: { get title() { return tx('스펙트로그램', 'Spectrogram'); }, get text() { return tx('위로 갈수록 높은 소리, 밝을수록 큰 소리예요. 시간이 지나면 오른쪽으로 쌓여요.', 'Higher up means a higher sound, and brighter means louder. Over time, it fills in toward the right.'); } },
 };
 const FONT = "system-ui, -apple-system, 'Noto Sans KR', sans-serif";
@@ -70,13 +70,66 @@ function Legend() {
   );
 }
 
+// ───────── 공통: 악기별 줄 ─────────
+/** 위에서부터 높은 악기 → 낮은 악기(레인 보기와 같은 순서) */
+const ROW_ORDER: InstrumentId[] = ['trumpet', 'piano', 'bass', 'cajon'];
+type Split = 'each' | 'all';
+
+function rowLabel(g: CanvasRenderingContext2D, col: VizColors, id: InstrumentId, isOn: boolean, x: number, y: number) {
+  const text = INSTRUMENT_SHORT[id] + (isOn ? '' : tx(' (꺼짐)', ' (off)'));
+  g.font = `700 14px ${FONT}`;
+  g.textBaseline = 'middle';
+  const tw = g.measureText(text).width;
+  // 글자 뒤 옅은 알약 바탕: 곡선 위에서도 읽히게
+  g.fillStyle = withAlpha(col.soft, 0.85);
+  pill(g, x, y - 12, tw + 30, 24, 12);
+  g.fill();
+  g.fillStyle = isOn ? col.lane[id] : col.muted;
+  g.beginPath();
+  g.arc(x + 12, y, 5, 0, Math.PI * 2);
+  if (isOn) g.fill();
+  else {
+    g.lineWidth = 2;
+    g.strokeStyle = col.muted;
+    g.stroke();
+  }
+  g.fillStyle = isOn ? col.body : col.muted;
+  g.fillText(text, x + 22, y + 1);
+}
+
+function pill(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  g.beginPath();
+  const rr = Math.max(0, Math.min(r, w / 2, h / 2));
+  if (typeof g.roundRect === 'function') g.roundRect(x, y, w, h, rr);
+  else g.rect(x, y, w, h);
+}
+
+function playhead(g: CanvasRenderingContext2D, col: VizColors, x: number, h: number) {
+  g.strokeStyle = col.ink;
+  g.lineWidth = 2;
+  g.beginPath();
+  g.moveTo(x, 2);
+  g.lineTo(x, h - 2);
+  g.stroke();
+  g.fillStyle = col.ink;
+  g.beginPath();
+  g.moveTo(x - 6, 0);
+  g.lineTo(x + 6, 0);
+  g.lineTo(x, 7);
+  g.closePath();
+  g.fill();
+}
+
 // ───────── ① 파형/엔벨로프 ─────────
 function WaveView({ on }: { on: Record<InstrumentId, boolean> }) {
-  const { ref, size } = useFitCanvas((w) => (w < 520 ? 170 : 210));
+  const [split, setSplit] = useState<Split>('each');
+  const { ref, size } = useFitCanvas((w) => (w < 520 ? 240 : 300));
   const colors = useRef<VizColors | null>(null);
   const n = useRef(0);
   const onRef = useRef(on);
   onRef.current = on;
+  const splitRef = useRef(split);
+  splitRef.current = split;
   const draw = useCallback(() => {
     const c = ref.current;
     const g = c?.getContext('2d');
@@ -93,48 +146,99 @@ function WaveView({ on }: { on: Record<InstrumentId, boolean> }) {
     const px = (w * BACK) / (BACK + FWD);
     const pps = w / (BACK + FWD);
     const inst = effectiveInstGain(profileStore.get(), engine.state.songId);
-    // 바닥선
-    g.strokeStyle = col.hair;
-    g.lineWidth = 1;
-    g.beginPath();
-    g.moveTo(0, h - 8.5);
-    g.lineTo(w, h - 8.5);
-    g.stroke();
-    for (const id of INSTRUMENTS) {
+    const each = splitRef.current === 'each';
+    const rowH = each ? h / ROW_ORDER.length : h;
+
+    ROW_ORDER.forEach((id, k) => {
       const tl = engine.timeline(id);
-      if (!tl) continue;
+      if (!tl) return;
       const isOn = onRef.current[id];
-      const gain = isOn ? Math.pow(10, (inst[id] ?? 0) / 20) : 0;
-      g.beginPath();
-      g.moveTo(0, h - 8);
+      const gain = isOn ? Math.pow(10, (inst[id] ?? 0) / 20) : 0.35;
+      const color = isOn ? col.lane[id] : col.muted;
+      const y0 = each ? k * rowH : 0;
+      const mid = each ? y0 + rowH / 2 : h - 10;
+      const amp = each ? rowH / 2 - 6 : h - 24;
+      // 가운데를 기준으로 위아래가 같은 모양(악기별) 또는 바닥에서 솟는 모양(겹쳐 보기)
+      const pts: number[] = [];
       for (let x = 0; x <= w; x += 2) {
         const v = Math.min(1, rmsAt(tl, t + (x - px) / pps) * gain);
-        g.lineTo(x, h - 8 - v * (h - 24));
+        pts.push(Math.pow(v, 0.8) * amp);
       }
-      g.setLineDash(DASH[id]);
-      g.lineWidth = id === 'trumpet' ? 3 : 2.5;
-      g.strokeStyle = isOn ? col.lane[id] : col.muted;
-      g.globalAlpha = isOn ? 1 : 0.5;
-      g.stroke();
-      g.setLineDash([]);
-      g.globalAlpha = 1;
-    }
-    g.strokeStyle = col.ink;
-    g.lineWidth = 2;
-    g.beginPath();
-    g.moveTo(px, 2);
-    g.lineTo(px, h - 2);
-    g.stroke();
+      g.beginPath();
+      g.moveTo(0, mid);
+      pts.forEach((v, i) => g.lineTo(i * 2, mid - v));
+      if (each) for (let i = pts.length - 1; i >= 0; i--) g.lineTo(i * 2, mid + pts[i]);
+      else g.lineTo(w, mid);
+      g.closePath();
+      const grad = g.createLinearGradient(0, mid - amp, 0, each ? mid + amp : mid);
+      if (each) {
+        grad.addColorStop(0, withAlpha(color, 0.25));
+        grad.addColorStop(0.5, withAlpha(color, isOn ? 0.95 : 0.4));
+        grad.addColorStop(1, withAlpha(color, 0.25));
+      } else {
+        grad.addColorStop(0, withAlpha(color, isOn ? 0.55 : 0.2));
+        grad.addColorStop(1, withAlpha(color, 0.05));
+      }
+      g.fillStyle = grad;
+      g.fill();
+      if (!each) {
+        g.beginPath();
+        pts.forEach((v, i) => (i ? g.lineTo(i * 2, mid - v) : g.moveTo(0, mid - v)));
+        g.setLineDash(DASH[id]);
+        g.lineWidth = id === 'trumpet' ? 3 : 2.5;
+        g.strokeStyle = color;
+        g.stroke();
+        g.setLineDash([]);
+      } else {
+        // 가운데 기준선과 줄 구분선
+        g.strokeStyle = withAlpha(color, 0.35);
+        g.lineWidth = 1;
+        g.beginPath();
+        g.moveTo(0, mid + 0.5);
+        g.lineTo(w, mid + 0.5);
+        g.stroke();
+        if (k > 0) {
+          g.strokeStyle = col.hair;
+          g.beginPath();
+          g.moveTo(0, y0 + 0.5);
+          g.lineTo(w, y0 + 0.5);
+          g.stroke();
+        }
+      }
+    });
+    // 앞으로 올 부분은 살짝 흐리게
+    g.fillStyle = withAlpha(col.soft, 0.45);
+    g.fillRect(px, 0, w - px, h);
+    if (each) ROW_ORDER.forEach((id, k) => rowLabel(g, col, id, onRef.current[id], 6, k * rowH + 16));
+    playhead(g, col, px, h);
   }, [ref, size]);
   useAnimationFrame(draw, true);
   return (
-    <div className="viz-canvas-box">
-      <canvas ref={ref} className="viz-canvas" role="img" aria-label={tx('악기별 소리 크기 곡선. 선이 높을수록 큰 소리', 'Loudness curve for each instrument. A higher line means a louder sound')} />
+    <div className="viz-wrap">
+      <Segmented
+        label={tx('보기 범위', 'Show')}
+        value={split}
+        onChange={setSplit}
+        options={[
+          { value: 'each', label: tx('악기별', 'By instrument') },
+          { value: 'all', label: tx('겹쳐 보기', 'Overlaid') },
+        ]}
+      />
+      <div className="viz-canvas-box">
+        <canvas
+          ref={ref}
+          className="viz-canvas"
+          role="img"
+          aria-label={split === 'each'
+            ? tx('악기마다 한 줄씩 그린 소리 크기 모양. 위에서부터 트럼펫, 피아노, 베이스, 카혼. 두꺼울수록 큰 소리', 'One row per instrument showing loudness: from the top, trumpet, piano, bass, cajon. Thicker means louder')
+            : tx('악기별 소리 크기 곡선. 선이 높을수록 큰 소리', 'Loudness curve for each instrument. A higher line means a louder sound')}
+        />
+      </div>
     </div>
   );
 }
 
-// ───────── ② 스펙트럼 막대 ─────────
+// ───────── ② 스펙트럼 ─────────
 const F0 = 50;
 const F1 = 8000;
 function useSmoothing(value: number) {
@@ -166,19 +270,24 @@ function bandEdges(bins: number, sr: number, count: number) {
   return out;
 }
 
+/** 전체 보기 막대 색: 아래 초록 → 노랑 → 위 산호(높을수록 큰 소리). 라이트·다크 모두에서 보이는 고정 색 */
+const BAR_STOPS: [number, string][] = [[0, '#2f8a6c'], [0.55, '#e8b94a'], [1, '#ff6b5a']];
+const GRID_HZ: [number, string][] = [[100, '100'], [500, '500'], [1000, '1k'], [4000, '4k']];
+
 function SpectrumView({ on }: { on: Record<InstrumentId, boolean> }) {
-  const [mode, setMode] = useState<'all' | 'each'>('all');
-  const { ref, size } = useFitCanvas((w) => (w < 520 ? 190 : 230));
+  const [split, setSplit] = useState<Split>('each');
+  const { ref, size } = useFitCanvas((w) => (w < 520 ? 240 : 300));
   const colors = useRef<VizColors | null>(null);
   const n = useRef(0);
   const bufs = useRef<Record<string, Float32Array>>({});
-  const modeRef = useRef(mode);
-  modeRef.current = mode;
+  const peaks = useRef<number[]>([]);
+  const splitRef = useRef(split);
+  splitRef.current = split;
   const onRef = useRef(on);
   onRef.current = on;
-  useSmoothing(0.6);
+  useSmoothing(0.7);
 
-  const draw = useCallback(() => {
+  const draw = useCallback((dtMs: number) => {
     const c = ref.current;
     const g = c?.getContext('2d');
     if (!c || !g || !engine.ctx) return;
@@ -205,51 +314,110 @@ function SpectrumView({ on }: { on: Record<InstrumentId, boolean> }) {
       data[id] = b;
     }
     if (!bins) return;
-    const count = w < 420 ? 28 : 44;
-    const edges = bandEdges(bins, sr, count);
     const norm = (v: number) => (Math.max(v, minDb) - minDb) / (maxDb - minDb);
     const bandMax = (arr: Float32Array, [i0, i1]: [number, number]) => {
       let m = -Infinity;
       for (let i = i0; i <= i1; i++) if (arr[i] > m) m = arr[i];
       return m;
     };
-    const panels: { id: InstrumentId | null; vals: number[] }[] = [];
-    if (modeRef.current === 'all') {
-      panels.push({
-        id: null,
-        vals: edges.map((e) => {
-          let pw = 0;
-          for (const id of INSTRUMENTS) {
-            const arr = data[id];
-            if (arr) pw += Math.pow(10, Math.max(bandMax(arr, e), minDb) / 10);
-          }
-          return norm(10 * Math.log10(pw || 1e-12));
-        }),
-      });
-    } else {
-      for (const id of INSTRUMENTS) {
-        const arr = data[id];
-        panels.push({ id, vals: edges.map((e) => (arr ? norm(bandMax(arr, e)) : 0)) });
-      }
+    const xOfHz = (hz: number) => (Math.log(hz / F0) / Math.log(F1 / F0)) * w;
+
+    // 세로 눈금(낮은 소리 ↔ 높은 소리)
+    g.font = `600 14px ${FONT}`;
+    g.textBaseline = 'bottom';
+    for (const [hz, label] of GRID_HZ) {
+      const x = Math.round(xOfHz(hz)) + 0.5;
+      g.strokeStyle = withAlpha(col.hair, 0.6);
+      g.lineWidth = 1;
+      g.setLineDash([3, 4]);
+      g.beginPath();
+      g.moveTo(x, 0);
+      g.lineTo(x, h);
+      g.stroke();
+      g.setLineDash([]);
+      g.fillStyle = col.muted;
+      g.fillText(label, x + 4, h - 2);
     }
-    const ph = h / panels.length;
-    panels.forEach((pn, k) => {
-      const y0 = k * ph;
-      const bw = w / count;
-      const isOn = pn.id ? onRef.current[pn.id] : true;
-      const color = pn.id ? (isOn ? col.lane[pn.id] : col.muted) : col.primary;
-      g.fillStyle = color;
-      g.globalAlpha = isOn ? 1 : 0.4;
-      pn.vals.forEach((v, i) => {
-        const bh = Math.max(2, v * (ph - 22));
-        g.fillRect(i * bw + 1, y0 + ph - 4 - bh, Math.max(1, bw - 2), bh);
+
+    if (splitRef.current === 'all') {
+      const count = w < 420 ? 28 : 44;
+      const edges = bandEdges(bins, sr, count);
+      const vals = edges.map((e) => {
+        let pw = 0;
+        for (const id of INSTRUMENTS) {
+          const arr = data[id];
+          if (arr) pw += Math.pow(10, Math.max(bandMax(arr, e), minDb) / 10);
+        }
+        return norm(10 * Math.log10(pw || 1e-12));
       });
+      if (peaks.current.length !== count) peaks.current = new Array(count).fill(0);
+      const fall = (Math.min(dtMs, 100) / 1000) * 0.5;
+      const top = 10;
+      const base = h - 22;
+      const grad = g.createLinearGradient(0, base, 0, top);
+      for (const [o, cc] of BAR_STOPS) grad.addColorStop(o, cc);
+      const bw = w / count;
+      const gap = Math.max(2, bw * 0.22);
+      vals.forEach((v, i) => {
+        const bh = Math.max(3, v * (base - top));
+        const x = i * bw + gap / 2;
+        g.fillStyle = grad;
+        pill(g, x, base - bh, bw - gap, bh, (bw - gap) / 2);
+        g.fill();
+        const pk = (peaks.current[i] = Math.max(v, peaks.current[i] - fall));
+        g.fillStyle = withAlpha(col.ink, 0.55);
+        pill(g, x, base - pk * (base - top) - 5, bw - gap, 3, 1.5);
+        g.fill();
+      });
+      return;
+    }
+
+    // 악기별: 한 줄에 한 악기, 매끈한 산 모양
+    const count = w < 420 ? 40 : 64;
+    const edges = bandEdges(bins, sr, count);
+    const rowH = (h - 18) / ROW_ORDER.length;
+    ROW_ORDER.forEach((id, k) => {
+      const arr = data[id];
+      const isOn = onRef.current[id];
+      const color = isOn ? col.lane[id] : col.muted;
+      const y0 = k * rowH;
+      const base = y0 + rowH - 3;
+      const amp = rowH - 10;
+      const raw = edges.map((e) => (arr ? Math.pow(norm(bandMax(arr, e)), 1.4) : 0));
+      // 줄마다 모양이 잘 보이게 조금 키운다(가장 높은 곳이 줄 높이의 75% 정도, 최대 2.5배)
+      const rowMax = Math.max(...raw);
+      const boost = rowMax > 0.02 ? Math.min(2.5, 0.75 / rowMax) : 1;
+      const vals = raw.map((v) => Math.min(1, v * boost));
+      const step = w / (count - 1);
+      const ys = vals.map((v) => base - v * amp);
+      g.beginPath();
+      g.moveTo(0, base);
+      g.lineTo(0, ys[0]);
+      for (let i = 1; i < ys.length; i++) {
+        const xm = (i - 0.5) * step;
+        g.quadraticCurveTo((i - 1) * step, ys[i - 1], xm, (ys[i - 1] + ys[i]) / 2);
+      }
+      g.lineTo(w, ys[ys.length - 1]);
+      g.lineTo(w, base);
+      g.closePath();
+      const grad = g.createLinearGradient(0, y0, 0, base);
+      grad.addColorStop(0, withAlpha(color, isOn ? 0.85 : 0.3));
+      grad.addColorStop(1, withAlpha(color, 0.08));
+      g.fillStyle = grad;
+      g.fill();
+      g.strokeStyle = color;
+      g.lineWidth = 2;
+      g.globalAlpha = isOn ? 1 : 0.5;
+      g.stroke();
       g.globalAlpha = 1;
-      if (pn.id) {
-        g.font = `700 14px ${FONT}`;
-        g.textBaseline = 'top';
-        g.fillStyle = col.body;
-        g.fillText(INSTRUMENT_SHORT[pn.id] + (isOn ? '' : tx(' (꺼짐)', ' (off)')), 6, y0 + 3);
+      // 가장 큰 높이 표시
+      let best = 0;
+      vals.forEach((v, i) => { if (v > vals[best]) best = i; });
+      if (isOn && vals[best] > 0.08) {
+        g.fillStyle = col.ink;
+        g.beginPath();
+        g.arc(best * step, ys[best], 4, 0, Math.PI * 2);
+        g.fill();
       }
       if (k > 0) {
         g.strokeStyle = col.hair;
@@ -259,6 +427,7 @@ function SpectrumView({ on }: { on: Record<InstrumentId, boolean> }) {
         g.lineTo(w, y0 + 0.5);
         g.stroke();
       }
+      rowLabel(g, col, id, isOn, 6, y0 + 16);
     });
   }, [ref, size]);
   useAnimationFrame(draw, true);
@@ -267,19 +436,26 @@ function SpectrumView({ on }: { on: Record<InstrumentId, boolean> }) {
     <div className="viz-wrap">
       <Segmented
         label={tx('보기 범위', 'Show')}
-        value={mode}
-        onChange={setMode}
+        value={split}
+        onChange={setSplit}
         options={[
-          { value: 'all', label: tx('전체', 'All') },
           { value: 'each', label: tx('악기별', 'By instrument') },
+          { value: 'all', label: tx('전체', 'All') },
         ]}
       />
       <div className="viz-canvas-box">
-        <canvas ref={ref} className="viz-canvas" role="img" aria-label={tx('소리 높이별 크기를 보여 주는 막대. 왼쪽 낮은 소리, 오른쪽 높은 소리', 'Bars showing how loud each pitch is. Low sounds on the left, high sounds on the right')} />
+        <canvas
+          ref={ref}
+          className="viz-canvas"
+          role="img"
+          aria-label={split === 'each'
+            ? tx('악기마다 한 줄씩 소리 높이별 크기를 보여 주는 산 모양. 왼쪽 낮은 소리, 오른쪽 높은 소리', 'One row per instrument showing how loud each pitch is. Low sounds on the left, high sounds on the right')
+            : tx('소리 높이별 크기를 보여 주는 막대. 왼쪽 낮은 소리, 오른쪽 높은 소리', 'Bars showing how loud each pitch is. Low sounds on the left, high sounds on the right')}
+        />
       </div>
       <div className="viz-axis" aria-hidden="true">
-        <span>{tx('낮은 소리', 'Low sounds')}</span>
-        <span>{tx('높은 소리', 'High sounds')}</span>
+        <span>{tx('← 낮은 소리', '← Low sounds')}</span>
+        <span>{tx('높은 소리 →', 'High sounds →')}</span>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { Icon } from '../ui/Icon';
 import { INSTRUMENT_LABEL, type InstrumentId, type MotionLevel, type RoomMode } from '../../types';
 import { InstrumentFigure, type FigurePose } from './figures';
 import { getLang, ko, tx } from '../../i18n';
+import { dbToLevel, loudnessWord, loudnessZone } from '../../config/loudness';
 import './instruments.css';
 
 export { InstrumentFigure };
@@ -32,27 +33,34 @@ export interface VolumeProps {
   onChange: (v: number) => void;
 }
 
-/** dB 대신 말로 보여 준다 */
+/** dB 대신 0–10 크기 척도(매핑 때 쓰는 표현)로 보여 준다 */
 export function volumeWord(db: number): string {
-  if (db === 0) return tx('보통', 'Normal');
-  if (db > 0) return db <= 2 ? tx('조금 크게', 'A bit louder') : db <= 6 ? tx('크게', 'Louder') : tx('아주 크게', 'Much louder');
-  return db >= -4 ? tx('조금 작게', 'A bit softer') : db >= -8 ? tx('작게', 'Softer') : tx('아주 작게', 'Much softer');
+  const n = dbToLevel(db);
+  return `${n} · ${loudnessWord(n)}`;
 }
 
 function VolumeStrip({ name, v }: { name: string; v: VolumeProps }) {
-  const pct = ((v.value - v.min) / (v.max - v.min)) * 100;
-  const zero = ((0 - v.min) / (v.max - v.min)) * 100;
-  const set = (n: number) => v.onChange(Math.max(v.min, Math.min(v.max, n)));
+  const n = dbToLevel(v.value);
+  const lo = dbToLevel(v.min);
+  const hi = dbToLevel(v.max);
+  const set = (x: number) => v.onChange(Math.max(v.min, Math.min(v.max, x)));
   return (
     <div className="inst-vol" role="group" aria-label={tx(ko`${name} 크기`, `${name} volume`)}>
       <button type="button" className="inst-vol-btn" aria-label={tx(ko`${name} 작게`, `${name} softer`)} disabled={v.value <= v.min} onClick={() => set(v.value - v.step)}>
         <Icon name="minus" size={20} />
       </button>
       <div className="inst-vol-mid">
-        <span className="inst-vol-word" aria-live="polite">{volumeWord(v.value)}</span>
-        <span className="inst-vol-meter" aria-hidden="true">
-          <span className="inst-vol-zero" style={{ left: `${zero}%` }} />
-          <span className="inst-vol-fill" style={{ width: `${pct}%` }} />
+        <span className="inst-vol-word" aria-live="polite">
+          <b className={'inst-vol-num is-' + loudnessZone(n)}>{n}</b>
+          <span className="inst-vol-txt">{loudnessWord(n)}</span>
+        </span>
+        <span className="inst-vol-steps" aria-hidden="true">
+          {Array.from({ length: 10 }, (_, i) => i + 1).map((k) => (
+            <span
+              key={k}
+              className={'inst-vol-seg is-' + loudnessZone(k) + (k <= n ? ' is-lit' : '') + (k === 6 ? ' is-home' : '') + (k < lo || k > hi ? ' is-out' : '')}
+            />
+          ))}
         </span>
       </div>
       <button type="button" className="inst-vol-btn" aria-label={tx(ko`${name} 크게`, `${name} louder`)} disabled={v.value >= v.max} onClick={() => set(v.value + v.step)}>

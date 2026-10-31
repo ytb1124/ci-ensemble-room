@@ -154,9 +154,20 @@
 .inst-vol-btn:disabled { opacity: 0.4; cursor: default; }
 .inst-vol-btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .inst-vol-mid { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.inst-vol-word { font-size: 14px; font-weight: 700; line-height: 1.2; white-space: nowrap; letter-spacing: -0.3px; color: var(--body-strong); }
-.inst-vol-meter { position: relative; width: 100%; max-width: 72px; height: 6px; border-radius: 9999px; background: var(--hairline-strong); overflow: hidden; }
-.inst-vol-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--primary); border-radius: 9999px; transition: width 120ms ease; }
-.inst-vol-zero { position: absolute; top: -2px; bottom: -2px; width: 2px; margin-left: -1px; background: var(--ink); opacity: 0.5; z-index: 1; }
-@container (max-width: 125px) { .inst-vol-word { font-size: 13px; } }
-@media (prefers-reduced-motion: reduce) { .inst-vol-fill { transition: none; } }
+.inst-vol-word { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; line-height: 1.2; letter-spacing: -0.3px; color: var(--body-strong); min-width: 0; max-width: 100%; }
+.inst-vol-txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inst-vol-num { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; padding: 0 4px; border-radius: 9999px; font-size: 15px; font-variant-numeric: tabular-nums; color: #0a0a0a; }
+.inst-vol-num.is-soft { background: var(--loud-soft); }
+.inst-vol-num.is-comfy { background: var(--loud-comfy); }
+.inst-vol-num.is-loud { background: var(--loud-loud); }
+/* 10칸 막대: 1–4 작음, 5–7 편안함, 8–10 큼. 6(가장 편안함) 칸에 기준 표시 */
+.inst-vol-steps { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 2px; width: 100%; max-width: 120px; height: 10px; align-items: end; }
+.inst-vol-seg { position: relative; display: block; height: 100%; border-radius: 2px; background: var(--hairline-strong); opacity: 0.6; transition: background 120ms ease, opacity 120ms ease; }
+.inst-vol-seg.is-lit { opacity: 1; }
+.inst-vol-seg.is-lit.is-soft { background: var(--loud-soft-ink); }
+.inst-vol-seg.is-lit.is-comfy { background: var(--loud-comfy-ink); }
+.inst-vol-seg.is-lit.is-loud { background: var(--loud-loud-ink); }
+.inst-vol-seg.is-out { opacity: 0.2; }
+.inst-vol-seg.is-home::after { content: ''; position: absolute; left: 50%; bottom: -5px; width: 4px; height: 4px; margin-left: -2px; border-radius: 9999px; background: var(--ink); }
+@container (max-width: 125px) { .inst-vol-txt { display: none; } }
+@media (prefers-reduced-motion: reduce) { .inst-vol-seg { transition: none; } }

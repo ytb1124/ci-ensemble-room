@@ -263,7 +263,7 @@ export function Lanes(p: { on: Record<InstrumentId, boolean>; pitchLines: boolea
   );
 }
 
-function withAlpha(color: string, a: number): string {
+export function withAlpha(color: string, a: number): string {
   // #rrggbb → rgba. 그 밖의 형식은 globalAlpha 없이 그대로 쓴다
   const m = /^#([0-9a-f]{6})$/i.exec(color);
   if (!m) return color;

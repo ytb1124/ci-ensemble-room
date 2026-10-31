@@ -258,7 +258,7 @@ function RoomInner({ song }: { song: SongId }) {
   const probeTarget = !sets.includes(1) ? '/probe/set1' : !sets.includes(2) ? '/probe/set2' : '/report';
 
   return (
-    <main className="page page-narrow">
+    <main className="page room-page">
       <div className="stack-lg">
         <header className="room-head">
           <button type="button" className="btn btn-sm" aria-expanded={showSwitch} onClick={() => setShowSwitch(!showSwitch)}>
@@ -305,16 +305,9 @@ function RoomInner({ song }: { song: SongId }) {
         {st.loading && <p className="muted" role="status">{tx('곡을 불러오는 중이에요…', 'Loading the song…')}</p>}
         {st.error && <p role="alert" style={{ color: 'var(--error)' }}>{st.error}</p>}
 
-        {listenFirst && (
-          <ListenFirst
-            onView={(v) => setView(v)}
-            onDone={() => {
-              setListenFirst(false);
-              setView(profile.viz.defaultView, false);
-            }}
-          />
-        )}
-
+        {/* 넓은 화면: 왼쪽 듣기(연주자) · 오른쪽 보기(그림)를 나란히. 좁은 화면은 위아래 */}
+        <div className="room-stage">
+        <section className="room-listen stack-lg" aria-label={tx('듣기', 'Listen')}>
         <Segmented<RoomMode>
           label={tx('듣는 방식', 'Listening mode')}
           value={mode}
@@ -351,7 +344,19 @@ function RoomInner({ song }: { song: SongId }) {
             <button type="button" className="btn btn-primary" onClick={() => { setRevealed(true); logEvent({ type: 'blind', value: 'reveal' }); }}>{tx('이름 보기', 'Show names')}</button>
           </div>
         )}
-        {view !== 'off' && !(blind && !revealed) && (
+        </section>
+        <section className="room-see stack" aria-label={tx('보기', 'View')}>
+        {listenFirst && (
+          <ListenFirst
+            onView={(v) => setView(v)}
+            onDone={() => {
+              setListenFirst(false);
+              setView(profile.viz.defaultView, false);
+            }}
+          />
+        )}
+
+        {view !== 'off' && !(blind && !revealed) ? (
           <div className="room-viz">
             {view === 'lanes' ? (
               <Lanes on={st.on} pitchLines={profile.viz.pitchLines} bassEmphasis={profile.bassVizEmphasis} motion={profile.viz.motion} />
@@ -359,7 +364,26 @@ function RoomInner({ song }: { song: SongId }) {
               <Explore on={st.on} />
             )}
           </div>
+        ) : (
+          <div className="card card-soft room-viz-off" role="note">
+            <Icon name={blind && !revealed ? 'eyeOff' : 'headphones'} size={32} />
+            {listenFirst ? (
+              <p>{tx('지금은 그림 없이 소리에만 귀 기울여 보세요.', 'For now, focus only on the sound, without the picture.')}</p>
+            ) : blind && !revealed ? (
+              <p>{tx('이름을 확인하면 그림이 다시 보여요.', 'The picture comes back after you show the names.')}</p>
+            ) : (
+              <>
+                <p>{tx('그림을 켜면 들리는 소리를 눈으로 함께 볼 수 있어요.', 'Turn on the picture to see the sound while you hear it.')}</p>
+                <div className="row" style={{ justifyContent: 'center' }}>
+                  <button type="button" className="btn btn-primary btn-sm" onClick={() => setView('lanes')}>{tx('악기별로 보기', 'Show by instrument')}</button>
+                  <button type="button" className="btn btn-sm" onClick={() => setView('explore')}>{tx('자세히 보기', 'Show details')}</button>
+                </div>
+              </>
+            )}
+          </div>
         )}
+        </section>
+        <div className="room-more stack-lg">
         {showSync && view !== 'off' && (
           syncOpen ? (
             <SyncCard onClose={() => { syncCardDismissed = true; setShowSync(false); setSyncOpen(false); }} />
@@ -390,6 +414,8 @@ function RoomInner({ song }: { song: SongId }) {
           {sets.includes(1) && sets.includes(2) && (
             <Link className="btn btn-sm btn-ghost" to="/probe/set1">{tx('잠깐 질문 다시 하기', 'Do Quick questions again')}</Link>
           )}
+        </div>
+        </div>
         </div>
       </div>
       <TransportBar song={song} extra={controls} />

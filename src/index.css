@@ -48,6 +48,13 @@
   --lane-bass: #1e3a8a;
   --lane-trumpet: #a16207;
 
+  /* 0–10 크기 척도 구간(작음·편안함·큼). 숫자 칩은 검은 글자 위 옅은 바탕 */
+  --loud-soft: #cfe0f5;
+  --loud-comfy: #a4d4c5;
+  --loud-loud: #ffb084;
+  --loud-soft-ink: #5b7fae;
+  --loud-comfy-ink: #2f8a6c;
+  --loud-loud-ink: #d4562f;
   --font-display: 'Gmarket Sans', 'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
   --font-body: 'Pretendard Variable', Pretendard, -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
 
@@ -91,6 +98,9 @@
     --lane-cajon: #fb923c;
     --lane-bass: #93c5fd;
     --lane-trumpet: #facc15;
+  --loud-soft-ink: #93b4e0;
+  --loud-comfy-ink: #6fd0ad;
+  --loud-loud-ink: #ff9a6e;
     --focus: #93c5fd;
     --success: #4ade80;
     --warning: #fbbf24;
@@ -118,6 +128,9 @@
   --lane-cajon: #fb923c;
   --lane-bass: #93c5fd;
   --lane-trumpet: #facc15;
+  --loud-soft-ink: #93b4e0;
+  --loud-comfy-ink: #6fd0ad;
+  --loud-loud-ink: #ff9a6e;
   --focus: #93c5fd;
   --success: #4ade80;
   --warning: #fbbf24;

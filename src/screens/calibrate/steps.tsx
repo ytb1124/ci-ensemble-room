@@ -6,7 +6,8 @@ import { engine, useEngineState } from '../../audio/useEngine';
 import { ABChoice, DbSlider } from '../../components/ui/controls';
 import { Icon } from '../../components/ui/Icon';
 import { InstrumentFigure } from '../../components/instruments/InstrumentCard';
-import { tx } from '../../i18n';
+import { ko, tx } from '../../i18n';
+import { dbToLevel, loudnessScale, loudnessWord, loudnessZone } from '../../config/loudness';
 
 export type Draft = Pick<
   Profile,
@@ -84,6 +85,7 @@ export function Step1({ d, set }: StepProps) {
   return (
     <div className="stack-lg">
       <p className="cal-note">{tx('처음 소리를 정하는 데만 써요. 시험이 아니에요.', 'This is only used to set up your first sound. It is not a test.')}</p>
+      <MusicProgramNote maker={d.maker} />
       <div className="stack" role="group" aria-labelledby="cal-q-config">
         <h3 className="cal-group-title" id="cal-q-config">{tx('어떻게 듣고 있나요?', 'How do you hear?')}</h3>
         <div className="cal-choices">
@@ -130,6 +132,39 @@ export function Step1({ d, set }: StepProps) {
   );
 }
 
+/** 회사별 프로그램 바꾸는 곳(앱·리모컨 이름). 이름만 안내하고 메뉴 경로는 기기마다 달라 적지 않는다 */
+const MUSIC_PROGRAM_WHERE: Partial<Record<NonNullable<Maker>, string>> = {
+  get cochlear() { return tx('Nucleus Smart 앱이나 리모컨', 'the Nucleus Smart app or remote'); },
+  get medel() { return tx('AudioKey 앱이나 리모컨', 'the AudioKey app or remote'); },
+  get ab() { return tx('AB Remote 앱이나 프로세서 버튼', 'the AB Remote app or the processor button'); },
+  get oticon() { return tx('Oticon Medical Streamer나 앱', 'the Oticon Medical Streamer or app'); },
+};
+
+/** 음악 듣기용 프로그램(맵)으로 바꾸라는 안내. 피드백(10/28): 소리 맞추기 첫 단계에서 먼저 알려 준다 */
+function MusicProgramNote({ maker }: { maker: Maker | null }) {
+  const where = maker ? MUSIC_PROGRAM_WHERE[maker] : undefined;
+  return (
+    <aside className="card card-tone mint cal-program" aria-labelledby="cal-program-title">
+      <span className="cal-program-icon" aria-hidden="true"><Icon name="music" size={28} /></span>
+      <div className="stack" style={{ gap: 6 }}>
+        <h3 className="cal-group-title" id="cal-program-title" style={{ margin: 0 }}>
+          {tx('시작 전에: 프로세서를 ‘음악’ 프로그램으로 바꿔 주세요', 'Before you start: switch your processor to its Music program')}
+        </h3>
+        <p style={{ margin: 0 }}>
+          {where
+            ? tx(ko`매핑 때 받은 ‘음악’ 프로그램(맵)이 있으면 ${where}에서 지금 바꿔 주세요.`, `If your audiologist set up a Music program (map), switch to it now using ${where}.`)
+            : tx('매핑 때 받은 ‘음악’ 프로그램(맵)이 있으면 리모컨이나 스마트폰 앱에서 지금 바꿔 주세요.', 'If your audiologist set up a Music program (map), switch to it now using your remote or phone app.')}
+          {' '}
+          {tx('말소리용 프로그램은 잡음을 줄이느라 악기 소리까지 줄일 수 있어요.', 'Programs made for speech may turn down instrument sounds while reducing noise.')}
+        </p>
+        <p className="small" style={{ margin: 0 }}>
+          {tx('음악 프로그램이 없다면 평소 프로그램 그대로 괜찮아요. 다음 매핑 때 청능사에게 음악용 프로그램을 따로 만들어 달라고 해 보세요.', 'No Music program? Your usual program is fine. At your next mapping, you can ask your audiologist for a separate program for music.')}
+        </p>
+      </div>
+    </aside>
+  );
+}
+
 // ───────── ② 편안한 크기 ─────────
 export function Step2({ d, set, onCommit }: StepProps & { onCommit: (v: number) => void }) {
   return (
@@ -149,6 +184,44 @@ export function Step2({ d, set, onCommit }: StepProps & { onCommit: (v: number) 
         onChange={(v) => set({ masterGainDb: v })}
         onCommit={onCommit}
       />
+      <LoudnessRating />
+    </div>
+  );
+}
+
+/** 매핑 때 쓰는 0–10 크기 차트로 지금 크기를 골라 보게 한다. 6(가장 편안함) 근처가 목표 */
+function LoudnessRating() {
+  const [pick, setPick] = useState<number | null>(null);
+  const steps = loudnessScale().slice().reverse(); // 차트처럼 위가 10
+  const advice =
+    pick === null ? null
+      : pick <= 4 ? tx('조금 작게 들려요. 음량을 올려서 6(가장 편안함) 근처로 맞춰 보세요.', 'It sounds a bit soft. Turn the volume up to around 6 (Most comfortable).')
+      : pick <= 7 ? tx('좋아요. 5–7이면 편안한 크기예요. 6에 가까울수록 오래 들어도 편해요.', 'Good. 5–7 is a comfortable level. Closer to 6 is easier for long listening.')
+      : pick === 8 ? tx('조금 커요. 음량을 낮춰서 6 근처로 맞춰 주세요.', 'A bit loud. Turn the volume down to around 6.')
+      : tx('너무 커요. 바로 음량을 낮춰 주세요.', 'Too loud. Please turn the volume down now.');
+  return (
+    <div className="stack card cal-loud" role="group" aria-labelledby="cal-loud-title">
+      <div className="stack" style={{ gap: 4 }}>
+        <h3 className="cal-group-title" id="cal-loud-title">{tx('지금 소리는 몇 정도인가요?', 'How loud is it right now?')}</h3>
+        <p className="small muted" style={{ margin: 0 }}>{tx('매핑 때 보던 0–10 크기 표와 같아요. 6(가장 편안함)이 되도록 맞춰 보세요.', 'This is the same 0–10 loudness chart used at your mapping. Try to reach 6 (Most comfortable).')}</p>
+      </div>
+      <div className="cal-loud-chart">
+        {steps.map((s) => (
+          <button
+            key={s.n}
+            type="button"
+            className={'cal-loud-row is-' + loudnessZone(s.n) + (s.n === 6 ? ' is-target' : '')}
+            aria-pressed={pick === s.n}
+            onClick={() => setPick(s.n)}
+          >
+            <span className={'cal-loud-num is-' + loudnessZone(s.n)}>{s.n}</span>
+            <span className="cal-loud-word">{s.word}</span>
+            {s.n === 6 && <span className="tag">{tx('목표', 'Target')}</span>}
+            {pick === s.n && <Icon name="check" size={20} />}
+          </button>
+        ))}
+      </div>
+      {advice && <p className="cal-note" role="status" style={{ margin: 0 }}>{advice}</p>}
     </div>
   );
 }
@@ -317,6 +390,7 @@ export function Step5({ d, set, range }: StepProps & { range: { min: number; max
             min={range.min}
             max={range.max}
             step={range.step}
+            formatValue={(v) => `${dbToLevel(v)} · ${loudnessWord(dbToLevel(v))}`}
             onChange={(v) => set({ instGainDb: { ...d.instGainDb, [id]: v } })}
           />
         </div>
